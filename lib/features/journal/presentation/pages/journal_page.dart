@@ -5,6 +5,7 @@ import '../../domain/entities/journal_entry.dart';
 import '../widgets/journal_entry_card.dart';
 import '../widgets/calendar_widget.dart';
 import '../widgets/journal_entry_screen.dart';
+import 'package:think_tract_flutter/core/storage/storage_service.dart';
 
 class JournalPage extends StatefulWidget {
   const JournalPage({super.key});
@@ -21,27 +22,37 @@ class _JournalPageState extends State<JournalPage> {
   void initState() {
     super.initState();
     initializeDateFormatting('zh_CN', null);
-    _journalEntries = [];
-    _sortJournalEntries();
+    _loadJournalEntries();
   }
 
-  void _addJournalEntry() {
+  Future<void> _loadJournalEntries() async {
+    try {
+      _journalEntries = await StorageService.instance.getAllJournalEntries();
+      _sortJournalEntries();
+      setState(() {});
+    } catch (e) {
+      print('Error loading journal entries: $e');
+    }
+  }
+
+  void _addJournalEntry() async {
     // Navigate to the journal entry screen and pass the callback to add entry
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => JournalEntryScreen(
-          onSave: (content, mood, entryDate) {
+          onSave: (content, mood, entryDate) async {
+            final newEntry = JournalEntry(
+              id: DateTime.now().millisecondsSinceEpoch,
+              content: content,
+              dateTime: entryDate,  // Use the entry date provided by the screen
+              mood: mood,
+            );
+            
+            await StorageService.instance.saveJournalEntry(newEntry);
+            
             setState(() {
-              _journalEntries.insert(
-                0, // Add to the beginning of the list
-                JournalEntry(
-                  id: DateTime.now().millisecondsSinceEpoch,
-                  content: content,
-                  dateTime: entryDate,  // Use the entry date provided by the screen
-                  mood: mood,
-                ),
-              );
+              _journalEntries.insert(0, newEntry);
               _sortJournalEntries();
             });
           },
@@ -51,24 +62,27 @@ class _JournalPageState extends State<JournalPage> {
     );
   }
 
-  void _editJournalEntry(JournalEntry entry) {
+  void _editJournalEntry(JournalEntry entry) async {
     // Navigate to the journal entry screen in edit mode
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => JournalEntryScreen(
-          onSave: (content, mood, entryDate) {
+          onSave: (content, mood, entryDate) async {
+            final updatedEntry = JournalEntry(
+              id: entry.id,
+              content: content,
+              dateTime: entry.dateTime, // Keep the original time
+              mood: mood,
+            );
+            
+            await StorageService.instance.updateJournalEntry(updatedEntry);
+            
             setState(() {
               // Find the index of the entry to edit
               int index = _journalEntries.indexWhere((e) => e.id == entry.id);
               if (index != -1) {
-                // Update the entry content and mood but keep the original time
-                _journalEntries[index] = JournalEntry(
-                  id: _journalEntries[index].id,
-                  content: content,
-                  dateTime: _journalEntries[index].dateTime, // Keep the original time
-                  mood: mood,
-                );
+                _journalEntries[index] = updatedEntry;
               }
             });
           },
@@ -81,7 +95,7 @@ class _JournalPageState extends State<JournalPage> {
   }
 
   void _sortJournalEntries() {
-    _journalEntries.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+    _journalEntries.sort((a, b) => b.dateTime.compareTo(a.dateTime)); // Sort in descending order (newest first)
   }
 
   List<JournalEntry> _getEntriesForSelectedDate() {
