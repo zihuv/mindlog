@@ -6,11 +6,8 @@ class JournalEntryCard extends StatelessWidget {
   final JournalEntry entry;
   final VoidCallback onTap;
 
-  const JournalEntryCard({
-    Key? key,
-    required this.entry,
-    required this.onTap,
-  }) : super(key: key);
+  const JournalEntryCard({Key? key, required this.entry, required this.onTap})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -57,10 +54,7 @@ class JournalEntryCard extends StatelessWidget {
                 ),
                 child: Text(
                   entry.content,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black87,
-                  ),
+                  style: const TextStyle(fontSize: 14, color: Colors.black87),
                 ),
               ),
             ),

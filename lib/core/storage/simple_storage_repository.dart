@@ -15,40 +15,48 @@ class SimpleStorageRepository implements StorageRepository {
   @override
   Future<List<JournalEntry>> getAllJournalEntries() async {
     if (_prefs == null) throw Exception('Storage not initialized');
-    
+
     final jsonString = _prefs!.getString(_key) ?? '[]';
     final List<dynamic> jsonList = json.decode(jsonString);
-    
+
     return jsonList.map((json) => _fromJson(json)).toList();
   }
 
   @override
   Future<JournalEntry?> getJournalEntryById(int id) async {
     final allEntries = await getAllJournalEntries();
-    final entry = allEntries.firstWhere((entry) => entry.id == id, orElse: () => JournalEntry(id: 0, content: '', dateTime: DateTime.now(), mood: ''));
-    return entry.id == 0 ? null : entry; // Return null if default entry was returned
+    final entry = allEntries.firstWhere(
+      (entry) => entry.id == id,
+      orElse: () =>
+          JournalEntry(id: 0, content: '', dateTime: DateTime.now(), mood: ''),
+    );
+    return entry.id == 0
+        ? null
+        : entry; // Return null if default entry was returned
   }
 
   @override
   Future<List<JournalEntry>> getJournalEntriesByDate(DateTime date) async {
     final allEntries = await getAllJournalEntries();
-    
+
     final startOfDay = DateTime(date.year, date.month, date.day);
     final endOfDay = DateTime(date.year, date.month, date.day + 1);
-    
+
     return allEntries
-        .where((entry) => 
-            entry.dateTime.isAfter(startOfDay) && 
-            entry.dateTime.isBefore(endOfDay))
+        .where(
+          (entry) =>
+              entry.dateTime.isAfter(startOfDay) &&
+              entry.dateTime.isBefore(endOfDay),
+        )
         .toList();
   }
 
   @override
   Future<void> saveJournalEntry(JournalEntry entry) async {
     if (_prefs == null) throw Exception('Storage not initialized');
-    
+
     final allEntries = await getAllJournalEntries();
-    
+
     // Check if entry already exists and update it, otherwise add new
     final existingIndex = allEntries.indexWhere((e) => e.id == entry.id);
     if (existingIndex != -1) {
@@ -56,8 +64,10 @@ class SimpleStorageRepository implements StorageRepository {
     } else {
       allEntries.add(entry);
     }
-    
-    final jsonString = json.encode(allEntries.map((entry) => _toJson(entry)).toList());
+
+    final jsonString = json.encode(
+      allEntries.map((entry) => _toJson(entry)).toList(),
+    );
     await _prefs!.setString(_key, jsonString);
   }
 
@@ -69,11 +79,13 @@ class SimpleStorageRepository implements StorageRepository {
   @override
   Future<void> deleteJournalEntry(int id) async {
     if (_prefs == null) throw Exception('Storage not initialized');
-    
+
     final allEntries = await getAllJournalEntries();
     allEntries.removeWhere((entry) => entry.id == id);
-    
-    final jsonString = json.encode(allEntries.map((entry) => _toJson(entry)).toList());
+
+    final jsonString = json.encode(
+      allEntries.map((entry) => _toJson(entry)).toList(),
+    );
     await _prefs!.setString(_key, jsonString);
   }
 
