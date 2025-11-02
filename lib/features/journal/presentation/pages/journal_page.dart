@@ -96,7 +96,7 @@ class _JournalPageState extends State<JournalPage> {
             final updatedEntry = JournalEntry(
               id: entry.id,
               content: content,
-              dateTime: entry.dateTime, // Keep the original time
+              dateTime: entryDate, // Use the date from the screen, which preserves original time in edit mode
               mood: mood,
             );
 
@@ -153,7 +153,7 @@ class _JournalPageState extends State<JournalPage> {
             final updatedEntry = JournalEntry(
               id: entry.id,
               content: content,
-              dateTime: entry.dateTime, // Keep the original time
+              dateTime: entryDate, // Use the date from the screen, which preserves original time in edit mode
               mood: mood,
             );
 
