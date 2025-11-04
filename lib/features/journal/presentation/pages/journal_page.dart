@@ -8,6 +8,7 @@ import '../widgets/journal_entry_card.dart';
 import '../widgets/calendar_widget.dart';
 import '../widgets/journal_entry_screen.dart';
 import 'package:think_tract_flutter/core/storage/storage_service.dart';
+import '../../../settings/presentation/pages/settings_page.dart';
 
 class JournalPage extends StatefulWidget {
   const JournalPage({super.key});
@@ -357,11 +358,13 @@ class _JournalPageState extends State<JournalPage> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
+            Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
             ),
             Text(
               '${_selectedDate.year}',
@@ -474,7 +477,10 @@ class _JournalPageState extends State<JournalPage> {
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsPage()),
+                );
               },
             ),
           ],
