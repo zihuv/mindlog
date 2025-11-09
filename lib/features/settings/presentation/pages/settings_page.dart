@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'webdav_settings_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -16,20 +15,6 @@ class SettingsPage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.cloud_sync),
-                title: const Text('WebDAV Sync'),
-                subtitle: const Text('Configure cross-platform data synchronization'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const WebDAVSettingsPage()),
-                  );
-                },
-              ),
-            ),
             const Card(
               child: ListTile(
                 leading: Icon(Icons.info),

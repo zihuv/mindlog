@@ -54,13 +54,43 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                 if (_contentController.text.isNotEmpty) {
                   DateTime entryDate;
 
-                  // If this is an edit operation, use the initialDate to preserve the original date/time
-                  // Otherwise, use current time for new entries to capture the creation time
+                  // For both new entries and edits, use the initialDate from the calendar if provided
+                  // If no initialDate is provided, use current date/time for new entries
                   if (widget.isEdit) {
+                    // For edits, preserve the original date/time but allow time to be updated if needed
                     entryDate = widget.initialDate ?? DateTime.now();
                   } else {
-                    // This is a new entry, use current time to capture the actual creation time with hours/minutes
-                    entryDate = DateTime.now();
+                    // For new entries, use the initialDate (selected date from calendar) with 00:00 time for non-today dates
+                    DateTime now = DateTime.now();
+                    DateTime today = DateTime(now.year, now.month, now.day);
+                    if (widget.initialDate != null) {
+                      DateTime selectedDate = DateTime(widget.initialDate!.year, widget.initialDate!.month, widget.initialDate!.day);
+                      // If selected date is today, use current time; otherwise use 00:00
+                      if (selectedDate.isAtSameMomentAs(today)) {
+                        // For today's entries, use current time
+                        entryDate = DateTime(
+                          widget.initialDate!.year,
+                          widget.initialDate!.month,
+                          widget.initialDate!.day,
+                          now.hour,
+                          now.minute,
+                          now.second,
+                        );
+                      } else {
+                        // For non-today entries, use 00:00
+                        entryDate = DateTime(
+                          widget.initialDate!.year,
+                          widget.initialDate!.month,
+                          widget.initialDate!.day,
+                          0,
+                          0,
+                          0,
+                        );
+                      }
+                    } else {
+                      // Fallback to current date/time
+                      entryDate = now;
+                    }
                   }
 
                   widget.onSave(

@@ -1,6 +1,6 @@
 {
-    "name": "think_tract_flutter",
-    "short_name": "think_tract_flutter",
+    "name": "mindlog",
+    "short_name": "mindlog",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

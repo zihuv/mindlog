@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:think_tract_flutter/features/journal/domain/entities/journal_entry.dart';
-import 'package:think_tract_flutter/core/storage/interfaces/storage_repository.dart';
+import 'package:mindlog/features/journal/domain/entities/journal_entry.dart';
+import 'package:mindlog/core/storage/interfaces/storage_repository.dart';
 
 class SimpleStorageRepository implements StorageRepository {
   static const String _key = 'journal_entries';
@@ -105,10 +105,12 @@ class SimpleStorageRepository implements StorageRepository {
 
   JournalEntry _fromJson(Map<String, dynamic> json) {
     return JournalEntry(
-      id: json['id'],
-      content: json['content'],
-      dateTime: DateTime.parse(json['dateTime']),
-      mood: json['mood'],
+      id: json['id'] ?? 0,
+      content: json['content'] ?? '',
+      dateTime: json.containsKey('dateTime') 
+          ? DateTime.parse(json['dateTime']) 
+          : DateTime.fromMillisecondsSinceEpoch(json['date'] ?? DateTime.now().millisecondsSinceEpoch),
+      mood: json['mood'] ?? '',
     );
   }
 }

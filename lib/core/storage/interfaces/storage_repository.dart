@@ -1,4 +1,4 @@
-import 'package:think_tract_flutter/features/journal/domain/entities/journal_entry.dart';
+import 'package:mindlog/features/journal/domain/entities/journal_entry.dart';
 
 abstract class StorageRepository {
   /// Initialize the storage

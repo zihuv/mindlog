@@ -7,7 +7,7 @@ import '../../domain/entities/journal_entry.dart';
 import '../widgets/journal_entry_card.dart';
 import '../widgets/calendar_widget.dart';
 import '../widgets/journal_entry_screen.dart';
-import 'package:think_tract_flutter/core/storage/storage_service.dart';
+import 'package:mindlog/core/storage/storage_service.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
 
 class JournalPage extends StatefulWidget {
@@ -97,7 +97,8 @@ class _JournalPageState extends State<JournalPage> {
             final updatedEntry = JournalEntry(
               id: entry.id,
               content: content,
-              dateTime: entryDate, // Use the date from the screen, which preserves original time in edit mode
+              dateTime:
+                  entryDate, // Use the date from the screen, which preserves original time in edit mode
               mood: mood,
             );
 
@@ -154,7 +155,8 @@ class _JournalPageState extends State<JournalPage> {
             final updatedEntry = JournalEntry(
               id: entry.id,
               content: content,
-              dateTime: entryDate, // Use the date from the screen, which preserves original time in edit mode
+              dateTime:
+                  entryDate, // Use the date from the screen, which preserves original time in edit mode
               mood: mood,
             );
 
@@ -202,11 +204,10 @@ class _JournalPageState extends State<JournalPage> {
                   Expanded(
                     child: CalendarWidget(
                       selectedDate: _selectedDate,
-                      onDateSelected: (selectedDate) {
-                        _filterEntriesByDate(selectedDate);
-                        Navigator.pop(
-                          context,
-                        ); // Close the modal after selection
+                      onDateSelected: (selectedDate) async {
+                        await _filterEntriesByDate(selectedDate);
+                        // Close the modal after the animation completes
+                        Navigator.pop(context);
                       },
                       isExpanded: true,
                     ),
@@ -220,58 +221,33 @@ class _JournalPageState extends State<JournalPage> {
     );
   }
 
-  void _filterEntriesByDate(DateTime date) {
+  Future<void> _filterEntriesByDate(DateTime date) async {
     // Calculate the page index for the selected date based on the initial date
-    int daysDifference = date.difference(_initialDate).inDays;
+    // Normalize both dates to start of day to avoid timezone/time component issues
+    DateTime normalizedSelectedDate = DateTime(date.year, date.month, date.day);
+    DateTime normalizedInitialDate = DateTime(_initialDate.year, _initialDate.month, _initialDate.day);
+    
+    int daysDifference = normalizedSelectedDate.difference(normalizedInitialDate).inDays;
     int pageIndex = _getInitialPageIndex() + daysDifference;
 
     setState(() {
-      _selectedDate = date;
+      _selectedDate = normalizedSelectedDate;
+      _currentPageIndex = daysDifference;
     });
 
     // Animate to the correct page in the PageView
-    _pageController.animateToPage(
+    await _pageController.animateToPage(
       pageIndex,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
 
     print(
-      'Selected date: ${date.year}-${date.month}-${date.day}, pageIndex: $pageIndex',
+      'Selected date: ${normalizedSelectedDate.year}-${normalizedSelectedDate.month}-${normalizedSelectedDate.day}, pageIndex: $pageIndex',
     );
   }
 
-  Widget _buildJournalContent() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Journal entries timeline
-          Expanded(
-            child: _getEntriesForSelectedDate().isEmpty
-                ? const Center(
-                    child: Text(
-                      'No journal entries yet for this date.\nTap + to add your first entry!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: _getEntriesForSelectedDate().length,
-                    itemBuilder: (context, index) {
-                      final entry = _getEntriesForSelectedDate()[index];
-                      return JournalEntryCard(
-                        entry: entry,
-                        onTap: () => _editJournalEntry(entry),
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   int _getInitialPageIndex() {
     // Return a large number so users can swipe in both directions
@@ -294,9 +270,6 @@ class _JournalPageState extends State<JournalPage> {
       _selectedDate = newDate;
       _currentPageIndex = offset; // Store relative index
     });
-
-    // Reload entries for the new date
-    _loadJournalEntries();
   }
 
   void _goToPreviousDay() {
@@ -331,15 +304,37 @@ class _JournalPageState extends State<JournalPage> {
                       style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                   )
-                : ListView.builder(
-                    itemCount: _getEntriesForDate(date).length,
-                    itemBuilder: (context, index) {
-                      final entry = _getEntriesForDate(date)[index];
-                      return JournalEntryCard(
-                        entry: entry,
-                        onTap: () => _editJournalEntryWithDate(entry, date),
-                      );
-                    },
+                : ScrollConfiguration(
+                    // Allow scrolling for the content within the page
+                    behavior: ScrollConfiguration.of(context).copyWith(
+                      dragDevices: {
+                        PointerDeviceKind.touch,
+                        PointerDeviceKind.mouse,
+                        PointerDeviceKind.trackpad,  // Add trackpad support for Mac
+                        PointerDeviceKind.stylus,
+                        PointerDeviceKind.unknown,
+                      },
+                    ),
+                    child: NotificationListener<ScrollEndNotification>(
+                      onNotification: (notification) {
+                        if (notification.dragDetails != null) {
+                          // This is a direct drag, not a velocity-driven scroll
+                          return false;
+                        }
+                        // Handle fling gestures
+                        return false;
+                      },
+                      child: ListView.builder(
+                        itemCount: _getEntriesForDate(date).length,
+                        itemBuilder: (context, index) {
+                          final entry = _getEntriesForDate(date)[index];
+                          return JournalEntryCard(
+                            entry: entry,
+                            onTap: () => _editJournalEntryWithDate(entry, date),
+                          );
+                        },
+                      ),
+                    ),
                   ),
           ),
         ],
@@ -352,192 +347,203 @@ class _JournalPageState extends State<JournalPage> {
     final formatter = DateFormat('MM月 dd EEE', 'zh_CN');
     final dateString = formatter.format(_selectedDate);
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false, // Remove default back button
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Builder(
-              builder: (context) => IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              ),
-            ),
-            Text(
-              '${_selectedDate.year}',
-              style: TextStyle(
-                fontSize: 64,
-                fontWeight: FontWeight.w300,
-                color: Colors.grey[300],
-              ),
-            ),
-            IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-          ],
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(70),
-          child: Container(
-            padding: const EdgeInsets.only(bottom: 12.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Date display with gesture detection (balanced compactness and readability)
-                GestureDetector(
-                  onTap: () {
-                    _showCalendarModal();
+    return WillPopScope(  // Add WillPopScope to control back button behavior
+      onWillPop: () async {
+        // Prevent back navigation if we're on the main journal page
+        // This prevents the unexpected back navigation that might be happening
+        return true; // Don't allow pop
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false, // Remove default back button
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
                   },
-                  child: Container(
-                    width: 85,
-                    height: 55,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.3),
-                          spreadRadius: 1,
-                          blurRadius: 2,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 2.0,
-                        horizontal: 6.0,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            dateString.split(' ')[0], // Month
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Text(
-                            dateString.split(' ')[1], // Day
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            dateString.split(' ')[2], // Weekday
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 8,
-                            ),
+                ),
+              ),
+              Text(
+                '${_selectedDate.year}',
+                style: TextStyle(
+                  fontSize: 64,
+                  fontWeight: FontWeight.w300,
+                  color: Colors.grey[300],
+                ),
+              ),
+              IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+            ],
+          ),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(70),
+            child: Container(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Date display with gesture detection (balanced compactness and readability)
+                  GestureDetector(
+                    onTap: () {
+                      _showCalendarModal();
+                    },
+                    child: Container(
+                      width: 85,
+                      height: 55,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            spreadRadius: 1,
+                            blurRadius: 2,
+                            offset: Offset(0, 2),
                           ),
                         ],
                       ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 2.0,
+                          horizontal: 6.0,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              dateString.split(' ')[0], // Month
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              dateString.split(' ')[1], // Day
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              dateString.split(' ')[2], // Weekday
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 8,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-              child: Text(
-                'Think Track',
-                style: TextStyle(color: Colors.white, fontSize: 24),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+                child: Text(
+                  'Think Track',
+                  style: TextStyle(color: Colors.white, fontSize: 24),
+                ),
               ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('Home'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: const Text('Calendar'),
-              onTap: () {
-                // Calendar is accessible by tapping the date in the app bar
-                // Just close the drawer
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SettingsPage()),
-                );
-              },
-            ),
-          ],
+              ListTile(
+                leading: const Icon(Icons.home),
+                title: const Text('Home'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.calendar_today),
+                title: const Text('Calendar'),
+                onTap: () {
+                  // Calendar is accessible by tapping the date in the app bar
+                  // Just close the drawer
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text('Settings'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SettingsPage()),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
-      ),
-      body: ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(
-          dragDevices: {
-            PointerDeviceKind.touch,
-            PointerDeviceKind.mouse,
-            PointerDeviceKind.stylus,
-            PointerDeviceKind.unknown,
-          },
-        ),
-        child: PageView.builder(
-          controller: _pageController,
-          onPageChanged: _handlePageChanged,
-          itemCount: null, // Infinite pages
-          itemBuilder: (context, index) {
-            // Calculate the date for this page based on the initial date and index
-            // We'll use a large starting index and calculate the offset
-            // For our purposes, we'll treat index 0 as the current date
-            DateTime pageDate = DateTime(
-              _initialDate.year,
-              _initialDate.month,
-              _initialDate.day + (index - _getInitialPageIndex()),
-            );
+        body: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(
+            dragDevices: {
+              PointerDeviceKind.touch,
+              PointerDeviceKind.mouse,
+              PointerDeviceKind.trackpad,  // Add trackpad support for Mac
+              PointerDeviceKind.stylus,
+              PointerDeviceKind.unknown,
+            },
+          ),
+          child: PageView.builder(
+            controller: _pageController,
+            onPageChanged: _handlePageChanged,
+            itemCount: null, // Infinite pages
+            itemBuilder: (context, index) {
+              // Calculate the date for this page based on the initial date and index
+              // We'll use a large starting index and calculate the offset
+              // For our purposes, we'll treat index 0 as the current date
+              DateTime pageDate = DateTime(
+                _initialDate.year,
+                _initialDate.month,
+                _initialDate.day + (index - _getInitialPageIndex()),
+              );
 
-            return Listener(
-              onPointerSignal: (PointerSignalEvent event) {
-                if (event is PointerScrollEvent) {
-                  // Handle touchpad scroll events
-                  double delta = event.scrollDelta.dx != 0
-                      ? event.scrollDelta.dx
-                      : event.scrollDelta.dy;
-
-                  if (delta > 0) {
-                    // Scroll right (user wants to go to next day)
-                    _goToNextDay();
-                  } else if (delta < 0) {
-                    // Scroll left (user wants to go to previous day)
-                    _goToPreviousDay();
+              // Use Listener for trackpad/mouse wheel events, separate from PageView gestures
+              return Listener(
+                onPointerSignal: (PointerSignalEvent event) {
+                  if (event is PointerScrollEvent) {
+                    // Handle trackpad/mouse wheel scroll events for date navigation
+                    // Only respond to horizontal scrolling (trackpad swipe)
+                    if (event.scrollDelta.dx != 0 && event.scrollDelta.dy == 0) {
+                      // Increase the sensitivity threshold since trackpad swipes are usually small
+                      if (event.scrollDelta.dx.abs() > 10) {  // Only respond to significant swipes
+                        if (event.scrollDelta.dx > 0) {
+                          // Swipe right on trackpad - go to next day
+                          _goToNextDay();
+                        } else if (event.scrollDelta.dx < 0) {
+                          // Swipe left on trackpad - go to previous day
+                          _goToPreviousDay();
+                        }
+                      }
+                    }
                   }
-                }
-              },
-              child: _buildJournalContentForDate(pageDate),
-            );
-          },
-          // Add page snapping for better UX
-          pageSnapping: true,
-          // Use BouncingScrollPhysics for smoother interaction
-          physics: const BouncingScrollPhysics(),
+                },
+                child: _buildJournalContentForDate(pageDate),
+              );
+            },
+            // Add page snapping for better UX
+            pageSnapping: true,
+            // Use BouncingScrollPhysics for smoother interaction
+            physics: const BouncingScrollPhysics(),
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addJournalEntry,
-        child: const Icon(Icons.add),
+        floatingActionButton: FloatingActionButton(
+          onPressed: _addJournalEntry,
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
