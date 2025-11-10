@@ -454,7 +454,7 @@ class _JournalPageState extends State<JournalPage> {
               DrawerHeader(
                 decoration: BoxDecoration(color: Theme.of(context).primaryColor),
                 child: Text(
-                  'Think Track',
+                  'MindLog',
                   style: TextStyle(color: Colors.white, fontSize: 24),
                 ),
               ),

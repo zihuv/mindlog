@@ -19,7 +19,7 @@ class SettingsPage extends StatelessWidget {
               child: ListTile(
                 leading: Icon(Icons.info),
                 title: const Text('About'),
-                subtitle: Text('Think Track v1.0.0'),
+                subtitle: Text('MindLog v1.0.0'),
               ),
             ),
             // Add more settings options as needed

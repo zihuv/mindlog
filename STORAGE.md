@@ -1,6 +1,6 @@
-# Storage Implementation for Think Track Flutter App
+# Storage Implementation for MindLog Flutter App
 
-This document explains how the cross-platform storage system works in the Think Track Flutter app.
+This document explains how the cross-platform storage system works in the MindLog Flutter app.
 
 ## Overview
 
