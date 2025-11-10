@@ -9,6 +9,7 @@ import '../widgets/calendar_widget.dart';
 import '../widgets/journal_entry_screen.dart';
 import 'package:mindlog/core/storage/storage_service.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
+import '../../../memos/presentation/pages/memos_page.dart';
 
 class JournalPage extends StatefulWidget {
   const JournalPage({super.key});
@@ -347,12 +348,8 @@ class _JournalPageState extends State<JournalPage> {
     final formatter = DateFormat('MM月 dd EEE', 'zh_CN');
     final dateString = formatter.format(_selectedDate);
 
-    return WillPopScope(  // Add WillPopScope to control back button behavior
-      onWillPop: () async {
-        // Prevent back navigation if we're on the main journal page
-        // This prevents the unexpected back navigation that might be happening
-        return true; // Don't allow pop
-      },
+    return PopScope(  // Add PopScope to control back button behavior (replaces deprecated WillPopScope)
+      canPop: false, // Don't allow pop
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false, // Remove default back button
@@ -459,19 +456,21 @@ class _JournalPageState extends State<JournalPage> {
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.home),
-                title: const Text('Home'),
+                leading: const Icon(Icons.book),
+                title: const Text('Journal'),
                 onTap: () {
+                  // Already on journal page, just close drawer
                   Navigator.pop(context);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.calendar_today),
-                title: const Text('Calendar'),
+                leading: const Icon(Icons.note),
+                title: const Text('Memos'),
                 onTap: () {
-                  // Calendar is accessible by tapping the date in the app bar
-                  // Just close the drawer
-                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MemosPage()),
+                  );
                 },
               ),
               ListTile(
