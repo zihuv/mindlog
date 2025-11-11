@@ -20,9 +20,7 @@ class MemoEditorScreen extends StatefulWidget {
 
 class _MemoEditorScreenState extends State<MemoEditorScreen> {
   final TextEditingController _controller = TextEditingController();
-  final TextEditingController _tagsController = TextEditingController();
-  bool _isPinned = false;
-  String _visibility = 'PRIVATE';
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -30,14 +28,28 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
 
     if (widget.initialMemo != null) {
       _controller.text = widget.initialMemo!.content;
-      _isPinned = widget.initialMemo!.isPinned;
-      _visibility = widget.initialMemo!.visibility ?? 'PRIVATE';
-
-      // Format tags as comma-separated string
-      if (widget.initialMemo!.tags.isNotEmpty) {
-        _tagsController.text = widget.initialMemo!.tags.join(', ');
-      }
+      // For editing, place cursor at the end of the content
+      _controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: _controller.text.length),
+      );
+    } else {
+      // For new memo, start with empty text and cursor at the beginning
+      _controller.text = '';
+      _controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: 0),
+      );
     }
+    
+    // Request focus after the widget is built to ensure cursor position is maintained
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+      // Ensure cursor is positioned at the beginning for new memos
+      if (widget.initialMemo == null) {
+        _controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: 0),
+        );
+      }
+    });
   }
 
   void _insertTaskList() {
@@ -72,20 +84,10 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
     );
   }
 
-  void _insertHeading() {
-    final text = _controller.text;
-    final selection = _controller.selection;
-    final newText = StringBuffer()
-      ..write(text.substring(0, selection.start))
-      ..write('## ')
-      ..write(text.substring(selection.end));
-
-    _controller.value = TextEditingValue(
-      text: newText.toString(),
-      selection: TextSelection.collapsed(
-        offset: selection.start + 3,
-      ), // 3 = length of "## "
-    );
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -99,86 +101,42 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Markdown toolbar
-            Container(
-              height: 40,
-              margin: const EdgeInsets.only(bottom: 8.0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.check_box_outlined),
-                    tooltip: 'Add task list item',
-                    onPressed: _insertTaskList,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.format_list_bulleted),
-                    tooltip: 'Add bullet list',
-                    onPressed: _insertBulletList,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.title),
-                    tooltip: 'Add heading',
-                    onPressed: _insertHeading,
-                  ),
-                ],
-              ),
-            ),
             Expanded(
               child: TextField(
                 controller: _controller,
+                focusNode: _focusNode,
                 maxLines: null,
                 expands: true,
+                textAlign: TextAlign.left,
+                textAlignVertical: TextAlignVertical.top,
                 decoration: const InputDecoration(
-                  hintText:
-                      'What\'s on your mind?\n\nUse [ ] for unchecked items\nUse [x] for checked items',
+                  hintText: 'Enter your memo here...',
                   border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.all(16.0),
                 ),
                 keyboardType: TextInputType.multiline,
                 textCapitalization: TextCapitalization.sentences,
               ),
             ),
-            const Divider(),
-            TextField(
-              controller: _tagsController,
-              decoration: const InputDecoration(
-                labelText: 'Tags (comma separated)',
-                hintText: 'work, personal, todo',
-              ),
-            ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: SwitchListTile(
-                    title: const Text('Pinned'),
-                    value: _isPinned,
-                    onChanged: (value) {
-                      setState(() {
-                        _isPinned = value;
-                      });
-                    },
+            // Bottom toolbar with formatting options
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton.icon(
+                    onPressed: _insertTaskList,
+                    icon: const Icon(Icons.check_box_outlined, size: 18),
+                    label: const Text('Task'),
                   ),
-                ),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _visibility,
-                    decoration: const InputDecoration(labelText: 'Visibility'),
-                    items: ['PRIVATE', 'PUBLIC', 'LIMITED']
-                        .map(
-                          (String value) => DropdownMenuItem(
-                            value: value,
-                            child: Text(value),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _visibility = newValue ?? 'PRIVATE';
-                      });
-                    },
+                  TextButton.icon(
+                    onPressed: _insertBulletList,
+                    icon: const Icon(Icons.format_list_bulleted, size: 18),
+                    label: const Text('List'),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -198,27 +156,13 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
       return;
     }
 
-    // Parse tags from comma-separated string
-    List<String> tags = [];
-    if (_tagsController.text.trim().isNotEmpty) {
-      tags = _tagsController.text
-          .split(',')
-          .map((tag) => tag.trim())
-          .where((tag) => tag.isNotEmpty)
-          .toList();
-    }
-
     Memo memo;
     if (widget.isEdit && widget.initialMemo != null) {
       // For edited memos, preserve the existing checklist states
       memo = widget.initialMemo!.copyWith(
         content: _controller.text.trim(),
         updatedAt: DateTime.now(),
-        isPinned: _isPinned,
-        visibility: _visibility,
-        tags: tags,
-        // Preserve existing checklist states
-        // We'll extract them from the content if needed
+        // Preserve existing pinned status and other values
       );
     } else {
       // For new memos, initialize with empty checklist states
@@ -226,9 +170,9 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
         id: DateTime.now().millisecondsSinceEpoch,
         content: _controller.text.trim(),
         createdAt: DateTime.now(),
-        isPinned: _isPinned,
-        visibility: _visibility,
-        tags: tags,
+        isPinned: false, // Default to not pinned
+        visibility: 'PRIVATE', // Default to private
+        tags: [], // No tags
         checklistStates: _extractChecklistStates(_controller.text.trim()),
       );
     }
