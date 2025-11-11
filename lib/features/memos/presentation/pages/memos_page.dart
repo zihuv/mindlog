@@ -142,10 +142,7 @@ class _MemosPageState extends State<MemosPage> {
             ),
             const Text(
               'Memos',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             IconButton(
               icon: const Icon(Icons.search),
@@ -201,45 +198,55 @@ class _MemosPageState extends State<MemosPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _memos.isEmpty
-              ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.note_add,
-                        size: 64,
-                        color: Colors.grey,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'No memos yet',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Tap the + button to create your first memo',
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                    ],
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.note_add, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text(
+                    'No memos yet',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: () async {
-                    await _loadMemos();
-                  },
-                  child: ListView.builder(
-                    itemCount: _memos.length,
-                    itemBuilder: (context, index) {
-                      final memo = _memos[index];
-                      return MemoCard(
-                        memo: memo,
-                        onTap: () => _editMemo(memo),
-                        onEdit: () => _editMemo(memo),
-                        onDelete: () => _deleteMemo(memo),
-                      );
+                  SizedBox(height: 8),
+                  Text(
+                    'Tap the + button to create your first memo',
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: () async {
+                await _loadMemos();
+              },
+              child: ListView.builder(
+                itemCount: _memos.length,
+                itemBuilder: (context, index) {
+                  final memo = _memos[index];
+                  return MemoCard(
+                    memo: memo,
+                    onTap: () => _editMemo(memo),
+                    onEdit: () => _editMemo(memo),
+                    onDelete: () => _deleteMemo(memo),
+                    onChecklistChanged: (updatedMemo) async {
+                      // Save the updated memo with new checklist states
+                      await MemoService.instance.updateMemo(updatedMemo);
+
+                      // Update the local list
+                      setState(() {
+                        int index = _memos.indexWhere(
+                          (m) => m.id == updatedMemo.id,
+                        );
+                        if (index != -1) {
+                          _memos[index] = updatedMemo;
+                        }
+                      });
                     },
-                  ),
-                ),
+                  );
+                },
+              ),
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addMemo,
         child: const Icon(Icons.add),

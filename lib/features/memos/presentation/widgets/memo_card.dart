@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:mindlog/features/memos/domain/entities/memo.dart';
+import 'package:mindlog/features/memos/presentation/widgets/markdown_checkbox_widget.dart';
 
 class MemoCard extends StatelessWidget {
   final Memo memo;
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final Function(Memo)? onChecklistChanged;
 
   const MemoCard({
     Key? key,
@@ -13,6 +15,7 @@ class MemoCard extends StatelessWidget {
     this.onTap,
     this.onEdit,
     this.onDelete,
+    this.onChecklistChanged,
   }) : super(key: key);
 
   @override
@@ -30,24 +33,14 @@ class MemoCard extends StatelessWidget {
               children: [
                 Text(
                   _formatDateTime(memo.createdAt),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
                 Row(
                   children: [
                     if (memo.isPinned)
-                      Icon(
-                        Icons.push_pin,
-                        size: 16,
-                        color: Colors.grey,
-                      ),
+                      Icon(Icons.push_pin, size: 16, color: Colors.grey),
                     PopupMenuButton<String>(
-                      icon: Icon(
-                        Icons.more_vert,
-                        color: Colors.grey[600],
-                      ),
+                      icon: Icon(Icons.more_vert, color: Colors.grey[600]),
                       onSelected: (String result) {
                         if (result == 'edit') {
                           onEdit?.call();
@@ -71,31 +64,49 @@ class MemoCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            // Memo content
-            Text(
-              memo.content,
-              style: const TextStyle(fontSize: 16),
+            // Memo content with markdown support for checkboxes
+            SimpleMarkdownCheckboxRenderer(
+              data: memo.content,
+              checklistStates: memo.checklistStates,
+              onCheckboxChanged: (index, isChecked) {
+                // Update the checkbox state in the memo
+                final updatedStates = Map<int, bool>.from(memo.checklistStates);
+                updatedStates[index] = isChecked;
+
+                // Create an updated memo with the new checklist states
+                final updatedMemo = memo.copyWith(
+                  checklistStates: updatedStates,
+                );
+
+                // Call the parent callback to update the memo
+                onChecklistChanged?.call(updatedMemo);
+              },
             ),
             if (memo.tags.isNotEmpty) ...[
               const SizedBox(height: 8),
               Wrap(
                 spacing: 4.0,
-                children: memo.tags.map((tag) => 
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '#$tag',
-                      style: TextStyle(
-                        color: Colors.blue[800],
-                        fontSize: 12,
+                children: memo.tags
+                    .map(
+                      (tag) => Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue[100],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '#$tag',
+                          style: TextStyle(
+                            color: Colors.blue[800],
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ).toList(),
+                    )
+                    .toList(),
               ),
             ],
           ],
@@ -105,17 +116,8 @@ class MemoCard extends StatelessWidget {
   }
 
   String _formatDateTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
+    return dateTime.toString().split(
+      '.',
+    )[0]; // Formats as 'YYYY-MM-DD HH:MM:SS'
   }
 }

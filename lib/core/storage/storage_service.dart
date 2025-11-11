@@ -35,11 +35,16 @@ class StorageService {
 
   // Proxy all StorageRepository methods to current repository
   Future<void> initialize() => repository.initialize();
-  Future<List<JournalEntry>> getAllJournalEntries() => repository.getAllJournalEntries();
-  Future<JournalEntry?> getJournalEntryById(int id) => repository.getJournalEntryById(id);
-  Future<List<JournalEntry>> getJournalEntriesByDate(DateTime date) => repository.getJournalEntriesByDate(date);
-  Future<void> saveJournalEntry(JournalEntry entry) => repository.saveJournalEntry(entry);
-  Future<void> updateJournalEntry(JournalEntry entry) => repository.updateJournalEntry(entry);
+  Future<List<JournalEntry>> getAllJournalEntries() =>
+      repository.getAllJournalEntries();
+  Future<JournalEntry?> getJournalEntryById(int id) =>
+      repository.getJournalEntryById(id);
+  Future<List<JournalEntry>> getJournalEntriesByDate(DateTime date) =>
+      repository.getJournalEntriesByDate(date);
+  Future<void> saveJournalEntry(JournalEntry entry) =>
+      repository.saveJournalEntry(entry);
+  Future<void> updateJournalEntry(JournalEntry entry) =>
+      repository.updateJournalEntry(entry);
   Future<void> deleteJournalEntry(int id) => repository.deleteJournalEntry(id);
   Future<void> close() => repository.close();
 }

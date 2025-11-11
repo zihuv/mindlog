@@ -8,6 +8,8 @@ class Memo extends Equatable {
   final bool isPinned;
   final String? visibility; // 'PUBLIC', 'PRIVATE', 'LIMITED'
   final List<String> tags;
+  final Map<int, bool>
+  checklistStates; // Tracks the checked/unchecked state of checkboxes
 
   const Memo({
     required this.id,
@@ -17,10 +19,20 @@ class Memo extends Equatable {
     this.isPinned = false,
     this.visibility = 'PRIVATE',
     this.tags = const [],
+    this.checklistStates = const {},
   });
 
   @override
-  List<Object?> get props => [id, content, createdAt, updatedAt, isPinned, visibility, tags];
+  List<Object?> get props => [
+    id,
+    content,
+    createdAt,
+    updatedAt,
+    isPinned,
+    visibility,
+    tags,
+    checklistStates,
+  ];
 
   Memo copyWith({
     int? id,
@@ -30,6 +42,7 @@ class Memo extends Equatable {
     bool? isPinned,
     String? visibility,
     List<String>? tags,
+    Map<int, bool>? checklistStates,
   }) {
     return Memo(
       id: id ?? this.id,
@@ -39,10 +52,17 @@ class Memo extends Equatable {
       isPinned: isPinned ?? this.isPinned,
       visibility: visibility ?? this.visibility,
       tags: tags ?? this.tags,
+      checklistStates: checklistStates ?? this.checklistStates,
     );
   }
 
   Map<String, dynamic> toJson() {
+    // Convert int keys to string for JSON serialization
+    Map<String, bool> serializedChecklistStates = {};
+    checklistStates.forEach((key, value) {
+      serializedChecklistStates[key.toString()] = value;
+    });
+
     return {
       'id': id,
       'content': content,
@@ -51,18 +71,37 @@ class Memo extends Equatable {
       'isPinned': isPinned,
       'visibility': visibility,
       'tags': tags,
+      'checklistStates': serializedChecklistStates,
     };
   }
 
   factory Memo.fromJson(Map<String, dynamic> json) {
+    // Convert string keys back to int when deserializing
+    Map<int, bool> deserializedChecklistStates = {};
+    final checklistJson = json['checklistStates'] ?? {};
+    if (checklistJson is Map) {
+      checklistJson.forEach((key, value) {
+        if (key is String) {
+          deserializedChecklistStates[int.tryParse(key) ?? 0] = value as bool;
+        } else if (key is int) {
+          deserializedChecklistStates[key] = value as bool;
+        }
+      });
+    }
+
     return Memo(
       id: json['id'] ?? 0,
       content: json['content'] ?? '',
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      createdAt: DateTime.parse(
+        json['createdAt'] ?? DateTime.now().toIso8601String(),
+      ),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : null,
       isPinned: json['isPinned'] ?? false,
       visibility: json['visibility'] ?? 'PRIVATE',
       tags: List<String>.from(json['tags'] ?? []),
+      checklistStates: deserializedChecklistStates,
     );
   }
 }

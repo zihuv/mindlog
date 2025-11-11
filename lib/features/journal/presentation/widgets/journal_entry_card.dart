@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../domain/entities/journal_entry.dart';
 
 class JournalEntryCard extends StatelessWidget {
@@ -18,16 +17,16 @@ class JournalEntryCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Time column on the left
+            // Time column on the left (updated to accommodate full date-time format)
             SizedBox(
-              width: 60,
+              width: 130,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    DateFormat('HH:mm').format(entry.dateTime),
+                    '${entry.dateTime.year}-${entry.dateTime.month.toString().padLeft(2, '0')}-${entry.dateTime.day.toString().padLeft(2, '0')} ${entry.dateTime.hour.toString().padLeft(2, '0')}:${entry.dateTime.minute.toString().padLeft(2, '0')}:${entry.dateTime.second.toString().padLeft(2, '0')}',
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

@@ -27,12 +27,12 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     if (widget.initialMemo != null) {
       _controller.text = widget.initialMemo!.content;
       _isPinned = widget.initialMemo!.isPinned;
       _visibility = widget.initialMemo!.visibility ?? 'PRIVATE';
-      
+
       // Format tags as comma-separated string
       if (widget.initialMemo!.tags.isNotEmpty) {
         _tagsController.text = widget.initialMemo!.tags.join(', ');
@@ -40,34 +40,104 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
     }
   }
 
+  void _insertTaskList() {
+    final text = _controller.text;
+    final selection = _controller.selection;
+    final newText = StringBuffer()
+      ..write(text.substring(0, selection.start))
+      ..write('- [ ] ')
+      ..write(text.substring(selection.end));
+
+    _controller.value = TextEditingValue(
+      text: newText.toString(),
+      selection: TextSelection.collapsed(
+        offset: selection.start + 6,
+      ), // 6 = length of "- [ ] "
+    );
+  }
+
+  void _insertBulletList() {
+    final text = _controller.text;
+    final selection = _controller.selection;
+    final newText = StringBuffer()
+      ..write(text.substring(0, selection.start))
+      ..write('- ')
+      ..write(text.substring(selection.end));
+
+    _controller.value = TextEditingValue(
+      text: newText.toString(),
+      selection: TextSelection.collapsed(
+        offset: selection.start + 2,
+      ), // 2 = length of "- "
+    );
+  }
+
+  void _insertHeading() {
+    final text = _controller.text;
+    final selection = _controller.selection;
+    final newText = StringBuffer()
+      ..write(text.substring(0, selection.start))
+      ..write('## ')
+      ..write(text.substring(selection.end));
+
+    _controller.value = TextEditingValue(
+      text: newText.toString(),
+      selection: TextSelection.collapsed(
+        offset: selection.start + 3,
+      ), // 3 = length of "## "
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.isEdit ? 'Edit Memo' : 'New Memo'),
-        actions: [
-          TextButton(
-            onPressed: _saveMemo,
-            child: const Text('Save'),
-          ),
-        ],
+        actions: [TextButton(onPressed: _saveMemo, child: const Text('Save'))],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
-              controller: _controller,
-              maxLines: null,
-              decoration: const InputDecoration(
-                hintText: 'What\'s on your mind?',
-                border: InputBorder.none,
+            // Markdown toolbar
+            Container(
+              height: 40,
+              margin: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.check_box_outlined),
+                    tooltip: 'Add task list item',
+                    onPressed: _insertTaskList,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.format_list_bulleted),
+                    tooltip: 'Add bullet list',
+                    onPressed: _insertBulletList,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.title),
+                    tooltip: 'Add heading',
+                    onPressed: _insertHeading,
+                  ),
+                ],
               ),
-              keyboardType: TextInputType.multiline,
-              textCapitalization: TextCapitalization.sentences,
+            ),
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                maxLines: null,
+                expands: true,
+                decoration: const InputDecoration(
+                  hintText:
+                      'What\'s on your mind?\n\nUse [ ] for unchecked items\nUse [x] for checked items',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.multiline,
+                textCapitalization: TextCapitalization.sentences,
+              ),
             ),
             const Divider(),
-            const SizedBox(height: 16),
             TextField(
               controller: _tagsController,
               decoration: const InputDecoration(
@@ -92,14 +162,14 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: _visibility,
-                    decoration: const InputDecoration(
-                      labelText: 'Visibility',
-                    ),
+                    decoration: const InputDecoration(labelText: 'Visibility'),
                     items: ['PRIVATE', 'PUBLIC', 'LIMITED']
-                        .map((String value) => DropdownMenuItem(
-                              value: value,
-                              child: Text(value),
-                            ))
+                        .map(
+                          (String value) => DropdownMenuItem(
+                            value: value,
+                            child: Text(value),
+                          ),
+                        )
                         .toList(),
                     onChanged: (String? newValue) {
                       setState(() {
@@ -140,16 +210,18 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
 
     Memo memo;
     if (widget.isEdit && widget.initialMemo != null) {
-      // Update existing memo
+      // For edited memos, preserve the existing checklist states
       memo = widget.initialMemo!.copyWith(
         content: _controller.text.trim(),
         updatedAt: DateTime.now(),
         isPinned: _isPinned,
         visibility: _visibility,
         tags: tags,
+        // Preserve existing checklist states
+        // We'll extract them from the content if needed
       );
     } else {
-      // Create new memo
+      // For new memos, initialize with empty checklist states
       memo = Memo(
         id: DateTime.now().millisecondsSinceEpoch,
         content: _controller.text.trim(),
@@ -157,6 +229,7 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
         isPinned: _isPinned,
         visibility: _visibility,
         tags: tags,
+        checklistStates: _extractChecklistStates(_controller.text.trim()),
       );
     }
 
@@ -168,5 +241,25 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
 
     // Navigate back
     Navigator.pop(context);
+  }
+
+  Map<int, bool> _extractChecklistStates(String content) {
+    final lines = content.split('\n');
+    final Map<int, bool> states = {};
+
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      if (RegExp(r'^\s*[\-\*]\s+\[([ xX])\]\s+.*').hasMatch(line)) {
+        final match = RegExp(
+          r'^(\s*[\-\*]\s+)\[([ xX])\](.*)$',
+        ).firstMatch(line);
+        if (match != null) {
+          final isChecked = match.group(2)!.trim().toLowerCase() == 'x';
+          states[i] = isChecked;
+        }
+      }
+    }
+
+    return states;
   }
 }

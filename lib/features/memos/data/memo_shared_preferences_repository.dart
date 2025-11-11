@@ -25,14 +25,19 @@ class MemoSharedPreferencesRepository implements MemoStorageRepository {
   @override
   Future<Memo?> getMemoById(int id) async {
     final allMemos = await getAllMemos();
-    final memo = allMemos.firstWhere((memo) => memo.id == id, orElse: () => Memo(
-      id: 0,
-      content: '',
-      createdAt: DateTime.now(),
-      isPinned: false,
-      visibility: 'PRIVATE',
-    ));
-    return memo.id == 0 ? null : memo; // Return null if default memo was returned
+    final memo = allMemos.firstWhere(
+      (memo) => memo.id == id,
+      orElse: () => Memo(
+        id: 0,
+        content: '',
+        createdAt: DateTime.now(),
+        isPinned: false,
+        visibility: 'PRIVATE',
+      ),
+    );
+    return memo.id == 0
+        ? null
+        : memo; // Return null if default memo was returned
   }
 
   @override
@@ -49,7 +54,9 @@ class MemoSharedPreferencesRepository implements MemoStorageRepository {
       allMemos.add(memo);
     }
 
-    final jsonString = json.encode(allMemos.map((memo) => memo.toJson()).toList());
+    final jsonString = json.encode(
+      allMemos.map((memo) => memo.toJson()).toList(),
+    );
     await _prefs!.setString(_key, jsonString);
   }
 
@@ -65,7 +72,9 @@ class MemoSharedPreferencesRepository implements MemoStorageRepository {
     final allMemos = await getAllMemos();
     allMemos.removeWhere((memo) => memo.id == id);
 
-    final jsonString = json.encode(allMemos.map((memo) => memo.toJson()).toList());
+    final jsonString = json.encode(
+      allMemos.map((memo) => memo.toJson()).toList(),
+    );
     await _prefs!.setString(_key, jsonString);
   }
 

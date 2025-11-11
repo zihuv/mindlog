@@ -226,9 +226,15 @@ class _JournalPageState extends State<JournalPage> {
     // Calculate the page index for the selected date based on the initial date
     // Normalize both dates to start of day to avoid timezone/time component issues
     DateTime normalizedSelectedDate = DateTime(date.year, date.month, date.day);
-    DateTime normalizedInitialDate = DateTime(_initialDate.year, _initialDate.month, _initialDate.day);
-    
-    int daysDifference = normalizedSelectedDate.difference(normalizedInitialDate).inDays;
+    DateTime normalizedInitialDate = DateTime(
+      _initialDate.year,
+      _initialDate.month,
+      _initialDate.day,
+    );
+
+    int daysDifference = normalizedSelectedDate
+        .difference(normalizedInitialDate)
+        .inDays;
     int pageIndex = _getInitialPageIndex() + daysDifference;
 
     setState(() {
@@ -247,8 +253,6 @@ class _JournalPageState extends State<JournalPage> {
       'Selected date: ${normalizedSelectedDate.year}-${normalizedSelectedDate.month}-${normalizedSelectedDate.day}, pageIndex: $pageIndex',
     );
   }
-
-
 
   int _getInitialPageIndex() {
     // Return a large number so users can swipe in both directions
@@ -311,7 +315,8 @@ class _JournalPageState extends State<JournalPage> {
                       dragDevices: {
                         PointerDeviceKind.touch,
                         PointerDeviceKind.mouse,
-                        PointerDeviceKind.trackpad,  // Add trackpad support for Mac
+                        PointerDeviceKind
+                            .trackpad, // Add trackpad support for Mac
                         PointerDeviceKind.stylus,
                         PointerDeviceKind.unknown,
                       },
@@ -348,7 +353,8 @@ class _JournalPageState extends State<JournalPage> {
     final formatter = DateFormat('MM月 dd EEE', 'zh_CN');
     final dateString = formatter.format(_selectedDate);
 
-    return PopScope(  // Add PopScope to control back button behavior (replaces deprecated WillPopScope)
+    return PopScope(
+      // Add PopScope to control back button behavior (replaces deprecated WillPopScope)
       canPop: false, // Don't allow pop
       child: Scaffold(
         appBar: AppBar(
@@ -449,7 +455,9 @@ class _JournalPageState extends State<JournalPage> {
             padding: EdgeInsets.zero,
             children: [
               DrawerHeader(
-                decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                ),
                 child: Text(
                   'MindLog',
                   style: TextStyle(color: Colors.white, fontSize: 24),
@@ -479,7 +487,9 @@ class _JournalPageState extends State<JournalPage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const SettingsPage()),
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsPage(),
+                    ),
                   );
                 },
               ),
@@ -491,7 +501,7 @@ class _JournalPageState extends State<JournalPage> {
             dragDevices: {
               PointerDeviceKind.touch,
               PointerDeviceKind.mouse,
-              PointerDeviceKind.trackpad,  // Add trackpad support for Mac
+              PointerDeviceKind.trackpad, // Add trackpad support for Mac
               PointerDeviceKind.stylus,
               PointerDeviceKind.unknown,
             },
@@ -516,9 +526,11 @@ class _JournalPageState extends State<JournalPage> {
                   if (event is PointerScrollEvent) {
                     // Handle trackpad/mouse wheel scroll events for date navigation
                     // Only respond to horizontal scrolling (trackpad swipe)
-                    if (event.scrollDelta.dx != 0 && event.scrollDelta.dy == 0) {
+                    if (event.scrollDelta.dx != 0 &&
+                        event.scrollDelta.dy == 0) {
                       // Increase the sensitivity threshold since trackpad swipes are usually small
-                      if (event.scrollDelta.dx.abs() > 10) {  // Only respond to significant swipes
+                      if (event.scrollDelta.dx.abs() > 10) {
+                        // Only respond to significant swipes
                         if (event.scrollDelta.dx > 0) {
                           // Swipe right on trackpad - go to next day
                           _goToNextDay();

@@ -107,9 +107,11 @@ class SimpleStorageRepository implements StorageRepository {
     return JournalEntry(
       id: json['id'] ?? 0,
       content: json['content'] ?? '',
-      dateTime: json.containsKey('dateTime') 
-          ? DateTime.parse(json['dateTime']) 
-          : DateTime.fromMillisecondsSinceEpoch(json['date'] ?? DateTime.now().millisecondsSinceEpoch),
+      dateTime: json.containsKey('dateTime')
+          ? DateTime.parse(json['dateTime'])
+          : DateTime.fromMillisecondsSinceEpoch(
+              json['date'] ?? DateTime.now().millisecondsSinceEpoch,
+            ),
       mood: json['mood'] ?? '',
     );
   }

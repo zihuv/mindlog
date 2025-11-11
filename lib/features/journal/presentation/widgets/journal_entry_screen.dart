@@ -64,7 +64,11 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                     DateTime now = DateTime.now();
                     DateTime today = DateTime(now.year, now.month, now.day);
                     if (widget.initialDate != null) {
-                      DateTime selectedDate = DateTime(widget.initialDate!.year, widget.initialDate!.month, widget.initialDate!.day);
+                      DateTime selectedDate = DateTime(
+                        widget.initialDate!.year,
+                        widget.initialDate!.month,
+                        widget.initialDate!.day,
+                      );
                       // If selected date is today, use current time; otherwise use 00:00
                       if (selectedDate.isAtSameMomentAs(today)) {
                         // For today's entries, use current time
