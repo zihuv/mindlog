@@ -226,7 +226,11 @@ class _MemosPageState extends State<MemosPage> {
                   final memo = _memos[index];
                   return MemoCard(
                     memo: memo,
-                    onTap: () => _editMemo(memo),
+                    onTap: () {
+                      // Single tap could be for selecting or expanding
+                      // For now, let's just keep it as a tap indicator if needed
+                      // or potentially expand/collapse functionality
+                    },
                     onEdit: () => _editMemo(memo),
                     onDelete: () => _deleteMemo(memo),
                     onChecklistChanged: (updatedMemo) async {
