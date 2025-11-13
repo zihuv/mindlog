@@ -1,25 +1,16 @@
 import 'package:mindlog/features/memos/memo_service.dart';
 import 'package:mindlog/features/memos/domain/entities/memo.dart';
+import 'package:uuid/uuid.dart';
 
 class NoteService {
-  // Counter to generate unique integer IDs
-  static Future<int> _generateId() async {
-    final allMemos = await MemoService.instance.getAllMemos();
-    int maxId = 0;
-    for (final memo in allMemos) {
-      if (memo.id > maxId) {
-        maxId = memo.id;
-      }
-    }
-    return maxId + 1;
-  }
+  static const Uuid _uuid = Uuid();
 
   Future<void> init() async {
     await MemoService.instance.init();
   }
 
   // Create a new note
-  Future<int> createNote({
+  Future<String> createNote({
     required String content,
     List<String>? imageName,
     List<String>? audioName,
@@ -27,10 +18,10 @@ class NoteService {
     List<String>? tags,
     Map<int, bool>? checklistStates,
   }) async {
-    final noteId = await _generateId();
+    final noteId = _uuid.v7();
     final now = DateTime.now();
 
-    // Create a new memo with the generated ID
+    // Create a new memo with the generated UUID
     final memo = Memo(
       id: noteId,
       content: content,
@@ -53,13 +44,13 @@ class NoteService {
   }
 
   // Get a note by ID
-  Future<Memo?> getNoteById(int id) async {
+  Future<Memo?> getNoteById(String id) async {
     return await MemoService.instance.getMemoById(id);
   }
 
   // Update a note
   Future<void> updateNote({
-    required int id,
+    required String id,
     String? content,
     List<String>? imageName,
     List<String>? audioName,
@@ -88,7 +79,7 @@ class NoteService {
   }
 
   // Delete a note
-  Future<void> deleteNote(int id) async {
+  Future<void> deleteNote(String id) async {
     await MemoService.instance.deleteMemo(id);
   }
 

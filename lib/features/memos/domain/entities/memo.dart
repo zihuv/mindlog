@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class Memo extends Equatable {
-  final int id;
+  final String id;
   final String content;
   final DateTime createdAt;
   final DateTime? updatedAt;
@@ -44,7 +44,7 @@ class Memo extends Equatable {
   ];
 
   Memo copyWith({
-    int? id,
+    String? id,
     String? content,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -108,7 +108,7 @@ class Memo extends Equatable {
     }
 
     return Memo(
-      id: json['id'] ?? 0,
+      id: json['id'] ?? '',
       content: json['content'] ?? '',
       createdAt: DateTime.parse(
         json['createdAt'] ?? DateTime.now().toIso8601String(),

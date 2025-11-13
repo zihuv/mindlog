@@ -1,5 +1,5 @@
 import 'package:mindlog/features/memos/data/memo_storage_repository.dart';
-import 'package:mindlog/features/memos/data/memo_shared_preferences_repository.dart';
+import 'package:mindlog/features/memos/data/memo_database_repository.dart';
 import 'package:mindlog/features/memos/domain/entities/memo.dart';
 
 class MemoService {
@@ -28,18 +28,18 @@ class MemoService {
       await _repository!.close();
     }
 
-    // Create local storage repository
-    _repository = MemoSharedPreferencesRepository();
+    // Create database repository for UUID support
+    _repository = MemoDatabaseRepository();
     await _repository!.initialize();
   }
 
   // Proxy all MemoStorageRepository methods to current repository
   Future<void> initialize() => repository.initialize();
   Future<List<Memo>> getAllMemos() => repository.getAllMemos();
-  Future<Memo?> getMemoById(int id) => repository.getMemoById(id);
+  Future<Memo?> getMemoById(String id) => repository.getMemoById(id);
   Future<void> saveMemo(Memo memo) => repository.saveMemo(memo);
   Future<void> updateMemo(Memo memo) => repository.updateMemo(memo);
-  Future<void> deleteMemo(int id) => repository.deleteMemo(id);
+  Future<void> deleteMemo(String id) => repository.deleteMemo(id);
   Future<List<Memo>> searchMemos(String query) => repository.searchMemos(query);
   Future<List<String>> getAllTags() => repository.getAllTags();
   Future<void> close() => repository.close();

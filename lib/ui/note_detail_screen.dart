@@ -4,7 +4,7 @@ import '../controllers/note_controller.dart';
 import 'package:image_picker/image_picker.dart';
 
 class NoteDetailScreen extends StatefulWidget {
-  final int? noteId;
+  final String? noteId;
 
   const NoteDetailScreen({Key? key, this.noteId}) : super(key: key);
 

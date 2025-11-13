@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mindlog/features/memos/domain/entities/memo.dart';
 import 'package:mindlog/features/memos/memo_service.dart';
 import 'package:mindlog/core/utils/tag_parser.dart';
+import 'package:uuid/uuid.dart';
 
 class MemoEditorScreen extends StatefulWidget {
   final Function(Memo memo)? onSave;
@@ -172,8 +173,9 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
       );
     } else {
       // For new memos, initialize with empty checklist states
+      final uuid = const Uuid();
       memo = Memo(
-        id: DateTime.now().millisecondsSinceEpoch,
+        id: uuid.v7(),
         content: _controller.text.trim(),
         createdAt: DateTime.now(),
         isPinned: false, // Default to not pinned

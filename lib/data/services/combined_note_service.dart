@@ -11,7 +11,7 @@ class CombinedNoteService {
   }
 
   // Create a new note with media files
-  Future<int> createNote({
+  Future<String> createNote({
     required String content,
     List<String>? imagesToCopy, // Source paths for images to be copied
     List<String>? videosToCopy, // Source paths for videos to be copied
@@ -33,7 +33,7 @@ class CombinedNoteService {
     if (imagesToCopy != null) {
       for (final imagePath in imagesToCopy) {
         await _mediaService.saveImage(
-          noteId.toString(),
+          noteId,
           imagePath.split('/').last,
           imagePath,
         );
@@ -43,7 +43,7 @@ class CombinedNoteService {
     if (videosToCopy != null) {
       for (final videoPath in videosToCopy) {
         await _mediaService.saveVideo(
-          noteId.toString(),
+          noteId,
           videoPath.split('/').last,
           videoPath,
         );
@@ -53,7 +53,7 @@ class CombinedNoteService {
     if (audiosToCopy != null) {
       for (final audioPath in audiosToCopy) {
         await _mediaService.saveAudio(
-          noteId.toString(),
+          noteId,
           audioPath.split('/').last,
           audioPath,
         );
@@ -69,18 +69,18 @@ class CombinedNoteService {
   }
 
   // Get a note by ID
-  Future<Memo?> getNoteById(int id) async {
+  Future<Memo?> getNoteById(String id) async {
     return await _noteService.getNoteById(id);
   }
 
   // Get all media paths for a note
-  Future<Map<String, List<String>>> getNoteMedia(int noteId) async {
-    return await _mediaService.getNoteMedia(noteId.toString());
+  Future<Map<String, List<String>>> getNoteMedia(String noteId) async {
+    return await _mediaService.getNoteMedia(noteId);
   }
 
   // Update a note with optional media additions
   Future<void> updateNote({
-    required int id,
+    required String id,
     String? content,
     List<String>? newImagesToCopy, // New images to add to the note
     List<String>? newVideosToCopy, // New videos to add to the note
@@ -104,39 +104,27 @@ class CombinedNoteService {
     // Add new media files if provided
     if (newImagesToCopy != null) {
       for (final imagePath in newImagesToCopy) {
-        await _mediaService.saveImage(
-          id.toString(),
-          imagePath.split('/').last,
-          imagePath,
-        );
+        await _mediaService.saveImage(id, imagePath.split('/').last, imagePath);
       }
     }
 
     if (newVideosToCopy != null) {
       for (final videoPath in newVideosToCopy) {
-        await _mediaService.saveVideo(
-          id.toString(),
-          videoPath.split('/').last,
-          videoPath,
-        );
+        await _mediaService.saveVideo(id, videoPath.split('/').last, videoPath);
       }
     }
 
     if (newAudiosToCopy != null) {
       for (final audioPath in newAudiosToCopy) {
-        await _mediaService.saveAudio(
-          id.toString(),
-          audioPath.split('/').last,
-          audioPath,
-        );
+        await _mediaService.saveAudio(id, audioPath.split('/').last, audioPath);
       }
     }
   }
 
   // Delete a note and its associated media
-  Future<void> deleteNote(int id) async {
+  Future<void> deleteNote(String id) async {
     // Delete all associated media files
-    await _mediaService.deleteNoteMedia(id.toString());
+    await _mediaService.deleteNoteMedia(id);
 
     // Then delete the note
     await _noteService.deleteNote(id);

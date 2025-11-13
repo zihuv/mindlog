@@ -73,7 +73,7 @@ class NoteController extends GetxController {
     }
   }
 
-  Future<Memo?> getNoteById(int id) async {
+  Future<Memo?> getNoteById(String id) async {
     return await _service.getNoteById(id);
   }
 
@@ -90,7 +90,7 @@ class NoteController extends GetxController {
   }
 
   Future<void> updateNote({
-    required int id,
+    required String id,
     String? content,
     List<String>? tags,
     Map<int, bool>? checklistStates,
@@ -103,12 +103,12 @@ class NoteController extends GetxController {
     );
   }
 
-  Future<void> deleteNote(int id) async {
+  Future<void> deleteNote(String id) async {
     await _service.deleteNote(id);
   }
 
   Future<void> updateChecklistItem(
-    int noteId,
+    String noteId,
     int itemIndex,
     String itemContent,
     bool newValue,

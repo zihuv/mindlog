@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:mindlog/features/memos/domain/entities/memo.dart';
 import 'package:mindlog/features/memos/data/memo_storage_repository.dart';
+import 'package:uuid/uuid.dart';
 
 class MemoSharedPreferencesRepository implements MemoStorageRepository {
   static const String _key = 'memos';
@@ -23,19 +24,19 @@ class MemoSharedPreferencesRepository implements MemoStorageRepository {
   }
 
   @override
-  Future<Memo?> getMemoById(int id) async {
+  Future<Memo?> getMemoById(String id) async {
     final allMemos = await getAllMemos();
     final memo = allMemos.firstWhere(
       (memo) => memo.id == id,
       orElse: () => Memo(
-        id: 0,
+        id: '',
         content: '',
         createdAt: DateTime.now(),
         isPinned: false,
         visibility: 'PRIVATE',
       ),
     );
-    return memo.id == 0
+    return memo.id.isEmpty
         ? null
         : memo; // Return null if default memo was returned
   }
@@ -46,12 +47,15 @@ class MemoSharedPreferencesRepository implements MemoStorageRepository {
 
     final allMemos = await getAllMemos();
 
+    // Generate a UUID if the memo doesn't have an ID yet
+    final memoToSave = memo.id.isEmpty ? memo.copyWith(id: Uuid().v7()) : memo;
+
     // Check if memo already exists and update it, otherwise add new
-    final existingIndex = allMemos.indexWhere((m) => m.id == memo.id);
+    final existingIndex = allMemos.indexWhere((m) => m.id == memoToSave.id);
     if (existingIndex != -1) {
-      allMemos[existingIndex] = memo;
+      allMemos[existingIndex] = memoToSave;
     } else {
-      allMemos.add(memo);
+      allMemos.add(memoToSave);
     }
 
     final jsonString = json.encode(
@@ -66,7 +70,7 @@ class MemoSharedPreferencesRepository implements MemoStorageRepository {
   }
 
   @override
-  Future<void> deleteMemo(int id) async {
+  Future<void> deleteMemo(String id) async {
     if (_prefs == null) throw Exception('Storage not initialized');
 
     final allMemos = await getAllMemos();
