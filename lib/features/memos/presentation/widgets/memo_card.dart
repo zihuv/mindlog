@@ -22,7 +22,8 @@ class MemoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: InkWell(  // Using InkWell to make the entire card tappable
+      child: InkWell(
+        // Using InkWell to make the entire card tappable
         onTap: onEdit, // Tap anywhere on the card to edit
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -72,7 +73,9 @@ class MemoCard extends StatelessWidget {
                 checklistStates: memo.checklistStates,
                 onCheckboxChanged: (index, isChecked) {
                   // Update the checkbox state in the memo
-                  final updatedStates = Map<int, bool>.from(memo.checklistStates);
+                  final updatedStates = Map<int, bool>.from(
+                    memo.checklistStates,
+                  );
                   updatedStates[index] = isChecked;
 
                   // Create an updated memo with the new checklist states

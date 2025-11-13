@@ -86,15 +86,11 @@ class _JournalPageState extends State<JournalPage> {
     );
   }
 
-
-
   void _sortJournalEntries() {
     _journalEntries.sort(
       (a, b) => a.dateTime.compareTo(b.dateTime),
     ); // Sort in ascending order (oldest first)
   }
-
-
 
   List<JournalEntry> _getEntriesForDate(DateTime date) {
     // Return entries for a specific date

@@ -107,9 +107,9 @@ class NoteService {
     }
 
     final allNotes = await getAllNotes();
-    return allNotes.where((note) =>
-      tags.any((tag) => note.tags.contains(tag))
-    ).toList();
+    return allNotes
+        .where((note) => tags.any((tag) => note.tags.contains(tag)))
+        .toList();
   }
 
   // Get all unique tags

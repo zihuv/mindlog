@@ -37,7 +37,7 @@ void main() {
 
       // Retrieve the note
       final retrievedNote = await noteDao.getNoteById('test-id-1');
-      
+
       expect(retrievedNote, isNotNull);
       expect(retrievedNote!.id, equals('test-id-1'));
       expect(retrievedNote.content, equals('Test content'));
@@ -76,12 +76,12 @@ void main() {
         tags: const drift.Value(['updated']),
         isDeleted: const drift.Value(false),
       );
-      
+
       await noteDao.updateNote(updatedNote, 'test-id-2');
 
       // Retrieve the updated note
       final retrievedNote = await noteDao.getNoteById('test-id-2');
-      
+
       expect(retrievedNote, isNotNull);
       expect(retrievedNote!.content, equals('Updated content'));
       expect(retrievedNote.tags, contains('updated'));

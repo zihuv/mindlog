@@ -15,11 +15,14 @@ void main() {
       expect(tags.toSet(), equals({'todo', 'urgent'}));
     });
 
-    test('extractTags should handle tags with numbers, underscores, and hyphens', () {
-      const content = 'Tags: #task_1, #bug-fix, #v2_launch';
-      final tags = TagParser.extractTags(content);
-      expect(tags.toSet(), equals({'task_1', 'bug-fix', 'v2_launch'}));
-    });
+    test(
+      'extractTags should handle tags with numbers, underscores, and hyphens',
+      () {
+        const content = 'Tags: #task_1, #bug-fix, #v2_launch';
+        final tags = TagParser.extractTags(content);
+        expect(tags.toSet(), equals({'task_1', 'bug-fix', 'v2_launch'}));
+      },
+    );
 
     test('extractTags should ignore non-tag hashtags', () {
       const content = 'Hello # world and #123test';

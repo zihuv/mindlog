@@ -7,19 +7,21 @@ class TagParser {
     // Must start with a letter, then can contain letters, numbers, underscores, and hyphens
     final tagRegex = RegExp(r'#([a-zA-Z][a-zA-Z0-9_\-]*)');
     final matches = tagRegex.allMatches(content);
-    
+
     // Use a set to ensure uniqueness
     final tags = <String>{};
     for (final match in matches) {
-      final tag = match.group(1)?.toLowerCase(); // Convert to lowercase for consistency
+      final tag = match
+          .group(1)
+          ?.toLowerCase(); // Convert to lowercase for consistency
       if (tag != null && tag.isNotEmpty) {
         tags.add(tag);
       }
     }
-    
+
     return tags.toList();
   }
-  
+
   /// Replaces tags in content with formatted version (for display purposes)
   static String formatTags(String content) {
     final tagRegex = RegExp(r'#([a-zA-Z0-9_\-]+)');

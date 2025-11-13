@@ -41,16 +41,20 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
       if (note != null) {
         _contentController.text = note.content;
-        _tags = List.from(note.tags); // Create a copy to avoid potential mutations
+        _tags = List.from(
+          note.tags,
+        ); // Create a copy to avoid potential mutations
         _checklistStates = Map.from(note.checklistStates);
         _updateTagsController();
       }
     } catch (e) {
-      Get.showSnackbar(GetSnackBar(
-        message: 'Error loading note: $e',
-        duration: const Duration(seconds: 2),
-        snackPosition: SnackPosition.BOTTOM,
-      ));
+      Get.showSnackbar(
+        GetSnackBar(
+          message: 'Error loading note: $e',
+          duration: const Duration(seconds: 2),
+          snackPosition: SnackPosition.BOTTOM,
+        ),
+      );
     } finally {
       setState(() {
         _isLoading = false;
@@ -64,10 +68,12 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
   Future<void> _saveNote() async {
     if (_contentController.text.trim().isEmpty) {
-      Get.showSnackbar(const GetSnackBar(
-        message: 'Please enter some content',
-        duration: Duration(seconds: 2),
-      ));
+      Get.showSnackbar(
+        const GetSnackBar(
+          message: 'Please enter some content',
+          duration: Duration(seconds: 2),
+        ),
+      );
       return;
     }
 
@@ -98,19 +104,23 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       }
     } on Exception catch (e) {
       if (mounted) {
-        Get.showSnackbar(GetSnackBar(
-          message: 'Error saving note: $e',
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.BOTTOM,
-        ));
+        Get.showSnackbar(
+          GetSnackBar(
+            message: 'Error saving note: $e',
+            duration: const Duration(seconds: 2),
+            snackPosition: SnackPosition.BOTTOM,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
-        Get.showSnackbar(GetSnackBar(
-          message: 'Unexpected error saving note: $e',
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.BOTTOM,
-        ));
+        Get.showSnackbar(
+          GetSnackBar(
+            message: 'Unexpected error saving note: $e',
+            duration: const Duration(seconds: 2),
+            snackPosition: SnackPosition.BOTTOM,
+          ),
+        );
       }
     } finally {
       setState(() {
@@ -135,16 +145,21 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
   Future<void> _pickImage() async {
     final imagePicker = ImagePicker();
-    final XFile? image = await imagePicker.pickImage(source: ImageSource.gallery);
+    final XFile? image = await imagePicker.pickImage(
+      source: ImageSource.gallery,
+    );
 
     if (image != null) {
       // In a real app, you would save the image to the note's media directory
       // and update the note with the image reference
       // For now, showing a simple message
-      Get.showSnackbar(const GetSnackBar(
-        message: 'Image selected. In a full implementation, it would be saved with the note.',
-        duration: Duration(seconds: 2),
-      ));
+      Get.showSnackbar(
+        const GetSnackBar(
+          message:
+              'Image selected. In a full implementation, it would be saved with the note.',
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
@@ -175,7 +190,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                         hintText: 'Write your note here...',
                       ),
                       minLines: 3,
-                      maxLines: 10, // Set a maximum number of lines to prevent infinite height
+                      maxLines:
+                          10, // Set a maximum number of lines to prevent infinite height
                       keyboardType: TextInputType.multiline,
                     ),
                   ),
@@ -205,15 +221,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                     Wrap(
                       spacing: 4.0,
                       children: _tags
-                          .map((tag) => Chip(
-                                label: Text(tag),
-                                onDeleted: () {
-                                  setState(() {
-                                    _tags.remove(tag);
-                                    _updateTagsController();
-                                  });
-                                },
-                              ))
+                          .map(
+                            (tag) => Chip(
+                              label: Text(tag),
+                              onDeleted: () {
+                                setState(() {
+                                  _tags.remove(tag);
+                                  _updateTagsController();
+                                });
+                              },
+                            ),
+                          )
                           .toList(),
                     ),
                   const SizedBox(height: 16),

@@ -63,6 +63,10 @@ flutter format .
 - Reactive variables use `.obs` property
 - Views use `Obx()` or `GetBuilder` for state updates
 
+### Platform Considerations
+- When making UI changes, focus on mobile and desktop platforms (no special web-only considerations needed)
+- After every code modification, run `flutter analyze` and `flutter build` to check for compilation errors
+
 ### File Structure
 - `lib/ui/`: Presentation layer containing screens and widgets
 - `lib/controllers/`: GetX controllers for business logic

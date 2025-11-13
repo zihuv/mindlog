@@ -43,10 +43,9 @@ class _TagFilterBarState extends State<TagFilterBar> {
                   widget.onTagsChanged([]);
                 }),
                 const SizedBox(width: 8),
-                ...widget.allTags.map((tag) => _buildTagChip(
-                      tag,
-                      widget.selectedTags.contains(tag),
-                      () {
+                ...widget.allTags.map(
+                  (tag) =>
+                      _buildTagChip(tag, widget.selectedTags.contains(tag), () {
                         final newSelectedTags = List<String>.from(
                           widget.selectedTags,
                         );
@@ -56,8 +55,8 @@ class _TagFilterBarState extends State<TagFilterBar> {
                           newSelectedTags.add(tag);
                         }
                         widget.onTagsChanged(newSelectedTags);
-                      },
-                    )),
+                      }),
+                ),
               ],
             ),
           ),
@@ -81,9 +80,7 @@ class _TagFilterBarState extends State<TagFilterBar> {
         onSelected: (_) => onTap(),
         selectedColor: Theme.of(context).primaryColor,
         backgroundColor: Colors.grey[300],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
     );
   }

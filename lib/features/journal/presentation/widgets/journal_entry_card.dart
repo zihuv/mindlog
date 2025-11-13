@@ -10,54 +10,71 @@ class JournalEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click, // Show pointer cursor on hover
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Time column on the left (updated to accommodate full date-time format)
-            SizedBox(
-              width: 130,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '${entry.dateTime.year}-${entry.dateTime.month.toString().padLeft(2, '0')}-${entry.dateTime.day.toString().padLeft(2, '0')} ${entry.dateTime.hour.toString().padLeft(2, '0')}:${entry.dateTime.minute.toString().padLeft(2, '0')}:${entry.dateTime.second.toString().padLeft(2, '0')}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
+        decoration: BoxDecoration(
+          color: Colors.grey[50], // Light background for entire card
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey[300]!, width: 0.5),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(
+            8,
+          ), // Make the entire card clickable with proper visual feedback
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Time column on the left (updated to accommodate full date-time format)
+                SizedBox(
+                  width: 130,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${entry.dateTime.year}-${entry.dateTime.month.toString().padLeft(2, '0')}-${entry.dateTime.day.toString().padLeft(2, '0')} ${entry.dateTime.hour.toString().padLeft(2, '0')}:${entry.dateTime.minute.toString().padLeft(2, '0')}:${entry.dateTime.second.toString().padLeft(2, '0')}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      CircleAvatar(
+                        backgroundColor: _getMoodColor(entry.mood),
+                        radius: 6,
+                        child: Text(
+                          _getMoodEmoji(entry.mood),
+                          style: const TextStyle(fontSize: 8),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  CircleAvatar(
-                    backgroundColor: _getMoodColor(entry.mood),
-                    radius: 6,
+                ),
+                const SizedBox(width: 12),
+                // Content column on the right
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     child: Text(
-                      _getMoodEmoji(entry.mood),
-                      style: const TextStyle(fontSize: 8),
+                      entry.content,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Content column on the right
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  entry.content,
-                  style: const TextStyle(fontSize: 14, color: Colors.black87),
-                ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

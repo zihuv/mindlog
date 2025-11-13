@@ -54,63 +54,71 @@ class NoteListScreen extends StatelessWidget {
                 itemCount: controller.notes.length,
                 itemBuilder: (context, index) {
                   final note = controller.notes[index];
-                  return Card(
-                    margin: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Creation time in top-left corner
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            _formatDateTime(note.createdAt),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.bold,
+                  return GestureDetector(
+                    onTap: () {
+                      Get.to(() => NoteDetailScreen(noteId: note.id));
+                    },
+                    child: Card(
+                      margin: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Creation time in top-left corner
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              _formatDateTime(note.createdAt),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        // ListTile for content and tags
-                        ListTile(
-                          title: Text(
-                            () {
-                              String contentWithoutChecklist = _getContentWithoutChecklistItems(note.content);
-                              return contentWithoutChecklist.length > 50
-                                  ? '${contentWithoutChecklist.substring(0, 50)}...'
-                                  : contentWithoutChecklist;
-                            }(),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Display checklist items if any
-                              ..._buildChecklistItems(note),
-                              if (note.tags.isNotEmpty)
-                                Wrap(
-                                  spacing: 4.0,
-                                  runSpacing: 2.0,
-                                  children: note.tags
-                                      .map((tag) => Chip(
+                          // ListTile for content and tags
+                          ListTile(
+                            title: Text(
+                              () {
+                                String contentWithoutChecklist =
+                                    _getContentWithoutChecklistItems(
+                                      note.content,
+                                    );
+                                return contentWithoutChecklist.length > 50
+                                    ? '${contentWithoutChecklist.substring(0, 50)}...'
+                                    : contentWithoutChecklist;
+                              }(),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Display checklist items if any
+                                ..._buildChecklistItems(note),
+                                if (note.tags.isNotEmpty)
+                                  Wrap(
+                                    spacing: 4.0,
+                                    runSpacing: 2.0,
+                                    children: note.tags
+                                        .map(
+                                          (tag) => Chip(
                                             label: Text(
                                               tag,
                                               style: const TextStyle(
-                                                  fontSize: 10),
+                                                fontSize: 10,
+                                              ),
                                             ),
                                             backgroundColor:
                                                 Colors.blue.shade100,
-                                          ))
-                                      .toList(),
-                                ),
-                            ],
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                              ],
+                            ),
                           ),
-                          onTap: () {
-                            Get.to(() => NoteDetailScreen(noteId: note.id));
-                          },
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -119,8 +127,7 @@ class NoteListScreen extends StatelessWidget {
           }),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
-              Get.to(() => const NoteDetailScreen(noteId: null))
-                  ?.then((value) {
+              Get.to(() => const NoteDetailScreen(noteId: null))?.then((value) {
                 // Refresh list after creating/updating
                 if (value == true) {
                   controller.loadNotes();
@@ -145,14 +152,14 @@ class NoteListScreen extends StatelessWidget {
   String _getContentWithoutChecklistItems(String content) {
     List<String> lines = content.split('\n');
     List<String> nonChecklistLines = [];
-    
+
     for (String line in lines) {
       // Skip lines that are checklist items
       if (!line.trim().startsWith('- [') || !line.contains('] ')) {
         nonChecklistLines.add(line);
       }
     }
-    
+
     // Join the remaining lines and return first 200 characters to avoid overly long text
     String result = nonChecklistLines.join('\n').trim();
     return result.length > 200 ? '${result.substring(0, 200)}...' : result;
@@ -198,25 +205,34 @@ class NoteListScreen extends StatelessWidget {
                   try {
                     final controller = Get.find<NoteController>();
                     // Update the specific checklist item
-                    await controller.updateChecklistItem(note.id, key, taskContent, newValue);
-                    
+                    await controller.updateChecklistItem(
+                      note.id,
+                      key,
+                      taskContent,
+                      newValue,
+                    );
+
                     // Update the local state to reflect the change
                     mutableChecklistStates[key] = newValue;
-                    
+
                     // Refresh the notes list to reflect the updated content
                     await controller.loadNotes();
                   } on Exception catch (e) {
-                    Get.showSnackbar(GetSnackBar(
-                      message: 'Error updating checklist: $e',
-                      duration: const Duration(seconds: 2),
-                      snackPosition: SnackPosition.BOTTOM,
-                    ));
+                    Get.showSnackbar(
+                      GetSnackBar(
+                        message: 'Error updating checklist: $e',
+                        duration: const Duration(seconds: 2),
+                        snackPosition: SnackPosition.BOTTOM,
+                      ),
+                    );
                   } catch (e) {
-                    Get.showSnackbar(GetSnackBar(
-                      message: 'Unexpected error updating checklist: $e',
-                      duration: const Duration(seconds: 2),
-                      snackPosition: SnackPosition.BOTTOM,
-                    ));
+                    Get.showSnackbar(
+                      GetSnackBar(
+                        message: 'Unexpected error updating checklist: $e',
+                        duration: const Duration(seconds: 2),
+                        snackPosition: SnackPosition.BOTTOM,
+                      ),
+                    );
                   }
                 },
               ),
@@ -224,7 +240,9 @@ class NoteListScreen extends StatelessWidget {
                 child: Text(
                   taskContent,
                   style: TextStyle(
-                    decoration: currentState ? TextDecoration.lineThrough : null,
+                    decoration: currentState
+                        ? TextDecoration.lineThrough
+                        : null,
                     color: currentState ? Colors.grey : null,
                   ),
                 ),
@@ -245,7 +263,6 @@ class NoteListScreen extends StatelessWidget {
 }
 
 class _NoteSearchDelegate extends SearchDelegate<String> {
-
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -273,27 +290,19 @@ class _NoteSearchDelegate extends SearchDelegate<String> {
     // This method is called when the search is submitted
     // For simplicity, we'll trigger the search from NoteListScreen
     if (query.isEmpty) {
-      return const Center(
-        child: Text('Enter a search term'),
-      );
+      return const Center(child: Text('Enter a search term'));
     }
     // Search is handled by NoteListScreen, not in the delegate
-    return const Center(
-      child: Text('Performing search...'),
-    );
+    return const Center(child: Text('Performing search...'));
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
     // Show suggestions based on query if needed
     if (query.isEmpty) {
-      return const Center(
-        child: Text('Enter a search term'),
-      );
+      return const Center(child: Text('Enter a search term'));
     } else {
-      return Center(
-        child: Text('Search for: "$query"'),
-      );
+      return Center(child: Text('Search for: "$query"'));
     }
   }
 }

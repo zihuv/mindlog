@@ -4,19 +4,19 @@ import '../features/memos/domain/entities/memo.dart';
 
 class NoteController extends GetxController {
   final CombinedNoteService _service = CombinedNoteService();
-  
+
   final _isLoading = false.obs;
   bool get isLoading => _isLoading.value;
-  
+
   final _notes = <Memo>[].obs;
   List<Memo> get notes => _notes.toList();
-  
+
   @override
   void onInit() {
     super.onInit();
     initialize();
   }
-  
+
   Future<void> initialize() async {
     _isLoading.value = true;
     try {
@@ -25,7 +25,7 @@ class NoteController extends GetxController {
       _isLoading.value = false;
     }
   }
-  
+
   Future<void> loadNotes() async {
     _isLoading.value = true;
     try {
@@ -47,14 +47,14 @@ class NoteController extends GetxController {
       _isLoading.value = false;
     }
   }
-  
+
   Future<void> searchNotes(String query) async {
     _isLoading.value = true;
     try {
       final notes = query.isEmpty
           ? await _service.getAllNotes()
           : await _service.searchNotes(query);
-          
+
       // Sort notes by creation time in descending order (newest first)
       notes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       _notes.assignAll(notes);
@@ -72,11 +72,11 @@ class NoteController extends GetxController {
       _isLoading.value = false;
     }
   }
-  
+
   Future<Memo?> getNoteById(int id) async {
     return await _service.getNoteById(id);
   }
-  
+
   Future<void> createNote({
     required String content,
     List<String>? tags,
@@ -88,7 +88,7 @@ class NoteController extends GetxController {
       checklistStates: checklistStates,
     );
   }
-  
+
   Future<void> updateNote({
     required int id,
     String? content,
@@ -102,55 +102,68 @@ class NoteController extends GetxController {
       checklistStates: checklistStates,
     );
   }
-  
+
   Future<void> deleteNote(int id) async {
     await _service.deleteNote(id);
   }
-  
-  Future<void> updateChecklistItem(int noteId, int itemIndex, String itemContent, bool newValue) async {
+
+  Future<void> updateChecklistItem(
+    int noteId,
+    int itemIndex,
+    String itemContent,
+    bool newValue,
+  ) async {
     final note = await getNoteById(noteId);
     if (note != null) {
       // Split the content into lines
       List<String> lines = note.content.split('\n');
-      
+
       // Find and update the specific checklist item based on position and content
       int checklistPosition = 0;
       for (int i = 0; i < lines.length; i++) {
         String line = lines[i].trim();
         if (line.startsWith('- [') && line.contains('] ')) {
           // Extract task content from line
-          String lineTaskContent = line.substring(line.indexOf('] ') + 2); // Skip "- [x] " or "- [ ] "
-          
+          String lineTaskContent = line.substring(
+            line.indexOf('] ') + 2,
+          ); // Skip "- [x] " or "- [ ] "
+
           // Generate key like in the UI to match exactly
-          int lineKey = _generateChecklistKey(lineTaskContent, checklistPosition);
-          
+          int lineKey = _generateChecklistKey(
+            lineTaskContent,
+            checklistPosition,
+          );
+
           if (lineKey == itemIndex && lineTaskContent == itemContent) {
             // Update the checkbox state in the line: [ ] becomes [x], [x] becomes [ ]
             String updatedLine = line.replaceFirst(
-              RegExp(r'- \[.\]'), 
-              '- [${newValue ? 'x' : ' '}]'
+              RegExp(r'- \[.\]'),
+              '- [${newValue ? 'x' : ' '}]',
             );
             // Preserve original indentation
             if (lines[i] != line) {
               // If the original line had indentation, preserve it
               String originalLine = lines[i];
-              String indentation = originalLine.substring(0, originalLine.indexOf(line));
+              String indentation = originalLine.substring(
+                0,
+                originalLine.indexOf(line),
+              );
               updatedLine = indentation + updatedLine;
             }
-            
+
             lines[i] = updatedLine;
             break; // Only update the first match
           }
           checklistPosition++;
         }
       }
-      
+
       String updatedContent = lines.join('\n');
-      
+
       // Also update checklistStates map
       Map<int, bool> updatedChecklistStates = Map.from(note.checklistStates);
       updatedChecklistStates[itemIndex] = newValue;
-      
+
       await updateNote(
         id: noteId,
         content: updatedContent,
@@ -159,12 +172,12 @@ class NoteController extends GetxController {
       );
     }
   }
-  
+
   // Helper function to generate consistent keys (same as in UI)
   int _generateChecklistKey(String content, int position) {
     return content.hashCode + position;
   }
-  
+
   @override
   void onClose() {
     _service.close();

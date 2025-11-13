@@ -38,7 +38,7 @@ class NoteService extends GetxService {
   }) async {
     final noteId = uuid.v7();
     final now = DateTime.now();
-    
+
     final note = NotesCompanion(
       id: drift.Value(noteId),
       content: drift.Value(content),
@@ -50,7 +50,7 @@ class NoteService extends GetxService {
       tags: drift.Value(tags ?? []),
       isDeleted: const drift.Value(false),
     );
-    
+
     await _noteDao.insertNote(note);
     return noteId;
   }
@@ -79,7 +79,7 @@ class NoteService extends GetxService {
     if (note == null) {
       throw Exception('Note with ID $id not found');
     }
-    
+
     final updatedNote = NotesCompanion(
       id: drift.Value(id),
       content: drift.Value(content ?? note.content),
@@ -90,7 +90,7 @@ class NoteService extends GetxService {
       tags: drift.Value(tags ?? note.tags),
       isDeleted: drift.Value(note.isDeleted),
     );
-    
+
     await _noteDao.updateNote(updatedNote, id);
   }
 
@@ -123,21 +123,42 @@ class NoteService extends GetxService {
   }
 
   // Add a media file to a note
-  Future<String?> addMediaToNote(String noteId, File mediaFile, String mediaType, {String? fileName}) async {
+  Future<String?> addMediaToNote(
+    String noteId,
+    File mediaFile,
+    String mediaType, {
+    String? fileName,
+  }) async {
     switch (mediaType.toLowerCase()) {
       case 'image':
-        return await _mediaManager.saveImage(noteId, mediaFile, fileName: fileName);
+        return await _mediaManager.saveImage(
+          noteId,
+          mediaFile,
+          fileName: fileName,
+        );
       case 'video':
-        return await _mediaManager.saveVideo(noteId, mediaFile, fileName: fileName);
+        return await _mediaManager.saveVideo(
+          noteId,
+          mediaFile,
+          fileName: fileName,
+        );
       case 'audio':
-        return await _mediaManager.saveAudio(noteId, mediaFile, fileName: fileName);
+        return await _mediaManager.saveAudio(
+          noteId,
+          mediaFile,
+          fileName: fileName,
+        );
       default:
         throw Exception('Unsupported media type: $mediaType');
     }
   }
 
   // Get the path to a specific media file for a note
-  Future<String?> getMediaPath(String noteId, String mediaName, String mediaType) async {
+  Future<String?> getMediaPath(
+    String noteId,
+    String mediaName,
+    String mediaType,
+  ) async {
     switch (mediaType.toLowerCase()) {
       case 'image':
         return await _mediaManager.getImagePath(noteId, mediaName);
@@ -166,7 +187,11 @@ class NoteService extends GetxService {
   }
 
   // Delete a specific media file for a note
-  Future<void> deleteMediaFromNote(String noteId, String mediaName, String mediaType) async {
+  Future<void> deleteMediaFromNote(
+    String noteId,
+    String mediaName,
+    String mediaType,
+  ) async {
     switch (mediaType.toLowerCase()) {
       case 'image':
         await _mediaManager.deleteImage(noteId, mediaName);

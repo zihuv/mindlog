@@ -82,11 +82,16 @@ class MemoSharedPreferencesRepository implements MemoStorageRepository {
   Future<List<Memo>> searchMemos(String query) async {
     final allMemos = await getAllMemos();
     if (query.isEmpty) return allMemos;
-    
-    return allMemos.where((memo) =>
-      memo.content.toLowerCase().contains(query.toLowerCase()) ||
-      memo.tags.any((tag) => tag.toLowerCase().contains(query.toLowerCase()))
-    ).toList();
+
+    return allMemos
+        .where(
+          (memo) =>
+              memo.content.toLowerCase().contains(query.toLowerCase()) ||
+              memo.tags.any(
+                (tag) => tag.toLowerCase().contains(query.toLowerCase()),
+              ),
+        )
+        .toList();
   }
 
   @override

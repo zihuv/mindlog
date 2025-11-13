@@ -32,11 +32,14 @@ class _MemosPageState extends State<MemosPage> {
   Future<void> _loadMemos() async {
     try {
       _allMemos = await MemoService.instance.getAllMemos();
-      _filteredMemos = _selectedTags.isEmpty 
-          ? _allMemos 
+      _filteredMemos = _selectedTags.isEmpty
+          ? _allMemos
           : _allMemos
-              .where((memo) => _selectedTags.every((tag) => memo.tags.contains(tag)))
-              .toList();
+                .where(
+                  (memo) =>
+                      _selectedTags.every((tag) => memo.tags.contains(tag)),
+                )
+                .toList();
       _sortMemos();
       setState(() {
         _isLoading = false;
@@ -115,7 +118,11 @@ class _MemosPageState extends State<MemosPage> {
                 // If we're currently filtering by tags, update the filtered list too
                 if (_selectedTags.isNotEmpty) {
                   _filteredMemos = _allMemos
-                      .where((memo) => _selectedTags.every((tag) => memo.tags.contains(tag)))
+                      .where(
+                        (memo) => _selectedTags.every(
+                          (tag) => memo.tags.contains(tag),
+                        ),
+                      )
                       .toList();
                 } else {
                   _filteredMemos = _allMemos;
@@ -325,7 +332,11 @@ class _MemosPageState extends State<MemosPage> {
                                 // If we're currently filtering by tags, update the filtered list too
                                 if (_selectedTags.isNotEmpty) {
                                   _filteredMemos = _allMemos
-                                      .where((memo) => _selectedTags.every((tag) => memo.tags.contains(tag)))
+                                      .where(
+                                        (memo) => _selectedTags.every(
+                                          (tag) => memo.tags.contains(tag),
+                                        ),
+                                      )
                                       .toList();
                                 } else {
                                   _filteredMemos = _allMemos;

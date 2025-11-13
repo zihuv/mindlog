@@ -12,10 +12,14 @@ class Notes extends Table {
   TextColumn get content => text()(); // Contains the note content for search
   DateTimeColumn get time => dateTime()();
   DateTimeColumn get lastModified => dateTime()();
-  TextColumn get imageName => text().map(const ListToStringConverter())(); // JSON string
-  TextColumn get audioName => text().map(const ListToStringConverter())(); // JSON string
-  TextColumn get videoName => text().map(const ListToStringConverter())(); // JSON string
-  TextColumn get tags => text().map(const ListToStringConverter())(); // JSON string
+  TextColumn get imageName =>
+      text().map(const ListToStringConverter())(); // JSON string
+  TextColumn get audioName =>
+      text().map(const ListToStringConverter())(); // JSON string
+  TextColumn get videoName =>
+      text().map(const ListToStringConverter())(); // JSON string
+  TextColumn get tags =>
+      text().map(const ListToStringConverter())(); // JSON string
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
 }
 
@@ -25,20 +29,28 @@ class ListToStringConverter extends TypeConverter<List<String>, String> {
 
   List<String> mapToDart(String? fromData) {
     if (fromData == null) return <String>[];
-    return fromData.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    return fromData
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
   }
 
   String? mapToSql(List<String>? value) {
     if (value == null) return null;
     return value.join(',');
   }
-  
+
   @override
   List<String> fromSql(String? fromDb) {
     if (fromDb == null) return <String>[];
-    return fromDb.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    return fromDb
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
   }
-  
+
   @override
   String toSql(List<String>? value) {
     if (value == null) return '';

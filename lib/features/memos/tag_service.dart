@@ -12,15 +12,15 @@ class TagService {
   Future<List<String>> getAllTags() async {
     final memos = await MemoService.instance.getAllMemos();
     final allTags = <String>{};
-    
+
     for (final memo in memos) {
       allTags.addAll(memo.tags);
     }
-    
+
     // Sort tags alphabetically
     final sortedTags = allTags.toList();
     sortedTags.sort();
-    
+
     return sortedTags;
   }
 

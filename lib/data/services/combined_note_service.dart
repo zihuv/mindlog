@@ -13,9 +13,9 @@ class CombinedNoteService {
   // Create a new note with media files
   Future<int> createNote({
     required String content,
-    List<String>? imagesToCopy,  // Source paths for images to be copied
-    List<String>? videosToCopy,  // Source paths for videos to be copied
-    List<String>? audiosToCopy,  // Source paths for audios to be copied
+    List<String>? imagesToCopy, // Source paths for images to be copied
+    List<String>? videosToCopy, // Source paths for videos to be copied
+    List<String>? audiosToCopy, // Source paths for audios to be copied
     List<String>? tags,
     Map<int, bool>? checklistStates,
   }) async {
@@ -32,19 +32,31 @@ class CombinedNoteService {
     // Copy media files to the appropriate directories
     if (imagesToCopy != null) {
       for (final imagePath in imagesToCopy) {
-        await _mediaService.saveImage(noteId.toString(), imagePath.split('/').last, imagePath);
+        await _mediaService.saveImage(
+          noteId.toString(),
+          imagePath.split('/').last,
+          imagePath,
+        );
       }
     }
 
     if (videosToCopy != null) {
       for (final videoPath in videosToCopy) {
-        await _mediaService.saveVideo(noteId.toString(), videoPath.split('/').last, videoPath);
+        await _mediaService.saveVideo(
+          noteId.toString(),
+          videoPath.split('/').last,
+          videoPath,
+        );
       }
     }
 
     if (audiosToCopy != null) {
       for (final audioPath in audiosToCopy) {
-        await _mediaService.saveAudio(noteId.toString(), audioPath.split('/').last, audioPath);
+        await _mediaService.saveAudio(
+          noteId.toString(),
+          audioPath.split('/').last,
+          audioPath,
+        );
       }
     }
 
@@ -70,9 +82,9 @@ class CombinedNoteService {
   Future<void> updateNote({
     required int id,
     String? content,
-    List<String>? newImagesToCopy,      // New images to add to the note
-    List<String>? newVideosToCopy,      // New videos to add to the note
-    List<String>? newAudiosToCopy,      // New audios to add to the note
+    List<String>? newImagesToCopy, // New images to add to the note
+    List<String>? newVideosToCopy, // New videos to add to the note
+    List<String>? newAudiosToCopy, // New audios to add to the note
     List<String>? tags,
     Map<int, bool>? checklistStates,
   }) async {
@@ -92,19 +104,31 @@ class CombinedNoteService {
     // Add new media files if provided
     if (newImagesToCopy != null) {
       for (final imagePath in newImagesToCopy) {
-        await _mediaService.saveImage(id.toString(), imagePath.split('/').last, imagePath);
+        await _mediaService.saveImage(
+          id.toString(),
+          imagePath.split('/').last,
+          imagePath,
+        );
       }
     }
 
     if (newVideosToCopy != null) {
       for (final videoPath in newVideosToCopy) {
-        await _mediaService.saveVideo(id.toString(), videoPath.split('/').last, videoPath);
+        await _mediaService.saveVideo(
+          id.toString(),
+          videoPath.split('/').last,
+          videoPath,
+        );
       }
     }
 
     if (newAudiosToCopy != null) {
       for (final audioPath in newAudiosToCopy) {
-        await _mediaService.saveAudio(id.toString(), audioPath.split('/').last, audioPath);
+        await _mediaService.saveAudio(
+          id.toString(),
+          audioPath.split('/').last,
+          audioPath,
+        );
       }
     }
   }

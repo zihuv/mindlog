@@ -26,23 +26,25 @@ void main() {
     const uuid = Uuid();
     final noteId = uuid.v7();
     final now = DateTime.now();
-    
+
     // Create a note
-    await noteDao.insertNote(NotesCompanion(
-      id: drift.Value(noteId),
-      content: drift.Value('Test note content'),
-      time: drift.Value(now),
-      lastModified: drift.Value(now),
-      imageName: drift.Value(['image1.jpg', 'image2.png']),
-      audioName: drift.Value(['voice_note.mp3']),
-      videoName: drift.Value(['vacation_video.mp4']),
-      tags: drift.Value(['生活']),
-      isDeleted: const drift.Value(false),
-    ));
-    
+    await noteDao.insertNote(
+      NotesCompanion(
+        id: drift.Value(noteId),
+        content: drift.Value('Test note content'),
+        time: drift.Value(now),
+        lastModified: drift.Value(now),
+        imageName: drift.Value(['image1.jpg', 'image2.png']),
+        audioName: drift.Value(['voice_note.mp3']),
+        videoName: drift.Value(['vacation_video.mp4']),
+        tags: drift.Value(['生活']),
+        isDeleted: const drift.Value(false),
+      ),
+    );
+
     // Retrieve the note
     final note = await noteDao.getNoteById(noteId);
-    
+
     expect(note, isNotNull);
     expect(note!.id, noteId);
     expect(note.content, 'Test note content');
@@ -54,41 +56,45 @@ void main() {
 
   test('Search notes functionality', () async {
     const uuid = Uuid();
-    
+
     // Insert test notes
     final noteId1 = uuid.v7();
     final noteId2 = uuid.v7();
     final now = DateTime.now();
-    
-    await noteDao.insertNote(NotesCompanion(
-      id: drift.Value(noteId1),
-      content: drift.Value('This is a test note about programming'),
-      time: drift.Value(now),
-      lastModified: drift.Value(now),
-      imageName: drift.Value([]),
-      audioName: drift.Value([]),
-      videoName: drift.Value([]),
-      tags: drift.Value(['技术']),
-      isDeleted: const drift.Value(false),
-    ));
-    
-    await noteDao.insertNote(NotesCompanion(
-      id: drift.Value(noteId2),
-      content: drift.Value('This is another note about daily life'),
-      time: drift.Value(now),
-      lastModified: drift.Value(now),
-      imageName: drift.Value([]),
-      audioName: drift.Value([]),
-      videoName: drift.Value([]),
-      tags: drift.Value(['生活']),
-      isDeleted: const drift.Value(false),
-    ));
-    
+
+    await noteDao.insertNote(
+      NotesCompanion(
+        id: drift.Value(noteId1),
+        content: drift.Value('This is a test note about programming'),
+        time: drift.Value(now),
+        lastModified: drift.Value(now),
+        imageName: drift.Value([]),
+        audioName: drift.Value([]),
+        videoName: drift.Value([]),
+        tags: drift.Value(['技术']),
+        isDeleted: const drift.Value(false),
+      ),
+    );
+
+    await noteDao.insertNote(
+      NotesCompanion(
+        id: drift.Value(noteId2),
+        content: drift.Value('This is another note about daily life'),
+        time: drift.Value(now),
+        lastModified: drift.Value(now),
+        imageName: drift.Value([]),
+        audioName: drift.Value([]),
+        videoName: drift.Value([]),
+        tags: drift.Value(['生活']),
+        isDeleted: const drift.Value(false),
+      ),
+    );
+
     // Test search functionality
     final results = await noteDao.searchNotes('programming');
     expect(results.length, 1);
     expect(results.first.id, noteId1);
-    
+
     // Test empty search returns all notes
     final allResults = await noteDao.searchNotes('');
     expect(allResults.length, 2);
@@ -103,7 +109,7 @@ void main() {
       videoName: ['video1.mp4'],
       tags: ['生活', '技术'],
     );
-    
+
     // Retrieve the note
     final note = await noteService.getNoteById(noteId);
     expect(note, isNotNull);
@@ -112,24 +118,24 @@ void main() {
     expect(note.audioName, ['audio1.mp3']);
     expect(note.videoName, ['video1.mp4']);
     expect(note.tags, ['生活', '技术']);
-    
+
     // Update the note
     await noteService.updateNote(
       id: noteId,
       content: 'Updated note content',
       tags: ['更新', '测试'],
     );
-    
+
     // Verify the update
     final updatedNote = await noteService.getNoteById(noteId);
     expect(updatedNote!.content, 'Updated note content');
     expect(updatedNote.tags, ['更新', '测试']);
-    
+
     // Test soft delete
     await noteService.deleteNote(noteId);
     final deletedNote = await noteService.getNoteById(noteId);
     expect(deletedNote, isNull);
-    
+
     // Check if it's soft deleted (still in database but marked as deleted)
     final allNotes = await noteDao.getAllNotes();
     expect(allNotes.any((note) => note.id == noteId), false);

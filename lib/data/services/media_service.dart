@@ -15,45 +15,57 @@ class MediaService {
   Future<Directory> _getNoteDirectory(String noteId, String mediaType) async {
     final appDir = await _getAppDirectory();
     final noteDir = Directory(path.join(appDir.path, mediaType, noteId));
-    
+
     // Create directory if it doesn't exist
     if (!await noteDir.exists()) {
       await noteDir.create(recursive: true);
     }
-    
+
     return noteDir;
   }
 
   // Save image file to the appropriate note directory
-  Future<String> saveImage(String noteId, String fileName, String sourcePath) async {
+  Future<String> saveImage(
+    String noteId,
+    String fileName,
+    String sourcePath,
+  ) async {
     final noteDir = await _getNoteDirectory(noteId, _imagesDirName);
     final destinationPath = path.join(noteDir.path, fileName);
-    
+
     final sourceFile = File(sourcePath);
     final destinationFile = await sourceFile.copy(destinationPath);
-    
+
     return destinationFile.path;
   }
 
   // Save video file to the appropriate note directory
-  Future<String> saveVideo(String noteId, String fileName, String sourcePath) async {
+  Future<String> saveVideo(
+    String noteId,
+    String fileName,
+    String sourcePath,
+  ) async {
     final noteDir = await _getNoteDirectory(noteId, _videosDirName);
     final destinationPath = path.join(noteDir.path, fileName);
-    
+
     final sourceFile = File(sourcePath);
     final destinationFile = await sourceFile.copy(destinationPath);
-    
+
     return destinationFile.path;
   }
 
   // Save audio file to the appropriate note directory
-  Future<String> saveAudio(String noteId, String fileName, String sourcePath) async {
+  Future<String> saveAudio(
+    String noteId,
+    String fileName,
+    String sourcePath,
+  ) async {
     final noteDir = await _getNoteDirectory(noteId, _audiosDirName);
     final destinationPath = path.join(noteDir.path, fileName);
-    
+
     final sourceFile = File(sourcePath);
     final destinationFile = await sourceFile.copy(destinationPath);
-    
+
     return destinationFile.path;
   }
 
@@ -63,7 +75,7 @@ class MediaService {
     if (!await noteDir.exists()) {
       return [];
     }
-    
+
     final files = await noteDir.list().toList();
     return files.whereType<File>().map((file) => file.path).toList();
   }
@@ -74,7 +86,7 @@ class MediaService {
     if (!await noteDir.exists()) {
       return [];
     }
-    
+
     final files = await noteDir.list().toList();
     return files.whereType<File>().map((file) => file.path).toList();
   }
@@ -85,7 +97,7 @@ class MediaService {
     if (!await noteDir.exists()) {
       return [];
     }
-    
+
     final files = await noteDir.list().toList();
     return files.whereType<File>().map((file) => file.path).toList();
   }
@@ -95,12 +107,8 @@ class MediaService {
     final images = await getNoteImages(noteId);
     final videos = await getNoteVideos(noteId);
     final audios = await getNoteAudios(noteId);
-    
-    return {
-      'images': images,
-      'videos': videos,
-      'audios': audios,
-    };
+
+    return {'images': images, 'videos': videos, 'audios': audios};
   }
 
   // Delete a specific media file
@@ -133,7 +141,11 @@ class MediaService {
   }
 
   // Get the full path for a media file in a specific note directory
-  Future<String> getMediaPath(String noteId, String mediaType, String fileName) async {
+  Future<String> getMediaPath(
+    String noteId,
+    String mediaType,
+    String fileName,
+  ) async {
     final noteDir = await _getNoteDirectory(noteId, mediaType);
     return path.join(noteDir.path, fileName);
   }

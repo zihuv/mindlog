@@ -1,4 +1,3 @@
-
 import 'package:mindlog/features/memos/domain/entities/memo.dart';
 
 abstract class MemoStorageRepository {

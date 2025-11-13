@@ -40,7 +40,7 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
         TextPosition(offset: 0),
       );
     }
-    
+
     // Request focus after the widget is built to ensure cursor position is maintained
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
