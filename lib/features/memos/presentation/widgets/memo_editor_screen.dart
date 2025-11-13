@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mindlog/features/memos/domain/entities/memo.dart';
 import 'package:mindlog/features/memos/memo_service.dart';
+import 'package:mindlog/core/utils/tag_parser.dart';
 
 class MemoEditorScreen extends StatefulWidget {
   final Function(Memo memo)? onSave;
@@ -156,12 +157,17 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
       return;
     }
 
+    // Extract tags from the content
+    final tags = TagParser.extractTags(_controller.text.trim());
+
     Memo memo;
     if (widget.isEdit && widget.initialMemo != null) {
       // For edited memos, preserve the existing checklist states
+      // but update the tags based on the new content
       memo = widget.initialMemo!.copyWith(
         content: _controller.text.trim(),
         updatedAt: DateTime.now(),
+        tags: tags,
         // Preserve existing pinned status and other values
       );
     } else {
@@ -172,7 +178,7 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
         createdAt: DateTime.now(),
         isPinned: false, // Default to not pinned
         visibility: 'PRIVATE', // Default to private
-        tags: [], // No tags
+        tags: tags,
         checklistStates: _extractChecklistStates(_controller.text.trim()),
       );
     }

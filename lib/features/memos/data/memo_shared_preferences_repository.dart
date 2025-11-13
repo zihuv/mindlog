@@ -79,6 +79,27 @@ class MemoSharedPreferencesRepository implements MemoStorageRepository {
   }
 
   @override
+  Future<List<Memo>> searchMemos(String query) async {
+    final allMemos = await getAllMemos();
+    if (query.isEmpty) return allMemos;
+    
+    return allMemos.where((memo) =>
+      memo.content.toLowerCase().contains(query.toLowerCase()) ||
+      memo.tags.any((tag) => tag.toLowerCase().contains(query.toLowerCase()))
+    ).toList();
+  }
+
+  @override
+  Future<List<String>> getAllTags() async {
+    final allMemos = await getAllMemos();
+    final allTags = <String>{};
+    for (final memo in allMemos) {
+      allTags.addAll(memo.tags);
+    }
+    return allTags.toList();
+  }
+
+  @override
   Future<void> close() async {
     // No specific close action needed for shared preferences
   }

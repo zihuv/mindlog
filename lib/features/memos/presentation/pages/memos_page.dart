@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mindlog/features/memos/memo_service.dart';
+import 'package:mindlog/features/memos/tag_service.dart';
 import 'package:mindlog/features/memos/domain/entities/memo.dart';
 import 'package:mindlog/features/memos/presentation/widgets/memo_card.dart';
 import 'package:mindlog/features/memos/presentation/widgets/memo_editor_screen.dart';
+import 'package:mindlog/features/memos/presentation/widgets/tag_filter_bar.dart';
 import 'package:mindlog/features/settings/presentation/pages/settings_page.dart';
 import 'package:mindlog/features/journal/presentation/pages/journal_page.dart';
 
@@ -14,18 +16,27 @@ class MemosPage extends StatefulWidget {
 }
 
 class _MemosPageState extends State<MemosPage> {
-  List<Memo> _memos = [];
+  List<Memo> _allMemos = [];
+  List<Memo> _filteredMemos = [];
+  List<String> _allTags = [];
+  List<String> _selectedTags = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _loadMemos();
+    _loadTags();
   }
 
   Future<void> _loadMemos() async {
     try {
-      _memos = await MemoService.instance.getAllMemos();
+      _allMemos = await MemoService.instance.getAllMemos();
+      _filteredMemos = _selectedTags.isEmpty 
+          ? _allMemos 
+          : _allMemos
+              .where((memo) => _selectedTags.every((tag) => memo.tags.contains(tag)))
+              .toList();
       _sortMemos();
       setState(() {
         _isLoading = false;
@@ -38,9 +49,32 @@ class _MemosPageState extends State<MemosPage> {
     }
   }
 
+  Future<void> _loadTags() async {
+    try {
+      _allTags = await TagService.instance.getAllTags();
+      setState(() {});
+    } catch (e) {
+      print('Error loading tags: $e');
+    }
+  }
+
+  void _filterMemosByTags(List<String> selectedTags) {
+    if (selectedTags.isEmpty) {
+      _filteredMemos = _allMemos;
+    } else {
+      _filteredMemos = _allMemos
+          .where((memo) => selectedTags.every((tag) => memo.tags.contains(tag)))
+          .toList();
+    }
+    _sortMemos();
+    setState(() {
+      _selectedTags = selectedTags;
+    });
+  }
+
   void _sortMemos() {
     // Sort by pinned first, then by creation date (newest first)
-    _memos.sort((a, b) {
+    _filteredMemos.sort((a, b) {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
       return b.createdAt.compareTo(a.createdAt);
@@ -54,9 +88,12 @@ class _MemosPageState extends State<MemosPage> {
         builder: (context) => MemoEditorScreen(
           onSave: (memo) async {
             setState(() {
-              _memos.insert(0, memo);
+              _allMemos.insert(0, memo);
+              _filteredMemos = _allMemos;
               _sortMemos();
             });
+            // Refresh tags list after adding a memo
+            _loadTags();
           },
         ),
       ),
@@ -72,12 +109,22 @@ class _MemosPageState extends State<MemosPage> {
           isEdit: true,
           onSave: (updatedMemo) async {
             setState(() {
-              int index = _memos.indexWhere((m) => m.id == updatedMemo.id);
+              int index = _allMemos.indexWhere((m) => m.id == updatedMemo.id);
               if (index != -1) {
-                _memos[index] = updatedMemo;
+                _allMemos[index] = updatedMemo;
+                // If we're currently filtering by tags, update the filtered list too
+                if (_selectedTags.isNotEmpty) {
+                  _filteredMemos = _allMemos
+                      .where((memo) => _selectedTags.every((tag) => memo.tags.contains(tag)))
+                      .toList();
+                } else {
+                  _filteredMemos = _allMemos;
+                }
                 _sortMemos();
               }
             });
+            // Refresh tags list after editing a memo
+            _loadTags();
           },
         ),
       ),
@@ -109,8 +156,11 @@ class _MemosPageState extends State<MemosPage> {
       try {
         await MemoService.instance.deleteMemo(memo.id);
         setState(() {
-          _memos.removeWhere((m) => m.id == memo.id);
+          _allMemos.removeWhere((m) => m.id == memo.id);
+          _filteredMemos.removeWhere((m) => m.id == memo.id);
         });
+        // Refresh tags list after deleting a memo
+        _loadTags();
       } catch (e) {
         print('Error deleting memo: $e');
         // Show error snackbar
@@ -195,62 +245,102 @@ class _MemosPageState extends State<MemosPage> {
           ],
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _memos.isEmpty
-          ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.note_add, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text(
-                    'No memos yet',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Tap the + button to create your first memo',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                ],
-              ),
-            )
-          : RefreshIndicator(
-              onRefresh: () async {
-                await _loadMemos();
-              },
-              child: ListView.builder(
-                itemCount: _memos.length,
-                itemBuilder: (context, index) {
-                  final memo = _memos[index];
-                  return MemoCard(
-                    memo: memo,
-                    onTap: () {
-                      // Single tap could be for selecting or expanding
-                      // For now, let's just keep it as a tap indicator if needed
-                      // or potentially expand/collapse functionality
+      body: Column(
+        children: [
+          TagFilterBar(
+            allTags: _allTags,
+            selectedTags: _selectedTags,
+            onTagsChanged: _filterMemosByTags,
+          ),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _allMemos.isEmpty
+                ? const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.note_add, size: 64, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text(
+                          'No memos yet',
+                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Tap the + button to create your first memo',
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  )
+                : _filteredMemos.isEmpty && _selectedTags.isNotEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.tag, size: 64, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text(
+                          'No memos with selected tags',
+                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Try selecting different tags or create a new memo',
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      await _loadMemos();
+                      await _loadTags();
                     },
-                    onEdit: () => _editMemo(memo),
-                    onDelete: () => _deleteMemo(memo),
-                    onChecklistChanged: (updatedMemo) async {
-                      // Save the updated memo with new checklist states
-                      await MemoService.instance.updateMemo(updatedMemo);
+                    child: ListView.builder(
+                      itemCount: _filteredMemos.length,
+                      itemBuilder: (context, index) {
+                        final memo = _filteredMemos[index];
+                        return MemoCard(
+                          memo: memo,
+                          onTap: () {
+                            // Single tap could be for selecting or expanding
+                            // For now, let's just keep it as a tap indicator if needed
+                            // or potentially expand/collapse functionality
+                          },
+                          onEdit: () => _editMemo(memo),
+                          onDelete: () => _deleteMemo(memo),
+                          onChecklistChanged: (updatedMemo) async {
+                            // Save the updated memo with new checklist states
+                            await MemoService.instance.updateMemo(updatedMemo);
 
-                      // Update the local list
-                      setState(() {
-                        int index = _memos.indexWhere(
-                          (m) => m.id == updatedMemo.id,
+                            // Update the local list
+                            setState(() {
+                              int index = _allMemos.indexWhere(
+                                (m) => m.id == updatedMemo.id,
+                              );
+                              if (index != -1) {
+                                _allMemos[index] = updatedMemo;
+                                // If we're currently filtering by tags, update the filtered list too
+                                if (_selectedTags.isNotEmpty) {
+                                  _filteredMemos = _allMemos
+                                      .where((memo) => _selectedTags.every((tag) => memo.tags.contains(tag)))
+                                      .toList();
+                                } else {
+                                  _filteredMemos = _allMemos;
+                                }
+                                _sortMemos();
+                              }
+                            });
+                          },
                         );
-                        if (index != -1) {
-                          _memos[index] = updatedMemo;
-                        }
-                      });
-                    },
-                  );
-                },
-              ),
-            ),
+                      },
+                    ),
+                  ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addMemo,
         child: const Icon(Icons.add),

@@ -23,8 +23,6 @@ class _JournalPageState extends State<JournalPage> {
   DateTime _selectedDate = DateTime.now();
   DateTime _initialDate = DateTime.now(); // Keep track of the initial date
   final PageController _pageController = PageController();
-  int _currentPageIndex =
-      0; // Track the current date index relative to the initial date
 
   @override
   void initState() {
@@ -88,39 +86,7 @@ class _JournalPageState extends State<JournalPage> {
     );
   }
 
-  void _editJournalEntry(JournalEntry entry) async {
-    // Navigate to the journal entry screen in edit mode
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => JournalEntryScreen(
-          onSave: (content, mood, entryDate) async {
-            final updatedEntry = JournalEntry(
-              id: entry.id,
-              content: content,
-              dateTime:
-                  entryDate, // Use the date from the screen, which preserves original time in edit mode
-              mood: mood,
-            );
 
-            await StorageService.instance.updateJournalEntry(updatedEntry);
-
-            setState(() {
-              // Find the index of the entry to edit
-              int index = _journalEntries.indexWhere((e) => e.id == entry.id);
-              if (index != -1) {
-                _journalEntries[index] = updatedEntry;
-              }
-            });
-          },
-          initialContent: entry.content,
-          initialMood: entry.mood,
-          initialDate: entry.dateTime, // Pass the original date of the entry
-          isEdit: true, // This is an edit operation
-        ),
-      ),
-    );
-  }
 
   void _sortJournalEntries() {
     _journalEntries.sort(
@@ -128,14 +94,7 @@ class _JournalPageState extends State<JournalPage> {
     ); // Sort in ascending order (oldest first)
   }
 
-  List<JournalEntry> _getEntriesForSelectedDate() {
-    // Return entries for the selected date
-    return _journalEntries.where((entry) {
-      return entry.dateTime.year == _selectedDate.year &&
-          entry.dateTime.month == _selectedDate.month &&
-          entry.dateTime.day == _selectedDate.day;
-    }).toList();
-  }
+
 
   List<JournalEntry> _getEntriesForDate(DateTime date) {
     // Return entries for a specific date
@@ -239,7 +198,6 @@ class _JournalPageState extends State<JournalPage> {
 
     setState(() {
       _selectedDate = normalizedSelectedDate;
-      _currentPageIndex = daysDifference;
     });
 
     // Animate to the correct page in the PageView
@@ -273,7 +231,6 @@ class _JournalPageState extends State<JournalPage> {
     // Update selected date
     setState(() {
       _selectedDate = newDate;
-      _currentPageIndex = offset; // Store relative index
     });
   }
 

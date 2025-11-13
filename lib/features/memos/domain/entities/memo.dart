@@ -8,6 +8,9 @@ class Memo extends Equatable {
   final bool isPinned;
   final String? visibility; // 'PUBLIC', 'PRIVATE', 'LIMITED'
   final List<String> tags;
+  final List<String> images;
+  final List<String> videos;
+  final List<String> audios;
   final Map<int, bool>
   checklistStates; // Tracks the checked/unchecked state of checkboxes
 
@@ -19,6 +22,9 @@ class Memo extends Equatable {
     this.isPinned = false,
     this.visibility = 'PRIVATE',
     this.tags = const [],
+    this.images = const [],
+    this.videos = const [],
+    this.audios = const [],
     this.checklistStates = const {},
   });
 
@@ -31,6 +37,9 @@ class Memo extends Equatable {
     isPinned,
     visibility,
     tags,
+    images,
+    videos,
+    audios,
     checklistStates,
   ];
 
@@ -42,6 +51,9 @@ class Memo extends Equatable {
     bool? isPinned,
     String? visibility,
     List<String>? tags,
+    List<String>? images,
+    List<String>? videos,
+    List<String>? audios,
     Map<int, bool>? checklistStates,
   }) {
     return Memo(
@@ -52,6 +64,9 @@ class Memo extends Equatable {
       isPinned: isPinned ?? this.isPinned,
       visibility: visibility ?? this.visibility,
       tags: tags ?? this.tags,
+      images: images ?? this.images,
+      videos: videos ?? this.videos,
+      audios: audios ?? this.audios,
       checklistStates: checklistStates ?? this.checklistStates,
     );
   }
@@ -71,6 +86,9 @@ class Memo extends Equatable {
       'isPinned': isPinned,
       'visibility': visibility,
       'tags': tags,
+      'images': images,
+      'videos': videos,
+      'audios': audios,
       'checklistStates': serializedChecklistStates,
     };
   }
@@ -101,6 +119,9 @@ class Memo extends Equatable {
       isPinned: json['isPinned'] ?? false,
       visibility: json['visibility'] ?? 'PRIVATE',
       tags: List<String>.from(json['tags'] ?? []),
+      images: List<String>.from(json['images'] ?? []),
+      videos: List<String>.from(json['videos'] ?? []),
+      audios: List<String>.from(json['audios'] ?? []),
       checklistStates: deserializedChecklistStates,
     );
   }

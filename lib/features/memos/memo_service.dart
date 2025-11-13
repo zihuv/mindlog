@@ -40,5 +40,7 @@ class MemoService {
   Future<void> saveMemo(Memo memo) => repository.saveMemo(memo);
   Future<void> updateMemo(Memo memo) => repository.updateMemo(memo);
   Future<void> deleteMemo(int id) => repository.deleteMemo(id);
+  Future<List<Memo>> searchMemos(String query) => repository.searchMemos(query);
+  Future<List<String>> getAllTags() => repository.getAllTags();
   Future<void> close() => repository.close();
 }
