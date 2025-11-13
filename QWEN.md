@@ -117,3 +117,23 @@ The application includes an interactive checklist feature:
 - `lib/ui/note_detail_screen.dart`: Screen for creating and editing individual notes
 - `lib/data/services/combined_note_service.dart`: Data service layer
 - `pubspec.yaml`: Project dependencies and configuration
+
+## Design System
+
+The application uses a unified design system with the following components:
+
+### Design System Files
+- `lib/ui/design_system/app_colors.dart`: Theme colors for the application
+- `lib/ui/design_system/border_radius.dart`: Consistent border radius values
+- `lib/ui/design_system/box_shadow.dart`: Standard box shadow styles
+- `lib/ui/design_system/flex.dart`: Consistent flex layout values
+- `lib/ui/design_system/font_size.dart`: Typography scale for text sizes
+- `lib/ui/design_system/font_weight.dart`: Consistent font weights
+- `lib/ui/design_system/padding.dart`: Standard padding and margin values
+- `lib/ui/design_system/app_theme.dart`: Complete theme definition combining all design elements
+- `lib/ui/design_system/design_system.dart`: Export file to import all design system components
+
+### Theme Usage
+- The application uses AppTheme.lightTheme and AppTheme.darkTheme from app_theme.dart
+- All UI components follow consistent design system values for colors, spacing, typography, and shapes
+- The design system ensures visual consistency across all application screens

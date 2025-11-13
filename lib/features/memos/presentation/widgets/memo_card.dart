@@ -66,7 +66,7 @@ class MemoCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 2), // Minimal spacing between time and content
               // Memo content with markdown support for checkboxes
               SimpleMarkdownCheckboxRenderer(
                 data: memo.content,

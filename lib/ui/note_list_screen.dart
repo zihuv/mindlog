@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:mindlog/features/memos/domain/entities/memo.dart';
 import 'note_detail_screen.dart';
 import '../controllers/note_controller.dart';
+import 'design_system/design_system.dart';
 
 class NoteListScreen extends StatelessWidget {
   const NoteListScreen({Key? key}) : super(key: key);
@@ -36,11 +37,15 @@ class NoteListScreen extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
             if (controller.notes.isEmpty) {
-              return const Center(
+              return Center(
                 child: Text(
                   'No notes yet.\nTap + to create your first note.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 18),
+                  style: TextStyle(
+                    fontSize: AppFontSize.large,
+                    fontWeight: AppFontWeight.normal,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
               );
             }
@@ -59,57 +64,74 @@ class NoteListScreen extends StatelessWidget {
                       Get.to(() => NoteDetailScreen(noteId: note.id));
                     },
                     child: Card(
-                      margin: const EdgeInsets.all(8.0),
+                      margin: AppPadding.small,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: AppBorderRadius.card,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Creation time in top-left corner
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
+                          Container(
+                            padding: EdgeInsets.fromLTRB(
+                              AppPadding.medium.left, 
+                              AppPadding.medium.top, 
+                              AppPadding.medium.right, 
+                              AppPadding.small.bottom, // Reduced bottom padding to reduce gap with content
+                            ),
                             child: Text(
                               _formatDateTime(note.createdAt),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold,
+                              style: TextStyle(
+                                fontSize: AppFontSize.small,
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                fontWeight: AppFontWeight.medium,
                               ),
                             ),
                           ),
-                          // ListTile for content and tags
-                          ListTile(
-                            title: Text(
-                              () {
-                                String contentWithoutChecklist =
-                                    _getContentWithoutChecklistItems(
-                                      note.content,
-                                    );
-                                return contentWithoutChecklist.length > 50
-                                    ? '${contentWithoutChecklist.substring(0, 50)}...'
-                                    : contentWithoutChecklist;
-                              }(),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                          // Content area with consistent padding
+                          Container(
+                            padding: EdgeInsets.fromLTRB(
+                              AppPadding.large.left, 
+                              0.0, 
+                              AppPadding.large.right, 
+                              AppPadding.medium.bottom, // No top padding to reduce gap from time
                             ),
-                            subtitle: Column(
+                            child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // Main content
+                                Text(
+                                  () {
+                                    String contentWithoutChecklist =
+                                        _getContentWithoutChecklistItems(
+                                          note.content,
+                                        );
+                                    return contentWithoutChecklist.length > 50
+                                        ? '${contentWithoutChecklist.substring(0, 50)}...'
+                                        : contentWithoutChecklist;
+                                  }(),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                                 // Display checklist items if any
-                                ..._buildChecklistItems(note),
+                                ..._buildChecklistItems(note, context),
                                 if (note.tags.isNotEmpty)
                                   Wrap(
                                     spacing: 4.0,
                                     runSpacing: 2.0,
                                     children: note.tags
                                         .map(
-                                          (tag) => Chip(
-                                            label: Text(
-                                              tag,
-                                              style: const TextStyle(
-                                                fontSize: 10,
+                                          (tag) => Padding(
+                                            padding: const EdgeInsets.only(top: 4.0),
+                                            child: Chip(
+                                              label: Text(
+                                                tag,
+                                                style: TextStyle(
+                                                  fontSize: AppFontSize.caption,
+                                                ),
                                               ),
+                                              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                                             ),
-                                            backgroundColor:
-                                                Colors.blue.shade100,
                                           ),
                                         )
                                         .toList(),
@@ -166,7 +188,7 @@ class NoteListScreen extends StatelessWidget {
   }
 
   // Extract checklist items from the content and display them as interactive checkboxes
-  List<Widget> _buildChecklistItems(Memo note) {
+  List<Widget> _buildChecklistItems(Memo note, BuildContext context) {
     // For now, we'll just display any stored checklist states from the memo
     List<Widget> checklistWidgets = [];
 
@@ -192,62 +214,69 @@ class NoteListScreen extends StatelessWidget {
             : isChecked;
 
         checklistWidgets.add(
-          Row(
-            children: [
-              Checkbox(
-                value: currentState,
-                onChanged: (bool? newValue) async {
-                  if (newValue == null) return;
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 1.0), // Standard padding to match text lineHeight
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start, // Align with text baseline
+              children: [
+                Checkbox(
+                  value: currentState,
+                  onChanged: (bool? newValue) async {
+                    if (newValue == null) return;
 
-                  // Update the checklist state
-                  mutableChecklistStates[key] = newValue;
-
-                  try {
-                    final controller = Get.find<NoteController>();
-                    // Update the specific checklist item
-                    await controller.updateChecklistItem(
-                      note.id,
-                      key,
-                      taskContent,
-                      newValue,
-                    );
-
-                    // Update the local state to reflect the change
+                    // Update the checklist state
                     mutableChecklistStates[key] = newValue;
 
-                    // Refresh the notes list to reflect the updated content
-                    await controller.loadNotes();
-                  } on Exception catch (e) {
-                    Get.showSnackbar(
-                      GetSnackBar(
-                        message: 'Error updating checklist: $e',
-                        duration: const Duration(seconds: 2),
-                        snackPosition: SnackPosition.BOTTOM,
-                      ),
-                    );
-                  } catch (e) {
-                    Get.showSnackbar(
-                      GetSnackBar(
-                        message: 'Unexpected error updating checklist: $e',
-                        duration: const Duration(seconds: 2),
-                        snackPosition: SnackPosition.BOTTOM,
-                      ),
-                    );
-                  }
-                },
-              ),
-              Expanded(
-                child: Text(
-                  taskContent,
-                  style: TextStyle(
-                    decoration: currentState
-                        ? TextDecoration.lineThrough
-                        : null,
-                    color: currentState ? Colors.grey : null,
+                    try {
+                      final controller = Get.find<NoteController>();
+                      // Update the specific checklist item
+                      await controller.updateChecklistItem(
+                        note.id,
+                        key,
+                        taskContent,
+                        newValue,
+                      );
+
+                      // Update the local state to reflect the change
+                      mutableChecklistStates[key] = newValue;
+
+                      // Refresh the notes list to reflect the updated content
+                      await controller.loadNotes();
+                    } on Exception catch (e) {
+                      Get.showSnackbar(
+                        GetSnackBar(
+                          message: 'Error updating checklist: $e',
+                          duration: const Duration(seconds: 2),
+                          snackPosition: SnackPosition.BOTTOM,
+                        ),
+                      );
+                    } catch (e) {
+                      Get.showSnackbar(
+                        GetSnackBar(
+                          message: 'Unexpected error updating checklist: $e',
+                          duration: const Duration(seconds: 2),
+                          snackPosition: SnackPosition.BOTTOM,
+                        ),
+                      );
+                    }
+                  },
+                  visualDensity: VisualDensity.compact, // Reduce checkbox size
+                  shape: RoundedRectangleBorder( // Smaller checkbox shape
+                    borderRadius: BorderRadius.circular(3),
                   ),
                 ),
-              ),
-            ],
+                SizedBox(width: 2), // Standard spacing to text
+                Expanded(
+                  child: Text(
+                    taskContent,
+                    style: TextStyle(
+                      fontSize: AppFontSize.body,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       }
@@ -290,19 +319,51 @@ class _NoteSearchDelegate extends SearchDelegate<String> {
     // This method is called when the search is submitted
     // For simplicity, we'll trigger the search from NoteListScreen
     if (query.isEmpty) {
-      return const Center(child: Text('Enter a search term'));
+      return Center(
+        child: Text(
+          'Enter a search term',
+          style: TextStyle(
+            fontSize: AppFontSize.large,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+      );
     }
     // Search is handled by NoteListScreen, not in the delegate
-    return const Center(child: Text('Performing search...'));
+    return Center(
+      child: Text(
+        'Performing search...',
+        style: TextStyle(
+          fontSize: AppFontSize.large,
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
+      ),
+    );
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
     // Show suggestions based on query if needed
     if (query.isEmpty) {
-      return const Center(child: Text('Enter a search term'));
+      return Center(
+        child: Text(
+          'Enter a search term',
+          style: TextStyle(
+            fontSize: AppFontSize.large,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+      );
     } else {
-      return Center(child: Text('Search for: "$query"'));
+      return Center(
+        child: Text(
+          'Search for: "$query"',
+          style: TextStyle(
+            fontSize: AppFontSize.large,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+      );
     }
   }
 }

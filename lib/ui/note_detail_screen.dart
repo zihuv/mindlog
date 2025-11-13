@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/note_controller.dart';
 import 'package:image_picker/image_picker.dart';
+import 'design_system/design_system.dart';
 
 class NoteDetailScreen extends StatefulWidget {
   final String? noteId;
@@ -178,15 +179,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: AppPadding.large,
               child: Column(
                 children: [
                   Flexible(
                     child: TextField(
                       controller: _contentController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Note Content',
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: AppBorderRadius.inputField,
+                        ),
                         hintText: 'Write your note here...',
                       ),
                       minLines: 3,
@@ -195,28 +198,30 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                       keyboardType: TextInputType.multiline,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: AppPadding.large.top),
                   Row(
                     children: [
                       Expanded(
                         child: TextField(
                           controller: _tagsController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Tags (comma-separated)',
-                            border: OutlineInputBorder(),
+                            border: OutlineInputBorder(
+                              borderRadius: AppBorderRadius.inputField,
+                            ),
                             hintText: 'work, personal, important...',
                           ),
                           onEditingComplete: _addTag,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: AppPadding.small.left),
                       ElevatedButton(
                         onPressed: _addTag,
-                        child: const Text('Add'),
+                        child: Text('Add'),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: AppPadding.medium.top),
                   if (_tags.isNotEmpty)
                     Wrap(
                       spacing: 4.0,
@@ -234,7 +239,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                           )
                           .toList(),
                     ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: AppPadding.large.top),
                   ElevatedButton.icon(
                     onPressed: _pickImage,
                     icon: const Icon(Icons.image),

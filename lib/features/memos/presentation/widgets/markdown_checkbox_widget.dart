@@ -44,10 +44,10 @@ class _TaskCheckboxBuilder extends MarkdownElementBuilder {
       final isChecked = text.contains('[x]') || text.contains('[X]');
       final index = _getCheckboxIndex(text, element);
 
-      return Container(
-        margin: const EdgeInsets.only(bottom: 4.0),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 1.0), // Minimal padding to match text line spacing
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center, // Better alignment
+          crossAxisAlignment: CrossAxisAlignment.start, // Align with text baseline
           children: [
             Checkbox(
               value: checklistStates[index] ?? isChecked,
@@ -57,19 +57,17 @@ class _TaskCheckboxBuilder extends MarkdownElementBuilder {
                 }
               },
               materialTapTargetSize: MaterialTapTargetSize.padded,
+              visualDensity: VisualDensity.compact, // Reduce checkbox size
+              shape: RoundedRectangleBorder( // Smaller checkbox shape
+                borderRadius: BorderRadius.circular(3),
+              ),
             ),
-            const SizedBox(width: 6), // Optimal spacing
+            const SizedBox(width: 2), // Minimal spacing to text
             Expanded(
               child: Text(
                 _removeCheckboxSyntax(text),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14.0, // Match default text size
-                  decoration: (checklistStates[index] ?? isChecked)
-                      ? TextDecoration.lineThrough
-                      : TextDecoration.none,
-                  color: (checklistStates[index] ?? isChecked)
-                      ? Colors.grey
-                      : null,
                 ),
               ),
             ),
@@ -124,12 +122,10 @@ class SimpleMarkdownCheckboxRenderer extends StatelessWidget {
         final index = i; // Use line index as the key
 
         widgets.add(
-          Container(
-            margin: const EdgeInsets.only(
-              bottom: 4.0,
-            ), // Reduced margin for better flow
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 1.0), // Minimal padding to match text line spacing
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center, // Better alignment
+              crossAxisAlignment: CrossAxisAlignment.start, // Align with text baseline
               children: [
                 Checkbox(
                   value: checklistStates[index] ?? isChecked,
@@ -139,19 +135,17 @@ class SimpleMarkdownCheckboxRenderer extends StatelessWidget {
                     }
                   },
                   materialTapTargetSize: MaterialTapTargetSize.padded,
+                  visualDensity: VisualDensity.compact, // Reduce checkbox size
+                  shape: RoundedRectangleBorder( // Smaller checkbox shape
+                    borderRadius: BorderRadius.circular(3),
+                  ),
                 ),
-                const SizedBox(width: 6), // Optimal spacing
+                const SizedBox(width: 2), // Minimal spacing to text
                 Expanded(
                   child: Text(
                     taskInfo.content,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14.0, // Match default text size
-                      decoration: (checklistStates[index] ?? isChecked)
-                          ? TextDecoration.lineThrough
-                          : TextDecoration.none,
-                      color: (checklistStates[index] ?? isChecked)
-                          ? Colors.grey
-                          : null,
                     ),
                   ),
                 ),
@@ -163,8 +157,11 @@ class SimpleMarkdownCheckboxRenderer extends StatelessWidget {
         // For non-checklist lines, use a more integrated approach
         widgets.add(
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2.0),
-            child: SelectableText(line, style: const TextStyle(fontSize: 14.0)),
+            padding: const EdgeInsets.symmetric(vertical: 1.0), // Match checklist item spacing
+            child: SelectableText(
+              line,
+              style: const TextStyle(fontSize: 14.0),
+            ),
           ),
         );
       }

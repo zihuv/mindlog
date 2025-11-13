@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'ui/note_list_screen.dart';
 import 'controllers/note_controller.dart';
+import 'ui/design_system/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +16,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'MindLog - Notes App',
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       home: const NoteListScreen(),
       initialBinding: NoteBinding(),
     );
