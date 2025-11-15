@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/note_controller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'design_system/design_system.dart';
+import 'components/markdown_checklist.dart';
 
 class NoteDetailScreen extends StatefulWidget {
   final String? noteId;
@@ -245,11 +246,68 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                     icon: const Icon(Icons.image),
                     label: const Text('Add Image'),
                   ),
+                  // Preview of the note content with markdown checklist rendering
+                  const SizedBox(height: 16.0),
+                  Container(
+                    padding: const EdgeInsets.all(12.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).dividerColor,
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Preview:',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 8.0),
+                        MarkdownChecklist(
+                          text: _contentController.text,
+                          style: TextStyle(
+                            fontSize: AppFontSize.body,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                          onTextChange: (updatedText) {
+                            _contentController.text = updatedText;
+                            // Update checklist states based on the new content
+                            _updateChecklistStates(updatedText);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                   // Additional media buttons could be added here
                 ],
               ),
             ),
     );
+  }
+
+  // Update checklist states based on the content
+  void _updateChecklistStates(String content) {
+    List<String> lines = content.split('\n');
+    Map<int, bool> newChecklistStates = {};
+
+    for (int i = 0; i < lines.length; i++) {
+      String line = lines[i].trim();
+      if (line.startsWith('- [') && line.contains('] ')) {
+        // Extract checkbox state
+        bool isChecked = line.substring(3, 4) == 'x';
+        String taskContent = line.substring(6); // Skip "- [x] " or "- [ ] "
+
+        // Create a unique key for this checklist item based on content and position
+        int key = taskContent.hashCode + i;
+        newChecklistStates[key] = isChecked;
+      }
+    }
+
+    setState(() {
+      _checklistStates = newChecklistStates;
+    });
   }
 
   @override

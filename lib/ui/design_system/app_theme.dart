@@ -17,19 +17,21 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         primary: AppColors.primary,
-        primaryContainer: AppColors.primaryVariant,
-        secondary: AppColors.secondary,
-        secondaryContainer: AppColors.secondaryVariant,
-        surface: AppColors.surface,
-        background: AppColors.background,
-        error: AppColors.error,
         onPrimary: AppColors.onPrimary,
+        primaryContainer: AppColors.primaryVariant,
+        onPrimaryContainer: AppColors.onPrimary,
+        secondary: AppColors.secondary,
         onSecondary: AppColors.onSecondary,
+        secondaryContainer: AppColors.secondaryVariant,
+        onSecondaryContainer: AppColors.onSecondary,
+        surface: AppColors.surface,
         onSurface: AppColors.onSurface,
-        onBackground: AppColors.onBackground,
+        error: AppColors.error,
         onError: AppColors.onError,
       ).copyWith(
         brightness: Brightness.light,
+        background: AppColors.surface,
+        onBackground: AppColors.onSurface,
       ),
 
       // Text theme
@@ -41,11 +43,11 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: AppBorderRadius.card,
         ),
-        elevation: 2.0,
-        shadowColor: Colors.black.withOpacity(0.1),
+        elevation: 1.0, // Reduced for a cleaner look
+        shadowColor: Colors.black12, // More subtle shadow
       ),
 
-      // AppBar theme
+      // AppBar theme - Clean white background
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.appBarBackground,
         foregroundColor: AppColors.appBarText,
@@ -58,7 +60,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: AppBorderRadius.appBar,
         ),
-        elevation: 2.0,
+        elevation: 0, // No elevation for cleaner look
       ),
 
       // Button theme
@@ -162,7 +164,7 @@ class AppTheme {
 
       // Divider theme
       dividerTheme: DividerThemeData(
-        color: AppColors.onSurface.withOpacity(0.12),
+        color: Colors.grey.shade200, // Cleaner divider color
         thickness: 1.0,
         space: 16.0,
       ),
@@ -180,19 +182,21 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         primary: AppColors.primary,
-        primaryContainer: AppColors.primaryVariant,
-        secondary: AppColors.secondary,
-        secondaryContainer: AppColors.secondaryVariant,
-        surface: AppColors.darkSurface,
-        background: AppColors.darkBackground,
-        error: AppColors.error,
         onPrimary: AppColors.onPrimary,
+        primaryContainer: AppColors.primaryVariant,
+        onPrimaryContainer: AppColors.onPrimary,
+        secondary: AppColors.secondary,
         onSecondary: AppColors.onSecondary,
+        secondaryContainer: AppColors.secondaryVariant,
+        onSecondaryContainer: AppColors.onSecondary,
+        surface: AppColors.darkSurface,
         onSurface: AppColors.darkOnSurface,
-        onBackground: AppColors.darkOnBackground,
+        error: AppColors.error,
         onError: AppColors.onError,
       ).copyWith(
         brightness: Brightness.dark,
+        background: AppColors.darkSurface,
+        onBackground: AppColors.darkOnSurface,
       ),
 
       // Text theme
@@ -208,7 +212,7 @@ class AppTheme {
           borderRadius: AppBorderRadius.card,
         ),
         elevation: 4.0,
-        shadowColor: Colors.black.withOpacity(0.25),
+        shadowColor: Colors.black38,
       ),
 
       // AppBar theme
@@ -328,7 +332,7 @@ class AppTheme {
 
       // Divider theme
       dividerTheme: DividerThemeData(
-        color: AppColors.darkOnSurface.withOpacity(0.12),
+        color: AppColors.darkOnSurface.withOpacity(0.12), // We'll keep this as is for now since there's no direct replacement
         thickness: 1.0,
         space: 16.0,
       ),

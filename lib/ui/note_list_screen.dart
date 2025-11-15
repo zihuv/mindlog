@@ -4,6 +4,7 @@ import 'package:mindlog/features/memos/domain/entities/memo.dart';
 import 'note_detail_screen.dart';
 import '../controllers/note_controller.dart';
 import 'design_system/design_system.dart';
+import 'components/markdown_checklist.dart';
 
 class NoteListScreen extends StatelessWidget {
   const NoteListScreen({Key? key}) : super(key: key);
@@ -99,22 +100,19 @@ class NoteListScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Main content
-                                Text(
-                                  () {
-                                    String contentWithoutChecklist =
-                                        _getContentWithoutChecklistItems(
-                                          note.content,
-                                        );
-                                    return contentWithoutChecklist.length > 50
-                                        ? '${contentWithoutChecklist.substring(0, 50)}...'
-                                        : contentWithoutChecklist;
-                                  }(),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                                // Main content with markdown checklist support
+                                MarkdownChecklist(
+                                  text: note.content.length > 200
+                                      ? '${note.content.substring(0, 200)}...'
+                                      : note.content,
+                                  style: TextStyle(
+                                    fontSize: AppFontSize.body,
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                  ),
+                                  onTextChange: (updatedText) {
+                                    _updateNoteContent(note.id, updatedText);
+                                  },
                                 ),
-                                // Display checklist items if any
-                                ..._buildChecklistItems(note, context),
                                 if (note.tags.isNotEmpty)
                                   Wrap(
                                     spacing: 4.0,
@@ -170,119 +168,34 @@ class NoteListScreen extends StatelessWidget {
     return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
-  // Extract content without checklist items
-  String _getContentWithoutChecklistItems(String content) {
-    List<String> lines = content.split('\n');
-    List<String> nonChecklistLines = [];
 
-    for (String line in lines) {
-      // Skip lines that are checklist items
-      if (!line.trim().startsWith('- [') || !line.contains('] ')) {
-        nonChecklistLines.add(line);
-      }
+  // Update the note content when checklist items are toggled
+  Future<void> _updateNoteContent(String noteId, String newContent) async {
+    try {
+      final controller = Get.find<NoteController>();
+      await controller.updateNote(
+        id: noteId,
+        content: newContent,
+      );
+      // Refresh the notes list to reflect the updated content
+      await controller.loadNotes();
+    } on Exception catch (e) {
+      Get.showSnackbar(
+        GetSnackBar(
+          message: 'Error updating checklist: $e',
+          duration: const Duration(seconds: 2),
+          snackPosition: SnackPosition.BOTTOM,
+        ),
+      );
+    } catch (e) {
+      Get.showSnackbar(
+        GetSnackBar(
+          message: 'Unexpected error updating checklist: $e',
+          duration: const Duration(seconds: 2),
+          snackPosition: SnackPosition.BOTTOM,
+        ),
+      );
     }
-
-    // Join the remaining lines and return first 200 characters to avoid overly long text
-    String result = nonChecklistLines.join('\n').trim();
-    return result.length > 200 ? '${result.substring(0, 200)}...' : result;
-  }
-
-  // Extract checklist items from the content and display them as interactive checkboxes
-  List<Widget> _buildChecklistItems(Memo note, BuildContext context) {
-    // For now, we'll just display any stored checklist states from the memo
-    List<Widget> checklistWidgets = [];
-
-    // Create a map of checklist states that can be modified
-    Map<int, bool> mutableChecklistStates = Map.from(note.checklistStates);
-
-    // Add any checklist items that are present in the content
-    List<String> lines = note.content.split('\n');
-
-    for (int i = 0; i < lines.length; i++) {
-      String line = lines[i].trim();
-      if (line.startsWith('- [') && line.contains('] ')) {
-        // Extract checkbox state
-        bool isChecked = line.substring(3, 4) == 'x';
-        String taskContent = line.substring(6); // Skip "- [x] " or "- [ ] "
-
-        // Create a unique key for this checklist item based on content and position
-        int key = _generateChecklistKey(taskContent, i);
-
-        // Use stored state if available, otherwise use parsed state
-        bool currentState = mutableChecklistStates.containsKey(key)
-            ? mutableChecklistStates[key]!
-            : isChecked;
-
-        checklistWidgets.add(
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 1.0), // Standard padding to match text lineHeight
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start, // Align with text baseline
-              children: [
-                Checkbox(
-                  value: currentState,
-                  onChanged: (bool? newValue) async {
-                    if (newValue == null) return;
-
-                    // Update the checklist state
-                    mutableChecklistStates[key] = newValue;
-
-                    try {
-                      final controller = Get.find<NoteController>();
-                      // Update the specific checklist item
-                      await controller.updateChecklistItem(
-                        note.id,
-                        key,
-                        taskContent,
-                        newValue,
-                      );
-
-                      // Update the local state to reflect the change
-                      mutableChecklistStates[key] = newValue;
-
-                      // Refresh the notes list to reflect the updated content
-                      await controller.loadNotes();
-                    } on Exception catch (e) {
-                      Get.showSnackbar(
-                        GetSnackBar(
-                          message: 'Error updating checklist: $e',
-                          duration: const Duration(seconds: 2),
-                          snackPosition: SnackPosition.BOTTOM,
-                        ),
-                      );
-                    } catch (e) {
-                      Get.showSnackbar(
-                        GetSnackBar(
-                          message: 'Unexpected error updating checklist: $e',
-                          duration: const Duration(seconds: 2),
-                          snackPosition: SnackPosition.BOTTOM,
-                        ),
-                      );
-                    }
-                  },
-                  visualDensity: VisualDensity.compact, // Reduce checkbox size
-                  shape: RoundedRectangleBorder( // Smaller checkbox shape
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-                SizedBox(width: 2), // Standard spacing to text
-                Expanded(
-                  child: Text(
-                    taskContent,
-                    style: TextStyle(
-                      fontSize: AppFontSize.body,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-    }
-
-    return checklistWidgets;
   }
 
   // Generate a unique key for a checklist item
