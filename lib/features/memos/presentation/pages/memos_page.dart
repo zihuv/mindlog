@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mindlog/features/memos/memo_service.dart';
-import 'package:mindlog/features/memos/tag_service.dart';
+import 'package:mindlog/features/memos/data/memo_service.dart';
 import 'package:mindlog/features/memos/domain/entities/memo.dart';
 import 'package:mindlog/features/memos/presentation/widgets/memo_card.dart';
 import 'package:mindlog/features/memos/presentation/widgets/memo_editor_screen.dart';
-import 'package:mindlog/features/memos/presentation/widgets/tag_filter_bar.dart';
+
 import 'package:mindlog/features/settings/presentation/pages/settings_page.dart';
 import 'package:mindlog/features/journal/presentation/pages/journal_page.dart';
 
@@ -26,20 +25,12 @@ class _MemosPageState extends State<MemosPage> {
   void initState() {
     super.initState();
     _loadMemos();
-    _loadTags();
   }
 
   Future<void> _loadMemos() async {
     try {
       _allMemos = await MemoService.instance.getAllMemos();
-      _filteredMemos = _selectedTags.isEmpty
-          ? _allMemos
-          : _allMemos
-                .where(
-                  (memo) =>
-                      _selectedTags.every((tag) => memo.tags.contains(tag)),
-                )
-                .toList();
+      _filteredMemos = _allMemos; // No tag filtering since tags are removed
       _sortMemos();
       setState(() {
         _isLoading = false;
@@ -53,25 +44,18 @@ class _MemosPageState extends State<MemosPage> {
   }
 
   Future<void> _loadTags() async {
-    try {
-      _allTags = await TagService.instance.getAllTags();
-      setState(() {});
-    } catch (e) {
-      print('Error loading tags: $e');
-    }
+    // Tag functionality has been removed in this refactor
+    // Keeping this as an empty implementation to maintain compatibility
+    _allTags = [];
+    setState(() {});
   }
 
   void _filterMemosByTags(List<String> selectedTags) {
-    if (selectedTags.isEmpty) {
-      _filteredMemos = _allMemos;
-    } else {
-      _filteredMemos = _allMemos
-          .where((memo) => selectedTags.every((tag) => memo.tags.contains(tag)))
-          .toList();
-    }
+    // Since tags have been removed, just return all memos
+    _filteredMemos = _allMemos;
     _sortMemos();
     setState(() {
-      _selectedTags = selectedTags;
+      _selectedTags = []; // Clear selected tags since they're removed
     });
   }
 
@@ -115,23 +99,11 @@ class _MemosPageState extends State<MemosPage> {
               int index = _allMemos.indexWhere((m) => m.id == updatedMemo.id);
               if (index != -1) {
                 _allMemos[index] = updatedMemo;
-                // If we're currently filtering by tags, update the filtered list too
-                if (_selectedTags.isNotEmpty) {
-                  _filteredMemos = _allMemos
-                      .where(
-                        (memo) => _selectedTags.every(
-                          (tag) => memo.tags.contains(tag),
-                        ),
-                      )
-                      .toList();
-                } else {
-                  _filteredMemos = _allMemos;
-                }
+                _filteredMemos = _allMemos; // Update the filtered list
                 _sortMemos();
               }
             });
-            // Refresh tags list after editing a memo
-            _loadTags();
+            // Tags have been removed from this refactor
           },
         ),
       ),
@@ -166,8 +138,7 @@ class _MemosPageState extends State<MemosPage> {
           _allMemos.removeWhere((m) => m.id == memo.id);
           _filteredMemos.removeWhere((m) => m.id == memo.id);
         });
-        // Refresh tags list after deleting a memo
-        _loadTags();
+        // Tags have been removed from this refactor
       } catch (e) {
         print('Error deleting memo: $e');
         // Show error snackbar
@@ -254,11 +225,7 @@ class _MemosPageState extends State<MemosPage> {
       ),
       body: Column(
         children: [
-          TagFilterBar(
-            allTags: _allTags,
-            selectedTags: _selectedTags,
-            onTagsChanged: _filterMemosByTags,
-          ),
+
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -281,29 +248,10 @@ class _MemosPageState extends State<MemosPage> {
                       ],
                     ),
                   )
-                : _filteredMemos.isEmpty && _selectedTags.isNotEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.tag, size: 64, color: Colors.grey),
-                        SizedBox(height: 16),
-                        Text(
-                          'No memos with selected tags',
-                          style: TextStyle(fontSize: 18, color: Colors.grey),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Try selecting different tags or create a new memo',
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  )
+
                 : RefreshIndicator(
                     onRefresh: () async {
                       await _loadMemos();
-                      await _loadTags();
                     },
                     child: ListView.builder(
                       itemCount: _filteredMemos.length,
@@ -329,18 +277,7 @@ class _MemosPageState extends State<MemosPage> {
                               );
                               if (index != -1) {
                                 _allMemos[index] = updatedMemo;
-                                // If we're currently filtering by tags, update the filtered list too
-                                if (_selectedTags.isNotEmpty) {
-                                  _filteredMemos = _allMemos
-                                      .where(
-                                        (memo) => _selectedTags.every(
-                                          (tag) => memo.tags.contains(tag),
-                                        ),
-                                      )
-                                      .toList();
-                                } else {
-                                  _filteredMemos = _allMemos;
-                                }
+                                _filteredMemos = _allMemos; // Update the filtered list
                                 _sortMemos();
                               }
                             });

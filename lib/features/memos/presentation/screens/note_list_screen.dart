@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mindlog/features/memos/domain/entities/memo.dart';
 import 'note_detail_screen.dart';
-import '../controllers/note_controller.dart';
-import 'design_system/design_system.dart';
-import 'components/markdown_checklist.dart';
+import '../../../../controllers/note_controller.dart';
+import '../../../../ui/design_system/design_system.dart';
+import '../components/components/markdown_checklist.dart';
 
 class NoteListScreen extends StatelessWidget {
   const NoteListScreen({Key? key}) : super(key: key);
@@ -113,27 +113,7 @@ class NoteListScreen extends StatelessWidget {
                                     _updateNoteContent(note.id, updatedText);
                                   },
                                 ),
-                                if (note.tags.isNotEmpty)
-                                  Wrap(
-                                    spacing: 4.0,
-                                    runSpacing: 2.0,
-                                    children: note.tags
-                                        .map(
-                                          (tag) => Padding(
-                                            padding: const EdgeInsets.only(top: 4.0),
-                                            child: Chip(
-                                              label: Text(
-                                                tag,
-                                                style: TextStyle(
-                                                  fontSize: AppFontSize.caption,
-                                                ),
-                                              ),
-                                              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                  ),
+
                               ],
                             ),
                           ),

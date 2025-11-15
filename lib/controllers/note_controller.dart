@@ -48,6 +48,11 @@ class NoteController extends GetxController {
     }
   }
 
+  Future<List<Memo>> getNotesByNotebookId(String notebookId) async {
+    final allNotes = await _service.getAllNotes();
+    return allNotes.where((note) => note.notebookId == notebookId).toList();
+  }
+
   Future<void> searchNotes(String query) async {
     _isLoading.value = true;
     try {
@@ -81,11 +86,13 @@ class NoteController extends GetxController {
     required String content,
     List<String>? tags,
     Map<int, bool>? checklistStates,
+    String? notebookId,
   }) async {
     await _service.createNote(
       content: content,
       tags: tags,
       checklistStates: checklistStates,
+      notebookId: notebookId,
     );
   }
 
@@ -94,12 +101,14 @@ class NoteController extends GetxController {
     String? content,
     List<String>? tags,
     Map<int, bool>? checklistStates,
+    String? notebookId,
   }) async {
     await _service.updateNote(
       id: id,
       content: content,
       tags: tags,
       checklistStates: checklistStates,
+      notebookId: notebookId,
     );
   }
 

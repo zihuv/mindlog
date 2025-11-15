@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mindlog/features/memos/domain/entities/memo.dart';
-import 'package:mindlog/features/memos/memo_service.dart';
-import 'package:mindlog/core/utils/tag_parser.dart';
+import 'package:mindlog/features/memos/data/memo_service.dart';
 import 'package:uuid/uuid.dart';
 
 class MemoEditorScreen extends StatefulWidget {
@@ -158,8 +157,8 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
       return;
     }
 
-    // Extract tags from the content
-    final tags = TagParser.extractTags(_controller.text.trim());
+    // Tags have been removed in this refactor, so use empty list
+    final tags = <String>[];
 
     Memo memo;
     if (widget.isEdit && widget.initialMemo != null) {

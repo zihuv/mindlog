@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'ui/note_list_screen.dart';
+import 'ui/home/home_screen.dart';
 import 'controllers/note_controller.dart';
+import 'controllers/notebooks/notebook_controller.dart';
 import 'ui/design_system/app_theme.dart';
 
 void main() async {
@@ -18,15 +19,16 @@ class MyApp extends StatelessWidget {
       title: 'MindLog - Notes App',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      home: const NoteListScreen(),
-      initialBinding: NoteBinding(),
+      home: const HomeScreen(),
+      initialBinding: AppBindings(),
     );
   }
 }
 
-class NoteBinding extends Bindings {
+class AppBindings extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<NoteController>(() => NoteController());
+    Get.lazyPut<NotebookController>(() => NotebookController());
   }
 }

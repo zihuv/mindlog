@@ -1,4 +1,4 @@
-import 'package:mindlog/features/memos/memo_service.dart';
+import 'package:mindlog/features/memos/data/memo_service.dart';
 import 'package:mindlog/features/memos/domain/entities/memo.dart';
 import 'package:uuid/uuid.dart';
 
@@ -17,6 +17,7 @@ class NoteService {
     List<String>? videoName,
     List<String>? tags,
     Map<int, bool>? checklistStates,
+    String? notebookId,
   }) async {
     final noteId = _uuid.v7();
     final now = DateTime.now();
@@ -27,6 +28,7 @@ class NoteService {
       content: content,
       createdAt: now,
       updatedAt: now,
+      notebookId: notebookId,
       tags: tags ?? [],
       images: imageName ?? [],
       videos: videoName ?? [],
@@ -57,6 +59,7 @@ class NoteService {
     List<String>? videoName,
     List<String>? tags,
     Map<int, bool>? checklistStates,
+    String? notebookId,
   }) async {
     final existingNote = await MemoService.instance.getMemoById(id);
     if (existingNote == null) {
@@ -68,6 +71,7 @@ class NoteService {
       content: content ?? existingNote.content,
       createdAt: existingNote.createdAt,
       updatedAt: DateTime.now(),
+      notebookId: notebookId ?? existingNote.notebookId,
       tags: tags ?? existingNote.tags,
       images: imageName ?? existingNote.images,
       videos: videoName ?? existingNote.videos,

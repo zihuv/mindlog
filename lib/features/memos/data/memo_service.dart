@@ -23,14 +23,12 @@ class MemoService {
   }
 
   Future<void> _initializeRepository() async {
-    // Ensure previous repository is closed
-    if (_repository != null) {
-      await _repository!.close();
+    // Don't close the repository here since it uses shared database
+    if (_repository == null) {
+      // Create database repository for UUID support
+      _repository = MemoDatabaseRepository();
+      await _repository!.initialize();
     }
-
-    // Create database repository for UUID support
-    _repository = MemoDatabaseRepository();
-    await _repository!.initialize();
   }
 
   // Proxy all MemoStorageRepository methods to current repository
@@ -42,5 +40,8 @@ class MemoService {
   Future<void> deleteMemo(String id) => repository.deleteMemo(id);
   Future<List<Memo>> searchMemos(String query) => repository.searchMemos(query);
   Future<List<String>> getAllTags() => repository.getAllTags();
-  Future<void> close() => repository.close();
+  Future<void> close() async {
+    // Don't close the repository since it uses shared database
+    // The shared database will be closed separately
+  }
 }

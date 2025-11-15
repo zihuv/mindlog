@@ -13,7 +13,7 @@ class MemoDatabaseRepository implements MemoStorageRepository {
 
   @override
   Future<void> initialize() async {
-    _database = AppDatabase();
+    _database = DatabaseProvider.instance.database;
     _noteDao = NoteDao(_database);
   }
 
@@ -50,6 +50,7 @@ class MemoDatabaseRepository implements MemoStorageRepository {
         audioName: Value(memo.audios),
         videoName: Value(memo.videos),
         tags: Value(memo.tags),
+        notebookId: Value(memo.notebookId),
         isDeleted: const Value(false),
       ),
     );
@@ -66,6 +67,7 @@ class MemoDatabaseRepository implements MemoStorageRepository {
         audioName: Value(memo.audios),
         videoName: Value(memo.videos),
         tags: Value(memo.tags),
+        notebookId: Value(memo.notebookId),
         // Note: isDeleted is a flag for soft delete, not the same as isPinned
       ),
       memo.id,
@@ -94,7 +96,8 @@ class MemoDatabaseRepository implements MemoStorageRepository {
 
   @override
   Future<void> close() async {
-    await _database.close();
+    // Don't close the shared database instance here
+    // The database will be closed by the DatabaseProvider when appropriate
   }
 
   Memo _mapNoteDataToMemo(NoteData noteData) {
@@ -107,6 +110,7 @@ class MemoDatabaseRepository implements MemoStorageRepository {
           : null,
       isPinned: false, // Not stored in DB, default to false
       visibility: 'PRIVATE', // Not stored in DB, default to PRIVATE
+      notebookId: noteData.notebookId,
       tags: noteData.tags,
       images: noteData.imageName,
       videos: noteData.videoName,

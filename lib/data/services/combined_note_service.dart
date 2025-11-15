@@ -18,6 +18,7 @@ class CombinedNoteService {
     List<String>? audiosToCopy, // Source paths for audios to be copied
     List<String>? tags,
     Map<int, bool>? checklistStates,
+    String? notebookId,
   }) async {
     // Create the note first
     final noteId = await _noteService.createNote(
@@ -27,6 +28,7 @@ class CombinedNoteService {
       audioName: audiosToCopy?.map((e) => e.split('/').last).toList(),
       tags: tags,
       checklistStates: checklistStates,
+      notebookId: notebookId,
     );
 
     // Copy media files to the appropriate directories
@@ -87,6 +89,7 @@ class CombinedNoteService {
     List<String>? newAudiosToCopy, // New audios to add to the note
     List<String>? tags,
     Map<int, bool>? checklistStates,
+    String? notebookId,
   }) async {
     final existingNote = await _noteService.getNoteById(id);
     if (existingNote == null) {
@@ -99,6 +102,7 @@ class CombinedNoteService {
       content: content,
       tags: tags,
       checklistStates: checklistStates,
+      notebookId: notebookId,
     );
 
     // Add new media files if provided

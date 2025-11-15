@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/note_controller.dart';
+import '../../../../controllers/note_controller.dart';
 import 'package:image_picker/image_picker.dart';
-import 'design_system/design_system.dart';
-import 'components/markdown_checklist.dart';
+import '../../../../ui/design_system/design_system.dart';
+import '../components/components/markdown_checklist.dart';
 
 class NoteDetailScreen extends StatefulWidget {
   final String? noteId;
+  final String? notebookId;
 
-  const NoteDetailScreen({Key? key, this.noteId}) : super(key: key);
+  const NoteDetailScreen({Key? key, this.noteId, this.notebookId}) : super(key: key);
 
   @override
   State<NoteDetailScreen> createState() => _NoteDetailScreenState();
@@ -16,9 +17,7 @@ class NoteDetailScreen extends StatefulWidget {
 
 class _NoteDetailScreenState extends State<NoteDetailScreen> {
   final TextEditingController _contentController = TextEditingController();
-  final TextEditingController _tagsController = TextEditingController();
   late bool _isNewNote;
-  List<String> _tags = [];
   bool _isLoading = false;
   Map<int, bool> _checklistStates = {};
 
@@ -43,11 +42,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
       if (note != null) {
         _contentController.text = note.content;
-        _tags = List.from(
-          note.tags,
-        ); // Create a copy to avoid potential mutations
         _checklistStates = Map.from(note.checklistStates);
-        _updateTagsController();
       }
     } catch (e) {
       Get.showSnackbar(
@@ -64,8 +59,56 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     }
   }
 
-  void _updateTagsController() {
-    _tagsController.text = _tags.join(',');
+  Future<void> _deleteNote() async {
+    // Show confirmation dialog before deleting
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Note'),
+          content: const Text('Are you sure you want to delete this note? This action cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final controller = Get.find<NoteController>();
+        await controller.deleteNote(widget.noteId!);
+
+        if (mounted) {
+          Get.back(result: true); // Indicate success and navigate back
+        }
+      } catch (e) {
+        if (mounted) {
+          Get.showSnackbar(
+            GetSnackBar(
+              message: 'Error deleting note: $e',
+              duration: const Duration(seconds: 2),
+              snackPosition: SnackPosition.BOTTOM,
+            ),
+          );
+        }
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> _saveNote() async {
@@ -89,15 +132,15 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       if (_isNewNote) {
         await controller.createNote(
           content: _contentController.text,
-          tags: _tags.isEmpty ? [] : _tags,
           checklistStates: _checklistStates,
+          notebookId: widget.notebookId, // Associate note with notebook if provided
         );
       } else {
         await controller.updateNote(
           id: widget.noteId!,
           content: _contentController.text,
-          tags: _tags.isEmpty ? [] : _tags,
           checklistStates: _checklistStates,
+          notebookId: widget.notebookId, // Update notebook association if needed
         );
       }
 
@@ -131,19 +174,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     }
   }
 
-  Future<void> _addTag() async {
-    if (_tagsController.text.trim().isNotEmpty) {
-      final newTags = _tagsController.text
-          .split(',')
-          .map((tag) => tag.trim())
-          .where((tag) => tag.isNotEmpty)
-          .toList();
 
-      setState(() {
-        _tags = newTags;
-      });
-    }
-  }
 
   Future<void> _pickImage() async {
     final imagePicker = ImagePicker();
@@ -171,6 +202,12 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       appBar: AppBar(
         title: Text(_isNewNote ? 'New Note' : 'Edit Note'),
         actions: [
+          if (!_isNewNote) ...[
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: _isLoading ? null : _deleteNote,
+            ),
+          ],
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: _isLoading ? null : _saveNote,
@@ -200,46 +237,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                     ),
                   ),
                   SizedBox(height: AppPadding.large.top),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _tagsController,
-                          decoration: InputDecoration(
-                            labelText: 'Tags (comma-separated)',
-                            border: OutlineInputBorder(
-                              borderRadius: AppBorderRadius.inputField,
-                            ),
-                            hintText: 'work, personal, important...',
-                          ),
-                          onEditingComplete: _addTag,
-                        ),
-                      ),
-                      SizedBox(width: AppPadding.small.left),
-                      ElevatedButton(
-                        onPressed: _addTag,
-                        child: Text('Add'),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: AppPadding.medium.top),
-                  if (_tags.isNotEmpty)
-                    Wrap(
-                      spacing: 4.0,
-                      children: _tags
-                          .map(
-                            (tag) => Chip(
-                              label: Text(tag),
-                              onDeleted: () {
-                                setState(() {
-                                  _tags.remove(tag);
-                                  _updateTagsController();
-                                });
-                              },
-                            ),
-                          )
-                          .toList(),
-                    ),
+
                   SizedBox(height: AppPadding.large.top),
                   ElevatedButton.icon(
                     onPressed: _pickImage,
@@ -313,7 +311,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   @override
   void dispose() {
     _contentController.dispose();
-    _tagsController.dispose();
     super.dispose();
   }
 }
