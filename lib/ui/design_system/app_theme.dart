@@ -332,7 +332,7 @@ class AppTheme {
 
       // Divider theme
       dividerTheme: DividerThemeData(
-        color: AppColors.darkOnSurface.withOpacity(0.12), // We'll keep this as is for now since there's no direct replacement
+        color: AppColors.darkOnSurface.withValues(alpha: 0.12),
         thickness: 1.0,
         space: 16.0,
       ),

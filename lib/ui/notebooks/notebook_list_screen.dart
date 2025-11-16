@@ -4,7 +4,7 @@ import 'package:mindlog/features/notebooks/domain/entities/notebook.dart';
 import 'package:mindlog/ui/notebooks/notebook_detail_screen.dart';
 import 'package:mindlog/ui/notebooks/notebook_notes_screen.dart';
 import 'package:mindlog/controllers/notebooks/notebook_controller.dart';
-import 'package:mindlog/features/memos/presentation/screens/note_detail_screen.dart';
+import 'package:mindlog/features/notes/presentation/screens/note_detail_screen.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
 
 class NotebookListScreen extends StatelessWidget {

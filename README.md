@@ -4,20 +4,20 @@ MindLog is a simple note-taking app with markdown support and tag functionality 
 
 ## Features
 
-- Create, edit, and delete memos
+- Create, edit, and delete notes
 - Markdown support with checkboxes
-- Tag support - use #tagname to add tags to your memos
-- Filter memos by tags using the tag filter bar
-- Pin important memos
-- Privacy settings for memos
+- Tag support - use #tagname to add tags to your notes
+- Filter notes by tags using the tag filter bar
+- Pin important notes
+- Privacy settings for notes
 
 ## Tag Feature
 
-- Add tags to your memos by including #tagname in the content
+- Add tags to your notes by including #tagname in the content
 - Tags support letters, numbers, underscores, and hyphens (e.g., #todo, #urgent_task, #bug-fix)
-- Memos with tags will display them below the content
-- Filter memos by clicking on tags in the filter bar
-- Tags are automatically extracted and reused across memos
+- Notes with tags will display them below the content
+- Filter notes by clicking on tags in the filter bar
+- Tags are automatically extracted and reused across notes
 
 ## Building
 

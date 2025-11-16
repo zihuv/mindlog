@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mindlog/features/memos/domain/entities/memo.dart';
 import 'note_detail_screen.dart';
 import '../../../../controllers/note_controller.dart';
 import '../../../../ui/design_system/design_system.dart';
@@ -84,7 +83,7 @@ class NoteListScreen extends StatelessWidget {
                               _formatDateTime(note.createdAt),
                               style: TextStyle(
                                 fontSize: AppFontSize.small,
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                 fontWeight: AppFontWeight.medium,
                               ),
                             ),
@@ -178,10 +177,6 @@ class NoteListScreen extends StatelessWidget {
     }
   }
 
-  // Generate a unique key for a checklist item
-  int _generateChecklistKey(String content, int position) {
-    return content.hashCode + position;
-  }
 }
 
 class _NoteSearchDelegate extends SearchDelegate<String> {

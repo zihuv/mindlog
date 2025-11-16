@@ -14,7 +14,7 @@ MindLog is a Flutter-based personal journal and reflection application that allo
 
 ### Architecture
 - **Presentation Layer**: UI screens and widgets located in the `ui` directory
-- **Domain Layer**: Business logic entities in `features/memos/domain`
+- **Domain Layer**: Business logic entities in `features/notes/domain`
 - **Data Layer**: Services and repositories in `data` directory
 - **Database Layer**: SQLite implementation using Drift in `database` directory
 - **State Management**: GetX framework with dedicated controllers

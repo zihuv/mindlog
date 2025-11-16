@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:mindlog/features/memos/domain/entities/memo.dart';
-import 'package:mindlog/features/memos/data/memo_service.dart';
+import 'package:mindlog/features/notes/domain/entities/note.dart';
+import 'package:mindlog/features/notes/data/note_service.dart';
 import 'package:uuid/uuid.dart';
 
-class MemoEditorScreen extends StatefulWidget {
-  final Function(Memo memo)? onSave;
-  final Memo? initialMemo;
+class NoteEditorScreen extends StatefulWidget {
+  final Function(Note note)? onSave;
+  final Note? initialNote;
   final bool isEdit;
 
-  const MemoEditorScreen({
+  const NoteEditorScreen({
     super.key,
     this.onSave,
-    this.initialMemo,
+    this.initialNote,
     this.isEdit = false,
   });
 
   @override
-  State<MemoEditorScreen> createState() => _MemoEditorScreenState();
+  State<NoteEditorScreen> createState() => _NoteEditorScreenState();
 }
 
-class _MemoEditorScreenState extends State<MemoEditorScreen> {
+class _NoteEditorScreenState extends State<NoteEditorScreen> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
@@ -27,14 +27,14 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
   void initState() {
     super.initState();
 
-    if (widget.initialMemo != null) {
-      _controller.text = widget.initialMemo!.content;
+    if (widget.initialNote != null) {
+      _controller.text = widget.initialNote!.content;
       // For editing, place cursor at the end of the content
       _controller.selection = TextSelection.fromPosition(
         TextPosition(offset: _controller.text.length),
       );
     } else {
-      // For new memo, start with empty text and cursor at the beginning
+      // For new note, start with empty text and cursor at the beginning
       _controller.text = '';
       _controller.selection = TextSelection.fromPosition(
         TextPosition(offset: 0),
@@ -44,8 +44,8 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
     // Request focus after the widget is built to ensure cursor position is maintained
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
-      // Ensure cursor is positioned at the beginning for new memos
-      if (widget.initialMemo == null) {
+      // Ensure cursor is positioned at the beginning for new notes
+      if (widget.initialNote == null) {
         _controller.selection = TextSelection.fromPosition(
           TextPosition(offset: 0),
         );
@@ -95,8 +95,8 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isEdit ? 'Edit Memo' : 'New Memo'),
-        actions: [TextButton(onPressed: _saveMemo, child: const Text('Save'))],
+        title: Text(widget.isEdit ? 'Edit Note' : 'New Note'),
+        actions: [TextButton(onPressed: _saveNote, child: const Text('Save'))],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -111,7 +111,7 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
                 textAlign: TextAlign.left,
                 textAlignVertical: TextAlignVertical.top,
                 decoration: const InputDecoration(
-                  hintText: 'Enter your memo here...',
+                  hintText: 'Enter your note here...',
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.all(16.0),
                 ),
@@ -145,12 +145,14 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
     );
   }
 
-  void _saveMemo() async {
+  void _saveNote() async {
+    final contextLocal = context; // Capture context before any async calls
+
     if (_controller.text.trim().isEmpty) {
       // Show error message if content is empty
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(contextLocal).showSnackBar(
         const SnackBar(
-          content: Text('Memo content cannot be empty'),
+          content: Text('Note content cannot be empty'),
           backgroundColor: Colors.red,
         ),
       );
@@ -160,20 +162,20 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
     // Tags have been removed in this refactor, so use empty list
     final tags = <String>[];
 
-    Memo memo;
-    if (widget.isEdit && widget.initialMemo != null) {
-      // For edited memos, preserve the existing checklist states
+    Note note;
+    if (widget.isEdit && widget.initialNote != null) {
+      // For edited notes, preserve the existing checklist states
       // but update the tags based on the new content
-      memo = widget.initialMemo!.copyWith(
+      note = widget.initialNote!.copyWith(
         content: _controller.text.trim(),
         updatedAt: DateTime.now(),
         tags: tags,
         // Preserve existing pinned status and other values
       );
     } else {
-      // For new memos, initialize with empty checklist states
+      // For new notes, initialize with empty checklist states
       final uuid = const Uuid();
-      memo = Memo(
+      note = Note(
         id: uuid.v7(),
         content: _controller.text.trim(),
         createdAt: DateTime.now(),
@@ -185,13 +187,13 @@ class _MemoEditorScreenState extends State<MemoEditorScreen> {
     }
 
     // Save to storage
-    await MemoService.instance.saveMemo(memo);
+    await NoteService.instance.saveNote(note);
 
     // Call the onSave callback if provided
-    widget.onSave?.call(memo);
+    widget.onSave?.call(note);
 
     // Navigate back
-    Navigator.pop(context);
+    Navigator.pop(contextLocal);
   }
 
   Map<int, bool> _extractChecklistStates(String content) {

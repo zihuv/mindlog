@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:mindlog/features/notebooks/domain/entities/notebook.dart';
 import 'package:mindlog/controllers/notebooks/notebook_controller.dart';
 import 'package:mindlog/controllers/note_controller.dart';
-import 'package:mindlog/features/memos/domain/entities/memo.dart';
-import 'package:mindlog/features/memos/presentation/screens/note_detail_screen.dart';
+import 'package:mindlog/features/notes/domain/entities/note.dart';
+import 'package:mindlog/features/notes/presentation/screens/note_detail_screen.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
 import 'dart:io';
 

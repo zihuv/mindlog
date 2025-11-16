@@ -3,11 +3,11 @@ import 'package:get/get.dart';
 import 'package:mindlog/features/notebooks/domain/entities/notebook.dart';
 import 'package:mindlog/controllers/notebooks/notebook_controller.dart';
 import 'package:mindlog/controllers/note_controller.dart';
-import 'package:mindlog/features/memos/domain/entities/memo.dart';
-import 'package:mindlog/features/memos/presentation/screens/note_detail_screen.dart';
+import 'package:mindlog/features/notes/domain/entities/note.dart';
+import 'package:mindlog/features/notes/presentation/screens/note_detail_screen.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
 import 'package:mindlog/ui/notebooks/notebook_detail_screen.dart';
-import 'package:mindlog/features/memos/presentation/components/components/markdown_checklist.dart';
+import 'package:mindlog/features/notes/presentation/components/components/markdown_checklist.dart';
 
 class NotebookNotesScreen extends StatefulWidget {
   final String notebookId;
@@ -21,7 +21,7 @@ class NotebookNotesScreen extends StatefulWidget {
 class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
   late NotebookController _notebookController;
   late NoteController _noteController;
-  List<Memo> _notes = [];
+  List<Note> _notes = [];
   Notebook? _notebook;
   bool _isLoading = false;
 

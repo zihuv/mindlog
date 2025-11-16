@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import '../data/services/combined_note_service.dart';
-import '../features/memos/domain/entities/memo.dart';
+import '../features/notes/domain/entities/note.dart';
 
 class NoteController extends GetxController {
   final CombinedNoteService _service = CombinedNoteService();
@@ -8,8 +8,8 @@ class NoteController extends GetxController {
   final _isLoading = false.obs;
   bool get isLoading => _isLoading.value;
 
-  final _notes = <Memo>[].obs;
-  List<Memo> get notes => _notes.toList();
+  final _notes = <Note>[].obs;
+  List<Note> get notes => _notes.toList();
 
   @override
   void onInit() {
@@ -48,9 +48,8 @@ class NoteController extends GetxController {
     }
   }
 
-  Future<List<Memo>> getNotesByNotebookId(String notebookId) async {
-    final allNotes = await _service.getAllNotes();
-    return allNotes.where((note) => note.notebookId == notebookId).toList();
+  Future<List<Note>> getNotesByNotebookId(String notebookId) async {
+    return await _service.getNotesByNotebookId(notebookId);
   }
 
   Future<void> searchNotes(String query) async {
@@ -78,7 +77,7 @@ class NoteController extends GetxController {
     }
   }
 
-  Future<Memo?> getNoteById(String id) async {
+  Future<Note?> getNoteById(String id) async {
     return await _service.getNoteById(id);
   }
 

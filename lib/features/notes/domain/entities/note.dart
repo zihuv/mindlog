@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class Memo extends Equatable {
+class Note extends Equatable {
   final String id;
   final String content;
   final DateTime createdAt;
@@ -15,7 +15,7 @@ class Memo extends Equatable {
   final Map<int, bool>
   checklistStates; // Tracks the checked/unchecked state of checkboxes
 
-  const Memo({
+  const Note({
     required this.id,
     required this.content,
     required this.createdAt,
@@ -46,7 +46,7 @@ class Memo extends Equatable {
     checklistStates,
   ];
 
-  Memo copyWith({
+  Note copyWith({
     String? id,
     String? content,
     DateTime? createdAt,
@@ -60,7 +60,7 @@ class Memo extends Equatable {
     List<String>? audios,
     Map<int, bool>? checklistStates,
   }) {
-    return Memo(
+    return Note(
       id: id ?? this.id,
       content: content ?? this.content,
       createdAt: createdAt ?? this.createdAt,
@@ -99,7 +99,7 @@ class Memo extends Equatable {
     };
   }
 
-  factory Memo.fromJson(Map<String, dynamic> json) {
+  factory Note.fromJson(Map<String, dynamic> json) {
     // Convert string keys back to int when deserializing
     Map<int, bool> deserializedChecklistStates = {};
     final checklistJson = json['checklistStates'] ?? {};
@@ -113,7 +113,7 @@ class Memo extends Equatable {
       });
     }
 
-    return Memo(
+    return Note(
       id: json['id'] ?? '',
       content: json['content'] ?? '',
       createdAt: DateTime.parse(

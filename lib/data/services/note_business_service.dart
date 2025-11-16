@@ -1,12 +1,12 @@
-import 'package:mindlog/features/memos/data/memo_service.dart';
-import 'package:mindlog/features/memos/domain/entities/memo.dart';
+import 'package:mindlog/features/notes/data/note_service.dart';
+import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:uuid/uuid.dart';
 
-class NoteService {
+class NoteBusinessService {
   static const Uuid _uuid = Uuid();
 
   Future<void> init() async {
-    await MemoService.instance.init();
+    await NoteService.instance.init();
   }
 
   // Create a new note
@@ -22,8 +22,8 @@ class NoteService {
     final noteId = _uuid.v7();
     final now = DateTime.now();
 
-    // Create a new memo with the generated UUID
-    final memo = Memo(
+    // Create a new note with the generated UUID
+    final note = Note(
       id: noteId,
       content: content,
       createdAt: now,
@@ -36,18 +36,18 @@ class NoteService {
       checklistStates: checklistStates ?? const {},
     );
 
-    await MemoService.instance.saveMemo(memo);
+    await NoteService.instance.saveNote(note);
     return noteId;
   }
 
   // Get all notes
-  Future<List<Memo>> getAllNotes() async {
-    return await MemoService.instance.getAllMemos();
+  Future<List<Note>> getAllNotes() async {
+    return await NoteService.instance.getAllNotes();
   }
 
   // Get a note by ID
-  Future<Memo?> getNoteById(String id) async {
-    return await MemoService.instance.getMemoById(id);
+  Future<Note?> getNoteById(String id) async {
+    return await NoteService.instance.getNoteById(id);
   }
 
   // Update a note
@@ -61,12 +61,12 @@ class NoteService {
     Map<int, bool>? checklistStates,
     String? notebookId,
   }) async {
-    final existingNote = await MemoService.instance.getMemoById(id);
+    final existingNote = await NoteService.instance.getNoteById(id);
     if (existingNote == null) {
       throw Exception('Note with id $id does not exist');
     }
 
-    final updatedNote = Memo(
+    final updatedNote = Note(
       id: id,
       content: content ?? existingNote.content,
       createdAt: existingNote.createdAt,
@@ -79,24 +79,29 @@ class NoteService {
       checklistStates: checklistStates ?? existingNote.checklistStates,
     );
 
-    await MemoService.instance.updateMemo(updatedNote);
+    await NoteService.instance.updateNote(updatedNote);
   }
 
   // Delete a note
   Future<void> deleteNote(String id) async {
-    await MemoService.instance.deleteMemo(id);
+    await NoteService.instance.deleteNote(id);
   }
 
   // Search notes by content
-  Future<List<Memo>> searchNotes(String query) async {
+  Future<List<Note>> searchNotes(String query) async {
     if (query.trim().isEmpty) {
       return await getAllNotes();
     }
-    return await MemoService.instance.searchMemos(query);
+    return await NoteService.instance.searchNotes(query);
+  }
+
+  // Get notes by notebook ID
+  Future<List<Note>> getNotesByNotebookId(String notebookId) async {
+    return await NoteService.instance.getNotesByNotebookId(notebookId);
   }
 
   // Search notes by tags
-  Future<List<Memo>> searchNotesByTags(List<String> tags) async {
+  Future<List<Note>> searchNotesByTags(List<String> tags) async {
     if (tags.isEmpty) {
       return await getAllNotes();
     }
@@ -109,11 +114,11 @@ class NoteService {
 
   // Get all unique tags
   Future<List<String>> getAllTags() async {
-    return await MemoService.instance.getAllTags();
+    return await NoteService.instance.getAllTags();
   }
 
   // Close the connection
   Future<void> close() async {
-    // Memo service doesn't require explicit closing
+    // Note service doesn't require explicit closing
   }
 }

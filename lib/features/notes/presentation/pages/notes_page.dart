@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:mindlog/features/memos/data/memo_service.dart';
-import 'package:mindlog/features/memos/domain/entities/memo.dart';
-import 'package:mindlog/features/memos/presentation/widgets/memo_card.dart';
-import 'package:mindlog/features/memos/presentation/widgets/memo_editor_screen.dart';
+import 'package:mindlog/features/notes/data/note_service.dart';
+import 'package:mindlog/features/notes/domain/entities/note.dart';
+import 'package:mindlog/features/notes/presentation/widgets/note_card.dart';
+import 'package:mindlog/features/notes/presentation/widgets/note_editor_screen.dart';
 
 import 'package:mindlog/features/settings/presentation/pages/settings_page.dart';
-import 'package:mindlog/features/journal/presentation/pages/journal_page.dart';
 
-class MemosPage extends StatefulWidget {
-  const MemosPage({super.key});
+class NotesPage extends StatefulWidget {
+  const NotesPage({super.key});
 
   @override
-  State<MemosPage> createState() => _MemosPageState();
+  State<NotesPage> createState() => _NotesPageState();
 }
 
-class _MemosPageState extends State<MemosPage> {
-  List<Memo> _allMemos = [];
-  List<Memo> _filteredMemos = [];
+class _NotesPageState extends State<NotesPage> {
+  List<Note> _allNotes = [];
+  List<Note> _filteredNotes = [];
   List<String> _allTags = [];
   List<String> _selectedTags = [];
   bool _isLoading = true;
@@ -24,19 +23,19 @@ class _MemosPageState extends State<MemosPage> {
   @override
   void initState() {
     super.initState();
-    _loadMemos();
+    _loadNotes();
   }
 
-  Future<void> _loadMemos() async {
+  Future<void> _loadNotes() async {
     try {
-      _allMemos = await MemoService.instance.getAllMemos();
-      _filteredMemos = _allMemos; // No tag filtering since tags are removed
-      _sortMemos();
+      _allNotes = await NoteService.instance.getAllNotes();
+      _filteredNotes = _allNotes; // No tag filtering since tags are removed
+      _sortNotes();
       setState(() {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading memos: $e');
+      print('Error loading notes: $e');
       setState(() {
         _isLoading = false;
       });
@@ -50,36 +49,37 @@ class _MemosPageState extends State<MemosPage> {
     setState(() {});
   }
 
-  void _filterMemosByTags(List<String> selectedTags) {
-    // Since tags have been removed, just return all memos
-    _filteredMemos = _allMemos;
-    _sortMemos();
+  void _filterNotesByTags(List<String> selectedTags) {
+    // Since tags have been removed, just return all notes
+    _filteredNotes = _allNotes;
+    _sortNotes();
     setState(() {
       _selectedTags = []; // Clear selected tags since they're removed
     });
   }
 
-  void _sortMemos() {
+  void _sortNotes() {
     // Sort by pinned first, then by creation date (newest first)
-    _filteredMemos.sort((a, b) {
+    _filteredNotes.sort((a, b) {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
       return b.createdAt.compareTo(a.createdAt);
     });
   }
 
-  void _addMemo() async {
+  void _addNote() async {
+    final contextLocal = context; // Capture context before async call
     Navigator.push(
-      context,
+      contextLocal,
       MaterialPageRoute(
-        builder: (context) => MemoEditorScreen(
-          onSave: (memo) async {
+        builder: (context) => NoteEditorScreen(
+          onSave: (note) async {
             setState(() {
-              _allMemos.insert(0, memo);
-              _filteredMemos = _allMemos;
-              _sortMemos();
+              _allNotes.insert(0, note);
+              _filteredNotes = _allNotes;
+              _sortNotes();
             });
-            // Refresh tags list after adding a memo
+            // Refresh tags list after adding a note
             _loadTags();
           },
         ),
@@ -87,20 +87,21 @@ class _MemosPageState extends State<MemosPage> {
     );
   }
 
-  void _editMemo(Memo memo) async {
+  void _editNote(Note note) async {
+    final contextLocal = context; // Capture context before async call
     Navigator.push(
-      context,
+      contextLocal,
       MaterialPageRoute(
-        builder: (context) => MemoEditorScreen(
-          initialMemo: memo,
+        builder: (context) => NoteEditorScreen(
+          initialNote: note,
           isEdit: true,
-          onSave: (updatedMemo) async {
+          onSave: (updatedNote) async {
             setState(() {
-              int index = _allMemos.indexWhere((m) => m.id == updatedMemo.id);
+              int index = _allNotes.indexWhere((m) => m.id == updatedNote.id);
               if (index != -1) {
-                _allMemos[index] = updatedMemo;
-                _filteredMemos = _allMemos; // Update the filtered list
-                _sortMemos();
+                _allNotes[index] = updatedNote;
+                _filteredNotes = _allNotes; // Update the filtered list
+                _sortNotes();
               }
             });
             // Tags have been removed from this refactor
@@ -110,13 +111,15 @@ class _MemosPageState extends State<MemosPage> {
     );
   }
 
-  void _deleteMemo(Memo memo) async {
+  void _deleteNote(Note note) async {
+    final contextLocal = context; // Capture context before any async calls
+
     // Show confirmation dialog
     bool confirm = await showDialog(
-      context: context,
+      context: contextLocal,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Memo'),
-        content: const Text('Are you sure you want to delete this memo?'),
+        title: const Text('Delete Note'),
+        content: const Text('Are you sure you want to delete this note?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -133,18 +136,18 @@ class _MemosPageState extends State<MemosPage> {
 
     if (confirm == true) {
       try {
-        await MemoService.instance.deleteMemo(memo.id);
+        await NoteService.instance.deleteNote(note.id);
         setState(() {
-          _allMemos.removeWhere((m) => m.id == memo.id);
-          _filteredMemos.removeWhere((m) => m.id == memo.id);
+          _allNotes.removeWhere((m) => m.id == note.id);
+          _filteredNotes.removeWhere((m) => m.id == note.id);
         });
         // Tags have been removed from this refactor
       } catch (e) {
-        print('Error deleting memo: $e');
+        print('Error deleting note: $e');
         // Show error snackbar
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(contextLocal).showSnackBar(
           SnackBar(
-            content: Text('Error deleting memo: $e'),
+            content: Text('Error deleting note: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -169,7 +172,7 @@ class _MemosPageState extends State<MemosPage> {
               ),
             ),
             const Text(
-              'Memos',
+              'Notes',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             IconButton(
@@ -194,20 +197,10 @@ class _MemosPageState extends State<MemosPage> {
             ),
             ListTile(
               leading: const Icon(Icons.note),
-              title: const Text('Memos'),
+              title: const Text('Notes'),
               onTap: () {
-                // Already on memos page, just close drawer
+                // Already on notes page, just close drawer
                 Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.book),
-              title: const Text('Journal'),
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const JournalPage()),
-                );
               },
             ),
             ListTile(
@@ -229,7 +222,7 @@ class _MemosPageState extends State<MemosPage> {
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _allMemos.isEmpty
+                : _allNotes.isEmpty
                 ? const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -237,12 +230,12 @@ class _MemosPageState extends State<MemosPage> {
                         Icon(Icons.note_add, size: 64, color: Colors.grey),
                         SizedBox(height: 16),
                         Text(
-                          'No memos yet',
+                          'No notes yet',
                           style: TextStyle(fontSize: 18, color: Colors.grey),
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'Tap the + button to create your first memo',
+                          'Tap the + button to create your first note',
                           style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                       ],
@@ -251,34 +244,34 @@ class _MemosPageState extends State<MemosPage> {
 
                 : RefreshIndicator(
                     onRefresh: () async {
-                      await _loadMemos();
+                      await _loadNotes();
                     },
                     child: ListView.builder(
-                      itemCount: _filteredMemos.length,
+                      itemCount: _filteredNotes.length,
                       itemBuilder: (context, index) {
-                        final memo = _filteredMemos[index];
-                        return MemoCard(
-                          memo: memo,
+                        final note = _filteredNotes[index];
+                        return NoteCard(
+                          note: note,
                           onTap: () {
                             // Single tap could be for selecting or expanding
                             // For now, let's just keep it as a tap indicator if needed
                             // or potentially expand/collapse functionality
                           },
-                          onEdit: () => _editMemo(memo),
-                          onDelete: () => _deleteMemo(memo),
-                          onChecklistChanged: (updatedMemo) async {
-                            // Save the updated memo with new checklist states
-                            await MemoService.instance.updateMemo(updatedMemo);
+                          onEdit: () => _editNote(note),
+                          onDelete: () => _deleteNote(note),
+                          onChecklistChanged: (updatedNote) async {
+                            // Save the updated note with new checklist states
+                            await NoteService.instance.updateNote(updatedNote);
 
                             // Update the local list
                             setState(() {
-                              int index = _allMemos.indexWhere(
-                                (m) => m.id == updatedMemo.id,
+                              int index = _allNotes.indexWhere(
+                                (m) => m.id == updatedNote.id,
                               );
                               if (index != -1) {
-                                _allMemos[index] = updatedMemo;
-                                _filteredMemos = _allMemos; // Update the filtered list
-                                _sortMemos();
+                                _allNotes[index] = updatedNote;
+                                _filteredNotes = _allNotes; // Update the filtered list
+                                _sortNotes();
                               }
                             });
                           },
@@ -290,7 +283,7 @@ class _MemosPageState extends State<MemosPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addMemo,
+        onPressed: _addNote,
         child: const Icon(Icons.add),
       ),
     );

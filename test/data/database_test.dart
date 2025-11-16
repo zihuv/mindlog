@@ -4,6 +4,7 @@ import 'package:mindlog/database/note_dao.dart';
 import 'package:drift/drift.dart' as drift show Value;
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late AppDatabase database;
   late NoteDao noteDao;
 

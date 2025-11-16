@@ -1,9 +1,9 @@
-import 'note_service.dart';
+import 'note_business_service.dart';
 import 'media_service.dart';
-import 'package:mindlog/features/memos/domain/entities/memo.dart';
+import 'package:mindlog/features/notes/domain/entities/note.dart';
 
 class CombinedNoteService {
-  final NoteService _noteService = NoteService();
+  final NoteBusinessService _noteService = NoteBusinessService();
   final MediaService _mediaService = MediaService();
 
   Future<void> init() async {
@@ -66,12 +66,12 @@ class CombinedNoteService {
   }
 
   // Get all notes
-  Future<List<Memo>> getAllNotes() async {
+  Future<List<Note>> getAllNotes() async {
     return await _noteService.getAllNotes();
   }
 
   // Get a note by ID
-  Future<Memo?> getNoteById(String id) async {
+  Future<Note?> getNoteById(String id) async {
     return await _noteService.getNoteById(id);
   }
 
@@ -135,12 +135,17 @@ class CombinedNoteService {
   }
 
   // Search notes by content
-  Future<List<Memo>> searchNotes(String query) async {
+  Future<List<Note>> searchNotes(String query) async {
     return await _noteService.searchNotes(query);
   }
 
+  // Get notes by notebook ID
+  Future<List<Note>> getNotesByNotebookId(String notebookId) async {
+    return await _noteService.getNotesByNotebookId(notebookId);
+  }
+
   // Search notes by tags
-  Future<List<Memo>> searchNotesByTags(List<String> tags) async {
+  Future<List<Note>> searchNotesByTags(List<String> tags) async {
     return await _noteService.searchNotesByTags(tags);
   }
 

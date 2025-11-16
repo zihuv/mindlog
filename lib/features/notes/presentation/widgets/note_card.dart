@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:mindlog/features/memos/domain/entities/memo.dart';
-import 'package:mindlog/features/memos/presentation/components/components/markdown_checklist.dart';
+import 'package:mindlog/features/notes/domain/entities/note.dart';
+import 'package:mindlog/features/notes/presentation/components/components/markdown_checklist.dart';
 
-class MemoCard extends StatelessWidget {
-  final Memo memo;
+class NoteCard extends StatelessWidget {
+  final Note note;
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
-  final Function(Memo)? onChecklistChanged;
+  final Function(Note)? onChecklistChanged;
 
-  const MemoCard({
+  const NoteCard({
     super.key,
-    required this.memo,
+    required this.note,
     this.onTap,
     this.onEdit,
     this.onDelete,
@@ -35,12 +35,12 @@ class MemoCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _formatDateTime(memo.createdAt),
+                    _formatDateTime(note.createdAt),
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   Row(
                     children: [
-                      if (memo.isPinned)
+                      if (note.isPinned)
                         Icon(Icons.push_pin, size: 16, color: Colors.grey),
                       PopupMenuButton<String>(
                         icon: Icon(Icons.more_vert, color: Colors.grey[600]),
@@ -67,25 +67,25 @@ class MemoCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 2), // Minimal spacing between time and content
-              // Memo content with markdown support for checkboxes (interactive)
+              // Note content with markdown support for checkboxes (interactive)
               MarkdownChecklist(
-                text: memo.content,
+                text: note.content,
                 style: const TextStyle(fontSize: 14.0),
                 onTextChange: (updatedText) async {
-                  // Create an updated memo with the new content
-                  final updatedMemo = memo.copyWith(
+                  // Create an updated note with the new content
+                  final updatedNote = note.copyWith(
                     content: updatedText,
                   );
 
-                  // Call the parent callback to update the memo
-                  onChecklistChanged?.call(updatedMemo);
+                  // Call the parent callback to update the note
+                  onChecklistChanged?.call(updatedNote);
                 },
               ),
-              if (memo.tags.isNotEmpty) ...[
+              if (note.tags.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 4.0,
-                  children: memo.tags
+                  children: note.tags
                       .map(
                         (tag) => Container(
                           padding: const EdgeInsets.symmetric(
