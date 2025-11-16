@@ -35,7 +35,7 @@ class NoteCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _formatDateTime(note.createdAt),
+                    _formatDateTime(note.updatedAt ?? note.createdAt),
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   Row(
@@ -115,7 +115,10 @@ class NoteCard extends StatelessWidget {
     );
   }
 
-  String _formatDateTime(DateTime dateTime) {
+  String _formatDateTime(DateTime? dateTime) {
+    if (dateTime == null) {
+      return 'No date';
+    }
     return dateTime.toString().split(
       '.',
     )[0]; // Formats as 'YYYY-MM-DD HH:MM:SS'
