@@ -7,12 +7,12 @@ class TagFilterBar extends StatefulWidget {
   final bool showLabel;
 
   const TagFilterBar({
-    Key? key,
+    super.key,
     required this.allTags,
     required this.selectedTags,
     required this.onTagsChanged,
     this.showLabel = true,
-  }) : super(key: key);
+  });
 
   @override
   _TagFilterBarState createState() => _TagFilterBarState();
@@ -34,7 +34,7 @@ class _TagFilterBarState extends State<TagFilterBar> {
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
-          Container(
+          SizedBox(
             height: 50,
             child: ListView(
               scrollDirection: Axis.horizontal,

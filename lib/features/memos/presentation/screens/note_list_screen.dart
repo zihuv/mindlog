@@ -7,7 +7,7 @@ import '../../../../ui/design_system/design_system.dart';
 import '../components/components/markdown_checklist.dart';
 
 class NoteListScreen extends StatelessWidget {
-  const NoteListScreen({Key? key}) : super(key: key);
+  const NoteListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

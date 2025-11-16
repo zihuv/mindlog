@@ -3,13 +3,12 @@ import 'package:get/get.dart';
 import '../../../../controllers/note_controller.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../ui/design_system/design_system.dart';
-import '../components/components/markdown_checklist.dart';
 
 class NoteDetailScreen extends StatefulWidget {
   final String? noteId;
   final String? notebookId;
 
-  const NoteDetailScreen({Key? key, this.noteId, this.notebookId}) : super(key: key);
+  const NoteDetailScreen({super.key, this.noteId, this.notebookId});
 
   @override
   State<NoteDetailScreen> createState() => _NoteDetailScreenState();
@@ -25,6 +24,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   void initState() {
     super.initState();
     _isNewNote = widget.noteId == null;
+
+    _contentController.addListener(_onContentChanged);
 
     if (!_isNewNote) {
       _loadNote();
@@ -129,6 +130,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     try {
       final controller = Get.find<NoteController>();
 
+      // Parse the content to update checklist states before saving
+      _updateChecklistStatesFromContent();
+
       if (_isNewNote) {
         await controller.createNote(
           content: _contentController.text,
@@ -196,6 +200,44 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     }
   }
 
+  void _insertChecklist() {
+    final text = _contentController.text;
+    final selection = _contentController.selection;
+    final start = selection.start.clamp(0, text.length);
+    final end = selection.end.clamp(0, text.length);
+
+    final newText = StringBuffer()
+      ..write(text.substring(0, start))
+      ..write('- [ ] ')
+      ..write(text.substring(end));
+
+    _contentController.value = TextEditingValue(
+      text: newText.toString(),
+      selection: TextSelection.collapsed(
+        offset: start + 6, // 6 = length of "- [ ] "
+      ),
+    );
+  }
+
+  void _insertBulletList() {
+    final text = _contentController.text;
+    final selection = _contentController.selection;
+    final start = selection.start.clamp(0, text.length);
+    final end = selection.end.clamp(0, text.length);
+
+    final newText = StringBuffer()
+      ..write(text.substring(0, start))
+      ..write('- ')
+      ..write(text.substring(end));
+
+    _contentController.value = TextEditingValue(
+      text: newText.toString(),
+      selection: TextSelection.collapsed(
+        offset: start + 2, // 2 = length of "- "
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -231,49 +273,31 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                         hintText: 'Write your note here...',
                       ),
                       minLines: 3,
-                      maxLines:
-                          10, // Set a maximum number of lines to prevent infinite height
+                      maxLines: 10, // Set a maximum number of lines to prevent infinite height
                       keyboardType: TextInputType.multiline,
                     ),
                   ),
-                  SizedBox(height: AppPadding.large.top),
-
-                  SizedBox(height: AppPadding.large.top),
-                  ElevatedButton.icon(
-                    onPressed: _pickImage,
-                    icon: const Icon(Icons.image),
-                    label: const Text('Add Image'),
-                  ),
-                  // Preview of the note content with markdown checklist rendering
                   const SizedBox(height: 16.0),
+                  // Toolbar for formatting options
                   Container(
-                    padding: const EdgeInsets.all(12.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context).dividerColor,
-                        width: 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Text(
-                          'Preview:',
-                          style: Theme.of(context).textTheme.titleSmall,
+                        IconButton(
+                          icon: const Icon(Icons.image),
+                          tooltip: 'Add Image',
+                          onPressed: _pickImage,
                         ),
-                        const SizedBox(height: 8.0),
-                        MarkdownChecklist(
-                          text: _contentController.text,
-                          style: TextStyle(
-                            fontSize: AppFontSize.body,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                          onTextChange: (updatedText) {
-                            _contentController.text = updatedText;
-                            // Update checklist states based on the new content
-                            _updateChecklistStates(updatedText);
-                          },
+                        IconButton(
+                          icon: const Icon(Icons.check_box_outlined),
+                          tooltip: 'Insert Checklist',
+                          onPressed: _insertChecklist,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.format_list_bulleted),
+                          tooltip: 'Insert Unordered List',
+                          onPressed: _insertBulletList,
                         ),
                       ],
                     ),
@@ -285,31 +309,45 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     );
   }
 
-  // Update checklist states based on the content
-  void _updateChecklistStates(String content) {
-    List<String> lines = content.split('\n');
+
+  // Parse the content to update checklist states based on - [ ] and - [x] patterns
+  void _onContentChanged() {
+    // Update checklist states whenever the content changes
+    _updateChecklistStatesFromContent();
+  }
+
+  void _updateChecklistStatesFromContent() {
+    List<String> lines = _contentController.text.split('\n');
     Map<int, bool> newChecklistStates = {};
 
     for (int i = 0; i < lines.length; i++) {
-      String line = lines[i].trim();
-      if (line.startsWith('- [') && line.contains('] ')) {
+      String line = lines[i];
+      // Check for checklist format: "- [x] task" or "- [ ] task" (with optional indentation)
+      final checklistRegex = RegExp(r'^(\s*)[-*]\s+\[([ xX])\]\s+(.+)$');
+      final match = checklistRegex.firstMatch(line);
+
+      if (match != null) {
         // Extract checkbox state
-        bool isChecked = line.substring(3, 4) == 'x';
-        String taskContent = line.substring(6); // Skip "- [x] " or "- [ ] "
+        bool isChecked = match.group(2)!.trim().toLowerCase() == 'x';
+        String taskContent = match.group(3)!.trim(); // Get the task content after the checkbox
 
         // Create a unique key for this checklist item based on content and position
-        int key = taskContent.hashCode + i;
+        int key = _generateChecklistKey(taskContent, i);
         newChecklistStates[key] = isChecked;
       }
     }
 
-    setState(() {
-      _checklistStates = newChecklistStates;
-    });
+    _checklistStates = newChecklistStates;
+  }
+
+  // Helper function to generate consistent keys (same as in controller)
+  int _generateChecklistKey(String content, int position) {
+    return content.hashCode + position;
   }
 
   @override
   void dispose() {
+    _contentController.removeListener(_onContentChanged);
     _contentController.dispose();
     super.dispose();
   }

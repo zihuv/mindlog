@@ -18,7 +18,7 @@ class SettingsPage extends StatelessWidget {
             const Card(
               child: ListTile(
                 leading: Icon(Icons.info),
-                title: const Text('About'),
+                title: Text('About'),
                 subtitle: Text('MindLog v1.0.0'),
               ),
             ),

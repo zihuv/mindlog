@@ -16,7 +16,7 @@ class MarkdownChecklist extends StatelessWidget {
   final TextHeightBehavior? textHeightBehavior;
 
   const MarkdownChecklist({
-    Key? key,
+    super.key,
     required this.text,
     this.style,
     this.onTextChange,
@@ -30,7 +30,7 @@ class MarkdownChecklist extends StatelessWidget {
     this.strutStyle,
     this.textWidthBasis,
     this.textHeightBehavior,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,40 +48,53 @@ class MarkdownChecklist extends StatelessWidget {
         final originalLine = part.originalLine!;
 
         // Extract the indentation and task content
-        final match = RegExp(r'^(\s*)- \[([ xX])\] (.+)$').firstMatch(originalLine);
+        final match = RegExp(r'^(\s*)[-*]\s+\[([ xX])\]\s+(.+)$').firstMatch(originalLine);
         if (match == null) continue;
 
         // Use the current text style for sizing but override color for the checkbox
         final iconColor = style?.color ?? Theme.of(context).colorScheme.onSurface;
         final iconSize = (style?.fontSize ?? Theme.of(context).textTheme.bodyLarge?.fontSize ?? 14.0) * 0.85;
 
+        // Create the entire checklist item as a clickable widget
         textSpans.add(
           TextSpan(
-            text: match.group(1), // Add the indentation as part of the text
             children: [
               WidgetSpan(
                 child: GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   onTap: () => _toggleChecklistItem(part),
-                  child: Icon(
-                    isChecked
-                      ? Icons.check_box
-                      : Icons.check_box_outline_blank,
-                    size: iconSize,
-                    color: isChecked
-                      ? Theme.of(context).colorScheme.primary
-                      : iconColor,
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          // Add a container with proper padding to increase tap area
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                          child: Icon(
+                            isChecked
+                              ? Icons.check_box
+                              : Icons.check_box_outline_blank,
+                            size: iconSize,
+                            color: isChecked
+                              ? Theme.of(context).colorScheme.primary
+                              : iconColor,
+                          ),
+                        ),
+                        Text(
+                          ' ${match.group(3)!}',
+                          style: style?.copyWith(
+                            decoration: isChecked
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 alignment: PlaceholderAlignment.middle,
-              ),
-              TextSpan(
-                text: ' ${match.group(3)}',
-                style: style?.copyWith(
-                  decoration: isChecked
-                    ? TextDecoration.lineThrough
-                    : TextDecoration.none,
-                ),
               ),
             ],
           ),
@@ -111,8 +124,8 @@ class MarkdownChecklist extends StatelessWidget {
   List<_TextPart> _parseMarkdownChecklists(String input) {
     final parts = <_TextPart>[];
 
-    // Use regex to find markdown checklist items
-    final checklistRegex = RegExp(r'^(\s*)- \[([ xX])\] (.+)$', multiLine: true);
+    // Use regex to find markdown checklist items (supporting both - and * for lists)
+    final checklistRegex = RegExp(r'^(\s*)[-*]\s+\[([ xX])\]\s+(.+)$', multiLine: true);
     final lines = input.split('\n');
 
     for (int i = 0; i < lines.length; i++) {
@@ -163,17 +176,18 @@ class MarkdownChecklist extends StatelessWidget {
 
   void _toggleChecklistItem(_TextPart checklistPart) {
     if (onTextChange != null) {
-      // Update the original text by replacing the checklist state
+      // Update the original text by replacing exactly the checklist line that was toggled
       final newCheckStatus = checklistPart.isChecked! ? '[ ]' : '[x]';
-      final oldCheckStatus = checklistPart.isChecked! ? '[x]' : '[ ]';
 
-      final newText = text.replaceFirst(
-        checklistPart.originalLine!,
-        checklistPart.originalLine!.replaceFirst(
-          oldCheckStatus,
-          newCheckStatus,
-        ),
+      // Create the replacement by modifying the original line
+      final originalLine = checklistPart.originalLine!;
+      final updatedLine = originalLine.replaceFirst(
+        RegExp(r'\[([ xX])\]'),
+        newCheckStatus,
       );
+
+      // Replace the original line with the updated line, ensuring we only change that specific line
+      final newText = text.replaceFirst(originalLine, updatedLine);
 
       onTextChange!(newText);
     }

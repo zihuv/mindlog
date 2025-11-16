@@ -30,8 +30,8 @@ class AppTheme {
         onError: AppColors.onError,
       ).copyWith(
         brightness: Brightness.light,
-        background: AppColors.surface,
-        onBackground: AppColors.onSurface,
+        surface: AppColors.surface,
+        onSurface: AppColors.onSurface,
       ),
 
       // Text theme
@@ -195,8 +195,8 @@ class AppTheme {
         onError: AppColors.onError,
       ).copyWith(
         brightness: Brightness.dark,
-        background: AppColors.darkSurface,
-        onBackground: AppColors.darkOnSurface,
+        surface: AppColors.darkSurface,
+        onSurface: AppColors.darkOnSurface,
       ),
 
       // Text theme

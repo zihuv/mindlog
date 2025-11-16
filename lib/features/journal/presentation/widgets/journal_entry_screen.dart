@@ -9,13 +9,13 @@ class JournalEntryScreen extends StatefulWidget {
   final bool isEdit; // Flag to indicate if this is an edit operation
 
   const JournalEntryScreen({
-    Key? key,
+    super.key,
     required this.onSave,
     this.initialContent,
     this.initialMood,
     this.initialDate, // Added parameter for initial date
     this.isEdit = false, // Default to false for new entries
-  }) : super(key: key);
+  });
 
   @override
   State<JournalEntryScreen> createState() => _JournalEntryScreenState();

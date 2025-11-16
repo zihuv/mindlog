@@ -5,8 +5,7 @@ class JournalEntryCard extends StatelessWidget {
   final JournalEntry entry;
   final VoidCallback onTap;
 
-  const JournalEntryCard({Key? key, required this.entry, required this.onTap})
-    : super(key: key);
+  const JournalEntryCard({super.key, required this.entry, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

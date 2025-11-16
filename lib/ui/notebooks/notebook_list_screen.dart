@@ -8,7 +8,7 @@ import 'package:mindlog/features/memos/presentation/screens/note_detail_screen.d
 import 'package:mindlog/ui/design_system/design_system.dart';
 
 class NotebookListScreen extends StatelessWidget {
-  const NotebookListScreen({Key? key}) : super(key: key);
+  const NotebookListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +90,7 @@ class NotebookListScreen extends StatelessWidget {
                                 ),
                                 color: Theme.of(
                                   context,
-                                ).colorScheme.surfaceVariant,
+                                ).colorScheme.surfaceContainerHighest,
                               ),
                               child:
                                   notebook.coverImage != null &&

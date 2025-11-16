@@ -6,11 +6,11 @@ class CalendarWidget extends StatefulWidget {
   final bool isExpanded;
 
   const CalendarWidget({
-    Key? key,
+    super.key,
     required this.selectedDate,
     required this.onDateSelected,
     this.isExpanded = false,
-  }) : super(key: key);
+  });
 
   @override
   State<CalendarWidget> createState() => _CalendarWidgetState();

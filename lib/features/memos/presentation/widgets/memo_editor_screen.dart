@@ -9,11 +9,11 @@ class MemoEditorScreen extends StatefulWidget {
   final bool isEdit;
 
   const MemoEditorScreen({
-    Key? key,
+    super.key,
     this.onSave,
     this.initialMemo,
     this.isEdit = false,
-  }) : super(key: key);
+  });
 
   @override
   State<MemoEditorScreen> createState() => _MemoEditorScreenState();

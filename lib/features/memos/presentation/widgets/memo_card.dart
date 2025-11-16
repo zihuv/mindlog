@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mindlog/features/memos/domain/entities/memo.dart';
-import 'package:mindlog/features/memos/presentation/widgets/markdown_checkbox_widget.dart';
+import 'package:mindlog/features/memos/presentation/components/components/markdown_checklist.dart';
 
 class MemoCard extends StatelessWidget {
   final Memo memo;
@@ -10,13 +10,13 @@ class MemoCard extends StatelessWidget {
   final Function(Memo)? onChecklistChanged;
 
   const MemoCard({
-    Key? key,
+    super.key,
     required this.memo,
     this.onTap,
     this.onEdit,
     this.onDelete,
     this.onChecklistChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -67,20 +67,14 @@ class MemoCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 2), // Minimal spacing between time and content
-              // Memo content with markdown support for checkboxes
-              SimpleMarkdownCheckboxRenderer(
-                data: memo.content,
-                checklistStates: memo.checklistStates,
-                onCheckboxChanged: (index, isChecked) {
-                  // Update the checkbox state in the memo
-                  final updatedStates = Map<int, bool>.from(
-                    memo.checklistStates,
-                  );
-                  updatedStates[index] = isChecked;
-
-                  // Create an updated memo with the new checklist states
+              // Memo content with markdown support for checkboxes (interactive)
+              MarkdownChecklist(
+                text: memo.content,
+                style: const TextStyle(fontSize: 14.0),
+                onTextChange: (updatedText) async {
+                  // Create an updated memo with the new content
                   final updatedMemo = memo.copyWith(
-                    checklistStates: updatedStates,
+                    content: updatedText,
                   );
 
                   // Call the parent callback to update the memo

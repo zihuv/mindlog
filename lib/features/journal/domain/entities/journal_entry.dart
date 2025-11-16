@@ -6,7 +6,7 @@ class JournalEntry extends Equatable {
   final DateTime dateTime;
   final String mood;
 
-  JournalEntry({
+  const JournalEntry({
     required this.id,
     required this.content,
     required this.dateTime,

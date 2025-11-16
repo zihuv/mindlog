@@ -12,8 +12,7 @@ class NotebookDetailScreen extends StatefulWidget {
   final String? notebookId;
   final Notebook? notebook; // Pass a new notebook object when creating
 
-  const NotebookDetailScreen({Key? key, this.notebookId, this.notebook})
-    : super(key: key);
+  const NotebookDetailScreen({super.key, this.notebookId, this.notebook});
 
   @override
   State<NotebookDetailScreen> createState() => _NotebookDetailScreenState();
@@ -253,7 +252,7 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
                       height: 150,
                       decoration: BoxDecoration(
                         borderRadius: AppBorderRadius.card,
-                        color: Theme.of(context).colorScheme.surfaceVariant,
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
                         border: Border.all(
                           color: Theme.of(context).dividerColor,
                           width: 0.5,

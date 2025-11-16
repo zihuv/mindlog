@@ -5,7 +5,7 @@ import 'package:mindlog/ui/calendar/calendar_screen.dart';
 import 'package:mindlog/ui/settings/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -31,12 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: _selectedIndex == 0
-            ? null  // No title for NotebookListScreen
-            : Text(_titles[_selectedIndex]),
-        toolbarHeight: _selectedIndex == 0 ? 48 : kToolbarHeight, // Compact toolbar when no title
-      ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

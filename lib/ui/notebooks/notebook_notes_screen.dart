@@ -7,12 +7,12 @@ import 'package:mindlog/features/memos/domain/entities/memo.dart';
 import 'package:mindlog/features/memos/presentation/screens/note_detail_screen.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
 import 'package:mindlog/ui/notebooks/notebook_detail_screen.dart';
+import 'package:mindlog/features/memos/presentation/components/components/markdown_checklist.dart';
 
 class NotebookNotesScreen extends StatefulWidget {
   final String notebookId;
 
-  const NotebookNotesScreen({Key? key, required this.notebookId})
-    : super(key: key);
+  const NotebookNotesScreen({super.key, required this.notebookId});
 
   @override
   State<NotebookNotesScreen> createState() => _NotebookNotesScreenState();
@@ -91,28 +91,41 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_notebook?.title ?? 'Notes'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () async {
-              // Navigate to the notebook edit screen
-              final result = await Get.to(
-                () => NotebookDetailScreen(notebookId: widget.notebookId),
-              );
-              if (result == true) {
-                // Refresh the notebook info if it was updated
-                await _loadNotebook();
-              }
-            },
-          ),
-        ],
-      ),
+      appBar: null, // Remove the AppBar as requested
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
+                // Notebook title as a header with back button
+                Container(
+                  width: double.infinity,
+                  padding: AppPadding.medium,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).appBarTheme.backgroundColor,
+                    boxShadow: AppBoxShadow.appBar,
+                  ),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () {
+                          Get.back(); // Navigate back to previous screen
+                        },
+                      ),
+                      const SizedBox(width: 8.0),
+                      Expanded(
+                        child: Text(
+                          _notebook?.title ?? 'Notes',
+                          style: TextStyle(
+                            fontSize: AppFontSize.large,
+                            fontWeight: AppFontWeight.medium,
+                            color: Theme.of(context).appBarTheme.titleTextStyle?.color,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 // Notes list
                 Expanded(
                   child: RefreshIndicator(
@@ -134,14 +147,27 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                             itemBuilder: (context, index) {
                               final note = _notes[index];
                               return Card(
-                                margin: const EdgeInsets.all(8.0),
+                                margin: AppPadding.small,
                                 child: ListTile(
-                                  title: Text(
-                                    note.content.length > 50
-                                        ? '${note.content.substring(0, 50)}...'
-                                        : note.content,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                  contentPadding: AppPadding.medium,
+                                  title: Container(
+                                    constraints: const BoxConstraints(
+                                      maxHeight: 60, // Limit height to 2 lines
+                                    ),
+                                    child: SingleChildScrollView(
+                                      child: MarkdownChecklist(
+                                        text: note.content.length > 50
+                                            ? '${note.content.substring(0, 50)}...'
+                                            : note.content,
+                                        style: TextStyle(
+                                          fontSize: AppFontSize.body,
+                                          color: Theme.of(context).colorScheme.onSurface,
+                                        ),
+                                        onTextChange: (updatedText) {
+                                          // Don't allow changes from this view
+                                        },
+                                      ),
+                                    ),
                                   ),
                                   subtitle: Text(
                                     _formatDateTime(

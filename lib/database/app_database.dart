@@ -126,9 +126,7 @@ class DatabaseProvider {
   AppDatabase? _database;
 
   AppDatabase get database {
-    if (_database == null) {
-      _database = AppDatabase();
-    }
+    _database ??= AppDatabase();
     return _database!;
   }
 

@@ -8,7 +8,7 @@ part 'note_dao.g.dart';
 
 @DriftAccessor(tables: [Notes, Notebooks])
 class NoteDao extends DatabaseAccessor<AppDatabase> with _$NoteDaoMixin {
-  NoteDao(AppDatabase db) : super(db);
+  NoteDao(super.db);
 
   // Insert or update a note
   Future<int> insertNote(NotesCompanion note) => into(notes).insert(note);

@@ -8,11 +8,11 @@ class MarkdownWithCheckboxes extends StatelessWidget {
   final Function(int, bool)? onCheckboxChanged;
 
   const MarkdownWithCheckboxes({
-    Key? key,
+    super.key,
     required this.data,
     required this.checklistStates,
     this.onCheckboxChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -104,11 +104,11 @@ class SimpleMarkdownCheckboxRenderer extends StatelessWidget {
   final Function(int, bool)? onCheckboxChanged;
 
   const SimpleMarkdownCheckboxRenderer({
-    Key? key,
+    super.key,
     required this.data,
     required this.checklistStates,
     this.onCheckboxChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
