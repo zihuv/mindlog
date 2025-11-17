@@ -33,7 +33,6 @@ class NoteService extends GetxService {
     List<String>? imageName,
     List<String>? audioName,
     List<String>? videoName,
-    List<String>? tags,
     Map<int, bool>? checklistStates,
   }) async {
     final noteId = uuid.v7();
@@ -47,7 +46,6 @@ class NoteService extends GetxService {
       imageName: drift.Value(imageName ?? []),
       audioName: drift.Value(audioName ?? []),
       videoName: drift.Value(videoName ?? []),
-      tags: drift.Value(tags ?? []),
       isDeleted: const drift.Value(false),
     );
 
@@ -72,7 +70,6 @@ class NoteService extends GetxService {
     List<String>? imageName,
     List<String>? audioName,
     List<String>? videoName,
-    List<String>? tags,
     Map<int, bool>? checklistStates,
   }) async {
     final note = await _noteDao.getNoteById(id);
@@ -87,7 +84,6 @@ class NoteService extends GetxService {
       imageName: drift.Value(imageName ?? note.imageName),
       audioName: drift.Value(audioName ?? note.audioName),
       videoName: drift.Value(videoName ?? note.videoName),
-      tags: drift.Value(tags ?? note.tags),
       isDeleted: drift.Value(note.isDeleted),
     );
 
@@ -112,15 +108,6 @@ class NoteService extends GetxService {
     return await _noteDao.searchNotes(query);
   }
 
-  // Get notes by tag
-  Future<List<NoteData>> getNotesByTag(String tag) async {
-    return await _noteDao.getNotesByTag(tag);
-  }
-
-  // Get all tags used in notes
-  Future<List<String>> getAllTags() async {
-    return await _noteDao.getAllTags();
-  }
 
   // Add a media file to a note
   Future<String?> addMediaToNote(

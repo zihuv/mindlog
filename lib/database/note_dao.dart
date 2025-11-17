@@ -64,46 +64,16 @@ class NoteDao extends DatabaseAccessor<AppDatabase> with _$NoteDaoMixin {
     return (delete(notes)..where((tbl) => tbl.id.equals(id))).go();
   }
 
-  // Get all notes with a specific tag
+  // Get all notes with a specific tag - functionality removed with tags column
   Future<List<NoteData>> getNotesByTag(String tag) async {
-    final result = await customSelect(
-      '''SELECT * FROM notes WHERE is_deleted = 0 AND tags LIKE ?''',
-      variables: [Variable.withString('%$tag%')],
-    ).get();
-
-    return result.map((row) {
-      final tagsStr = row.read<String>('tags');
-      final imageNameStr = row.read<String>('imageName');
-      final audioNameStr = row.read<String>('audioName');
-      final videoNameStr = row.read<String>('videoName');
-
-      return NoteData(
-        id: row.read<String>('id'),
-        content: row.read<String>('content'),
-        time: row.read<DateTime>('time'),
-        lastModified: row.read<DateTime>('lastModified'),
-        imageName: const ListToStringConverter().mapToDart(imageNameStr),
-        audioName: const ListToStringConverter().mapToDart(audioNameStr),
-        videoName: const ListToStringConverter().mapToDart(videoNameStr),
-        tags: const ListToStringConverter().mapToDart(tagsStr),
-        notebookId: row.readNullable<String>('notebook_id'),
-        isDeleted: row.read<bool>('isDeleted'),
-      );
-    }).toList();
+    // Since tags column was removed, return empty list
+    return [];
   }
 
-  // Get all tags used in notes
+  // Get all tags used in notes - functionality removed with tags column
   Future<List<String>> getAllTags() async {
-    final result = await customSelect(
-      'SELECT DISTINCT tags FROM notes WHERE is_deleted = 0',
-    ).get();
-    final allTags = <String>{};
-    for (final row in result) {
-      final tagsStr = row.read<String>('tags');
-      const converter = ListToStringConverter();
-      allTags.addAll(converter.mapToDart(tagsStr));
-    }
-    return allTags.toList();
+    // Since tags column was removed, return empty list
+    return [];
   }
 
   // Notebook operations
@@ -147,7 +117,6 @@ class NoteData {
   final List<String> imageName;
   final List<String> audioName;
   final List<String> videoName;
-  final List<String> tags;
   final String? notebookId;
   final bool isDeleted;
 
@@ -159,7 +128,6 @@ class NoteData {
     required this.imageName,
     required this.audioName,
     required this.videoName,
-    required this.tags,
     this.notebookId,
     required this.isDeleted,
   });
@@ -173,7 +141,6 @@ class NoteData {
       imageName: row.imageName,
       audioName: row.audioName,
       videoName: row.videoName,
-      tags: row.tags,
       notebookId: row.notebookId,
       isDeleted: row.isDeleted,
     );
@@ -189,7 +156,6 @@ class NoteData {
       imageName: Value(imageName),
       audioName: Value(audioName),
       videoName: Value(videoName),
-      tags: Value(tags),
       notebookId: Value(notebookId),
       isDeleted: Value(isDeleted),
     );

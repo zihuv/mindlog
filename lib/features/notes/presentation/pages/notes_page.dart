@@ -15,9 +15,6 @@ class NotesPage extends StatefulWidget {
 
 class _NotesPageState extends State<NotesPage> {
   List<Note> _allNotes = [];
-  List<Note> _filteredNotes = [];
-  List<String> _allTags = [];
-  List<String> _selectedTags = [];
   bool _isLoading = true;
 
   @override
@@ -29,7 +26,6 @@ class _NotesPageState extends State<NotesPage> {
   Future<void> _loadNotes() async {
     try {
       _allNotes = await NoteService.instance.getAllNotes();
-      _filteredNotes = _allNotes; // No tag filtering since tags are removed
       _sortNotes();
       setState(() {
         _isLoading = false;
@@ -42,27 +38,10 @@ class _NotesPageState extends State<NotesPage> {
     }
   }
 
-  Future<void> _loadTags() async {
-    // Tag functionality has been removed in this refactor
-    // Keeping this as an empty implementation to maintain compatibility
-    _allTags = [];
-    setState(() {});
-  }
-
-  void _filterNotesByTags(List<String> selectedTags) {
-    // Since tags have been removed, just return all notes
-    _filteredNotes = _allNotes;
-    _sortNotes();
-    setState(() {
-      _selectedTags = []; // Clear selected tags since they're removed
-    });
-  }
 
   void _sortNotes() {
-    // Sort by pinned first, then by creation date (newest first)
-    _filteredNotes.sort((a, b) {
-      if (a.isPinned && !b.isPinned) return -1;
-      if (!a.isPinned && b.isPinned) return 1;
+    // Sort by creation date (newest first) - isPinned has been removed
+    _allNotes.sort((a, b) {
       return b.createdAt.compareTo(a.createdAt);
     });
   }
@@ -76,11 +55,8 @@ class _NotesPageState extends State<NotesPage> {
           onSave: (note) async {
             setState(() {
               _allNotes.insert(0, note);
-              _filteredNotes = _allNotes;
               _sortNotes();
             });
-            // Refresh tags list after adding a note
-            _loadTags();
           },
         ),
       ),
@@ -100,11 +76,9 @@ class _NotesPageState extends State<NotesPage> {
               int index = _allNotes.indexWhere((m) => m.id == updatedNote.id);
               if (index != -1) {
                 _allNotes[index] = updatedNote;
-                _filteredNotes = _allNotes; // Update the filtered list
                 _sortNotes();
               }
             });
-            // Tags have been removed from this refactor
           },
         ),
       ),
@@ -139,9 +113,7 @@ class _NotesPageState extends State<NotesPage> {
         await NoteService.instance.deleteNote(note.id);
         setState(() {
           _allNotes.removeWhere((m) => m.id == note.id);
-          _filteredNotes.removeWhere((m) => m.id == note.id);
         });
-        // Tags have been removed from this refactor
       } catch (e) {
         print('Error deleting note: $e');
         // Show error snackbar
@@ -247,9 +219,9 @@ class _NotesPageState extends State<NotesPage> {
                       await _loadNotes();
                     },
                     child: ListView.builder(
-                      itemCount: _filteredNotes.length,
+                      itemCount: _allNotes.length,
                       itemBuilder: (context, index) {
-                        final note = _filteredNotes[index];
+                        final note = _allNotes[index];
                         return NoteCard(
                           note: note,
                           onTap: () {
@@ -270,7 +242,6 @@ class _NotesPageState extends State<NotesPage> {
                               );
                               if (index != -1) {
                                 _allNotes[index] = updatedNote;
-                                _filteredNotes = _allNotes; // Update the filtered list
                                 _sortNotes();
                               }
                             });

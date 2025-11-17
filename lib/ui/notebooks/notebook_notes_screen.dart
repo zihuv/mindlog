@@ -6,7 +6,6 @@ import 'package:mindlog/controllers/note_controller.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/presentation/screens/note_detail_screen.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
-import 'package:mindlog/ui/notebooks/notebook_detail_screen.dart';
 import 'package:mindlog/features/notes/presentation/components/components/markdown_checklist.dart';
 
 class NotebookNotesScreen extends StatefulWidget {

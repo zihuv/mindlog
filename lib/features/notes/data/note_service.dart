@@ -40,7 +40,10 @@ class NoteService {
   Future<void> deleteNote(String id) => repository.deleteNote(id);
   Future<List<Note>> searchNotes(String query) => repository.searchNotes(query);
   Future<List<Note>> getNotesByNotebookId(String notebookId) => repository.getNotesByNotebookId(notebookId);
-  Future<List<String>> getAllTags() => repository.getAllTags();
+  Future<List<String>> getAllTags() async {
+    // Tags functionality has been removed from the app
+    return [];
+  }
   Future<void> close() async {
     // Don't close the repository since it uses shared database
     // The shared database will be closed separately

@@ -75,15 +75,6 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       ).withConverter<List<String>>($NotesTable.$convertervideoName);
-  @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String> tags =
-      GeneratedColumn<String>(
-        'tags',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<List<String>>($NotesTable.$convertertags);
   static const VerificationMeta _notebookIdMeta = const VerificationMeta(
     'notebookId',
   );
@@ -119,7 +110,6 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
     imageName,
     audioName,
     videoName,
-    tags,
     notebookId,
     isDeleted,
   ];
@@ -222,12 +212,6 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
           data['${effectivePrefix}video_name'],
         )!,
       ),
-      tags: $NotesTable.$convertertags.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}tags'],
-        )!,
-      ),
       notebookId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notebook_id'],
@@ -250,8 +234,6 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
       const ListToStringConverter();
   static TypeConverter<List<String>, String> $convertervideoName =
       const ListToStringConverter();
-  static TypeConverter<List<String>, String> $convertertags =
-      const ListToStringConverter();
 }
 
 class Note extends DataClass implements Insertable<Note> {
@@ -262,7 +244,6 @@ class Note extends DataClass implements Insertable<Note> {
   final List<String> imageName;
   final List<String> audioName;
   final List<String> videoName;
-  final List<String> tags;
   final String? notebookId;
   final bool isDeleted;
   const Note({
@@ -273,7 +254,6 @@ class Note extends DataClass implements Insertable<Note> {
     required this.imageName,
     required this.audioName,
     required this.videoName,
-    required this.tags,
     this.notebookId,
     required this.isDeleted,
   });
@@ -299,9 +279,6 @@ class Note extends DataClass implements Insertable<Note> {
         $NotesTable.$convertervideoName.toSql(videoName),
       );
     }
-    {
-      map['tags'] = Variable<String>($NotesTable.$convertertags.toSql(tags));
-    }
     if (!nullToAbsent || notebookId != null) {
       map['notebook_id'] = Variable<String>(notebookId);
     }
@@ -318,7 +295,6 @@ class Note extends DataClass implements Insertable<Note> {
       imageName: Value(imageName),
       audioName: Value(audioName),
       videoName: Value(videoName),
-      tags: Value(tags),
       notebookId: notebookId == null && nullToAbsent
           ? const Value.absent()
           : Value(notebookId),
@@ -339,7 +315,6 @@ class Note extends DataClass implements Insertable<Note> {
       imageName: serializer.fromJson<List<String>>(json['imageName']),
       audioName: serializer.fromJson<List<String>>(json['audioName']),
       videoName: serializer.fromJson<List<String>>(json['videoName']),
-      tags: serializer.fromJson<List<String>>(json['tags']),
       notebookId: serializer.fromJson<String?>(json['notebookId']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
     );
@@ -355,7 +330,6 @@ class Note extends DataClass implements Insertable<Note> {
       'imageName': serializer.toJson<List<String>>(imageName),
       'audioName': serializer.toJson<List<String>>(audioName),
       'videoName': serializer.toJson<List<String>>(videoName),
-      'tags': serializer.toJson<List<String>>(tags),
       'notebookId': serializer.toJson<String?>(notebookId),
       'isDeleted': serializer.toJson<bool>(isDeleted),
     };
@@ -369,7 +343,6 @@ class Note extends DataClass implements Insertable<Note> {
     List<String>? imageName,
     List<String>? audioName,
     List<String>? videoName,
-    List<String>? tags,
     Value<String?> notebookId = const Value.absent(),
     bool? isDeleted,
   }) => Note(
@@ -380,7 +353,6 @@ class Note extends DataClass implements Insertable<Note> {
     imageName: imageName ?? this.imageName,
     audioName: audioName ?? this.audioName,
     videoName: videoName ?? this.videoName,
-    tags: tags ?? this.tags,
     notebookId: notebookId.present ? notebookId.value : this.notebookId,
     isDeleted: isDeleted ?? this.isDeleted,
   );
@@ -395,7 +367,6 @@ class Note extends DataClass implements Insertable<Note> {
       imageName: data.imageName.present ? data.imageName.value : this.imageName,
       audioName: data.audioName.present ? data.audioName.value : this.audioName,
       videoName: data.videoName.present ? data.videoName.value : this.videoName,
-      tags: data.tags.present ? data.tags.value : this.tags,
       notebookId: data.notebookId.present
           ? data.notebookId.value
           : this.notebookId,
@@ -413,7 +384,6 @@ class Note extends DataClass implements Insertable<Note> {
           ..write('imageName: $imageName, ')
           ..write('audioName: $audioName, ')
           ..write('videoName: $videoName, ')
-          ..write('tags: $tags, ')
           ..write('notebookId: $notebookId, ')
           ..write('isDeleted: $isDeleted')
           ..write(')'))
@@ -429,7 +399,6 @@ class Note extends DataClass implements Insertable<Note> {
     imageName,
     audioName,
     videoName,
-    tags,
     notebookId,
     isDeleted,
   );
@@ -444,7 +413,6 @@ class Note extends DataClass implements Insertable<Note> {
           other.imageName == this.imageName &&
           other.audioName == this.audioName &&
           other.videoName == this.videoName &&
-          other.tags == this.tags &&
           other.notebookId == this.notebookId &&
           other.isDeleted == this.isDeleted);
 }
@@ -457,7 +425,6 @@ class NotesCompanion extends UpdateCompanion<Note> {
   final Value<List<String>> imageName;
   final Value<List<String>> audioName;
   final Value<List<String>> videoName;
-  final Value<List<String>> tags;
   final Value<String?> notebookId;
   final Value<bool> isDeleted;
   final Value<int> rowid;
@@ -469,7 +436,6 @@ class NotesCompanion extends UpdateCompanion<Note> {
     this.imageName = const Value.absent(),
     this.audioName = const Value.absent(),
     this.videoName = const Value.absent(),
-    this.tags = const Value.absent(),
     this.notebookId = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -482,7 +448,6 @@ class NotesCompanion extends UpdateCompanion<Note> {
     required List<String> imageName,
     required List<String> audioName,
     required List<String> videoName,
-    required List<String> tags,
     this.notebookId = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -492,8 +457,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
        lastModified = Value(lastModified),
        imageName = Value(imageName),
        audioName = Value(audioName),
-       videoName = Value(videoName),
-       tags = Value(tags);
+       videoName = Value(videoName);
   static Insertable<Note> custom({
     Expression<String>? id,
     Expression<String>? content,
@@ -502,7 +466,6 @@ class NotesCompanion extends UpdateCompanion<Note> {
     Expression<String>? imageName,
     Expression<String>? audioName,
     Expression<String>? videoName,
-    Expression<String>? tags,
     Expression<String>? notebookId,
     Expression<bool>? isDeleted,
     Expression<int>? rowid,
@@ -515,7 +478,6 @@ class NotesCompanion extends UpdateCompanion<Note> {
       if (imageName != null) 'image_name': imageName,
       if (audioName != null) 'audio_name': audioName,
       if (videoName != null) 'video_name': videoName,
-      if (tags != null) 'tags': tags,
       if (notebookId != null) 'notebook_id': notebookId,
       if (isDeleted != null) 'is_deleted': isDeleted,
       if (rowid != null) 'rowid': rowid,
@@ -530,7 +492,6 @@ class NotesCompanion extends UpdateCompanion<Note> {
     Value<List<String>>? imageName,
     Value<List<String>>? audioName,
     Value<List<String>>? videoName,
-    Value<List<String>>? tags,
     Value<String?>? notebookId,
     Value<bool>? isDeleted,
     Value<int>? rowid,
@@ -543,7 +504,6 @@ class NotesCompanion extends UpdateCompanion<Note> {
       imageName: imageName ?? this.imageName,
       audioName: audioName ?? this.audioName,
       videoName: videoName ?? this.videoName,
-      tags: tags ?? this.tags,
       notebookId: notebookId ?? this.notebookId,
       isDeleted: isDeleted ?? this.isDeleted,
       rowid: rowid ?? this.rowid,
@@ -580,11 +540,6 @@ class NotesCompanion extends UpdateCompanion<Note> {
         $NotesTable.$convertervideoName.toSql(videoName.value),
       );
     }
-    if (tags.present) {
-      map['tags'] = Variable<String>(
-        $NotesTable.$convertertags.toSql(tags.value),
-      );
-    }
     if (notebookId.present) {
       map['notebook_id'] = Variable<String>(notebookId.value);
     }
@@ -607,7 +562,6 @@ class NotesCompanion extends UpdateCompanion<Note> {
           ..write('imageName: $imageName, ')
           ..write('audioName: $audioName, ')
           ..write('videoName: $videoName, ')
-          ..write('tags: $tags, ')
           ..write('notebookId: $notebookId, ')
           ..write('isDeleted: $isDeleted, ')
           ..write('rowid: $rowid')
@@ -1105,7 +1059,6 @@ typedef $$NotesTableCreateCompanionBuilder =
       required List<String> imageName,
       required List<String> audioName,
       required List<String> videoName,
-      required List<String> tags,
       Value<String?> notebookId,
       Value<bool> isDeleted,
       Value<int> rowid,
@@ -1119,7 +1072,6 @@ typedef $$NotesTableUpdateCompanionBuilder =
       Value<List<String>> imageName,
       Value<List<String>> audioName,
       Value<List<String>> videoName,
-      Value<List<String>> tags,
       Value<String?> notebookId,
       Value<bool> isDeleted,
       Value<int> rowid,
@@ -1170,12 +1122,6 @@ class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
     column: $table.videoName,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
-
-  ColumnWithTypeConverterFilters<List<String>, List<String>, String> get tags =>
-      $composableBuilder(
-        column: $table.tags,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
 
   ColumnFilters<String> get notebookId => $composableBuilder(
     column: $table.notebookId,
@@ -1232,11 +1178,6 @@ class $$NotesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get tags => $composableBuilder(
-    column: $table.tags,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get notebookId => $composableBuilder(
     column: $table.notebookId,
     builder: (column) => ColumnOrderings(column),
@@ -1279,9 +1220,6 @@ class $$NotesTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<List<String>, String> get videoName =>
       $composableBuilder(column: $table.videoName, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<List<String>, String> get tags =>
-      $composableBuilder(column: $table.tags, builder: (column) => column);
 
   GeneratedColumn<String> get notebookId => $composableBuilder(
     column: $table.notebookId,
@@ -1327,7 +1265,6 @@ class $$NotesTableTableManager
                 Value<List<String>> imageName = const Value.absent(),
                 Value<List<String>> audioName = const Value.absent(),
                 Value<List<String>> videoName = const Value.absent(),
-                Value<List<String>> tags = const Value.absent(),
                 Value<String?> notebookId = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -1339,7 +1276,6 @@ class $$NotesTableTableManager
                 imageName: imageName,
                 audioName: audioName,
                 videoName: videoName,
-                tags: tags,
                 notebookId: notebookId,
                 isDeleted: isDeleted,
                 rowid: rowid,
@@ -1353,7 +1289,6 @@ class $$NotesTableTableManager
                 required List<String> imageName,
                 required List<String> audioName,
                 required List<String> videoName,
-                required List<String> tags,
                 Value<String?> notebookId = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -1365,7 +1300,6 @@ class $$NotesTableTableManager
                 imageName: imageName,
                 audioName: audioName,
                 videoName: videoName,
-                tags: tags,
                 notebookId: notebookId,
                 isDeleted: isDeleted,
                 rowid: rowid,

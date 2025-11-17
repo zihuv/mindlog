@@ -15,8 +15,6 @@ class NoteBusinessService {
     List<String>? imageName,
     List<String>? audioName,
     List<String>? videoName,
-    List<String>? tags,
-    Map<int, bool>? checklistStates,
     String? notebookId,
   }) async {
     final noteId = _uuid.v7();
@@ -29,11 +27,9 @@ class NoteBusinessService {
       createdAt: now,
       updatedAt: now,
       notebookId: notebookId,
-      tags: tags ?? [],
       images: imageName ?? [],
       videos: videoName ?? [],
       audios: audioName ?? [],
-      checklistStates: checklistStates ?? const {},
     );
 
     await NoteService.instance.saveNote(note);
@@ -57,8 +53,6 @@ class NoteBusinessService {
     List<String>? imageName,
     List<String>? audioName,
     List<String>? videoName,
-    List<String>? tags,
-    Map<int, bool>? checklistStates,
     String? notebookId,
   }) async {
     final existingNote = await NoteService.instance.getNoteById(id);
@@ -72,11 +66,9 @@ class NoteBusinessService {
       createdAt: existingNote.createdAt,
       updatedAt: DateTime.now(),
       notebookId: notebookId ?? existingNote.notebookId,
-      tags: tags ?? existingNote.tags,
       images: imageName ?? existingNote.images,
       videos: videoName ?? existingNote.videos,
       audios: audioName ?? existingNote.audios,
-      checklistStates: checklistStates ?? existingNote.checklistStates,
     );
 
     await NoteService.instance.updateNote(updatedNote);
@@ -100,17 +92,6 @@ class NoteBusinessService {
     return await NoteService.instance.getNotesByNotebookId(notebookId);
   }
 
-  // Search notes by tags
-  Future<List<Note>> searchNotesByTags(List<String> tags) async {
-    if (tags.isEmpty) {
-      return await getAllNotes();
-    }
-
-    final allNotes = await getAllNotes();
-    return allNotes
-        .where((note) => tags.any((tag) => note.tags.contains(tag)))
-        .toList();
-  }
 
   // Get all unique tags
   Future<List<String>> getAllTags() async {

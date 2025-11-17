@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:mindlog/ui/notebooks/notebook_list_screen.dart';
 import 'package:mindlog/ui/calendar/calendar_screen.dart';
 import 'package:mindlog/ui/settings/settings_screen.dart';

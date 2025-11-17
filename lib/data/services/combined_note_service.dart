@@ -16,8 +16,6 @@ class CombinedNoteService {
     List<String>? imagesToCopy, // Source paths for images to be copied
     List<String>? videosToCopy, // Source paths for videos to be copied
     List<String>? audiosToCopy, // Source paths for audios to be copied
-    List<String>? tags,
-    Map<int, bool>? checklistStates,
     String? notebookId,
   }) async {
     // Create the note first
@@ -26,8 +24,6 @@ class CombinedNoteService {
       imageName: imagesToCopy?.map((e) => e.split('/').last).toList(),
       videoName: videosToCopy?.map((e) => e.split('/').last).toList(),
       audioName: audiosToCopy?.map((e) => e.split('/').last).toList(),
-      tags: tags,
-      checklistStates: checklistStates,
       notebookId: notebookId,
     );
 
@@ -87,8 +83,6 @@ class CombinedNoteService {
     List<String>? newImagesToCopy, // New images to add to the note
     List<String>? newVideosToCopy, // New videos to add to the note
     List<String>? newAudiosToCopy, // New audios to add to the note
-    List<String>? tags,
-    Map<int, bool>? checklistStates,
     String? notebookId,
   }) async {
     final existingNote = await _noteService.getNoteById(id);
@@ -100,8 +94,6 @@ class CombinedNoteService {
     await _noteService.updateNote(
       id: id,
       content: content,
-      tags: tags,
-      checklistStates: checklistStates,
       notebookId: notebookId,
     );
 
@@ -144,10 +136,6 @@ class CombinedNoteService {
     return await _noteService.getNotesByNotebookId(notebookId);
   }
 
-  // Search notes by tags
-  Future<List<Note>> searchNotesByTags(List<String> tags) async {
-    return await _noteService.searchNotesByTags(tags);
-  }
 
   // Get all unique tags
   Future<List<String>> getAllTags() async {

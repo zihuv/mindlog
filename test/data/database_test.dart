@@ -29,7 +29,6 @@ void main() {
         imageName: const drift.Value(['image1.jpg']),
         audioName: const drift.Value(['audio1.mp3']),
         videoName: const drift.Value(['video1.mp4']),
-        tags: const drift.Value(['test', 'note']),
         isDeleted: const drift.Value(false),
       );
 
@@ -45,7 +44,6 @@ void main() {
       expect(retrievedNote.imageName, contains('image1.jpg'));
       expect(retrievedNote.audioName, contains('audio1.mp3'));
       expect(retrievedNote.videoName, contains('video1.mp4'));
-      expect(retrievedNote.tags, containsAll(['test', 'note']));
       expect(retrievedNote.isDeleted, isFalse);
     });
 
@@ -59,7 +57,6 @@ void main() {
         imageName: const drift.Value([]),
         audioName: const drift.Value([]),
         videoName: const drift.Value([]),
-        tags: const drift.Value([]),
         isDeleted: const drift.Value(false),
       );
 
@@ -74,7 +71,6 @@ void main() {
         imageName: const drift.Value([]),
         audioName: const drift.Value([]),
         videoName: const drift.Value([]),
-        tags: const drift.Value(['updated']),
         isDeleted: const drift.Value(false),
       );
 
@@ -85,7 +81,6 @@ void main() {
 
       expect(retrievedNote, isNotNull);
       expect(retrievedNote!.content, equals('Updated content'));
-      expect(retrievedNote.tags, contains('updated'));
     });
 
     test('Soft delete a note', () async {
@@ -98,7 +93,6 @@ void main() {
         imageName: const drift.Value([]),
         audioName: const drift.Value([]),
         videoName: const drift.Value([]),
-        tags: const drift.Value([]),
         isDeleted: const drift.Value(false),
       );
 
@@ -129,7 +123,6 @@ void main() {
         imageName: const drift.Value([]),
         audioName: const drift.Value([]),
         videoName: const drift.Value([]),
-        tags: const drift.Value(['flutter', 'test']),
         isDeleted: const drift.Value(false),
       );
 
@@ -141,7 +134,6 @@ void main() {
         imageName: const drift.Value([]),
         audioName: const drift.Value([]),
         videoName: const drift.Value([]),
-        tags: const drift.Value(['dart', 'programming']),
         isDeleted: const drift.Value(false),
       );
 
@@ -159,39 +151,5 @@ void main() {
       expect(programmingResults.first.id, equals('search-test-2'));
     });
 
-    test('Get all tags', () async {
-      // Create test notes with tags
-      final now = DateTime.now();
-      final note1 = NotesCompanion(
-        id: const drift.Value('tags-test-1'),
-        content: const drift.Value('Note with tags'),
-        time: drift.Value(now),
-        lastModified: drift.Value(now),
-        imageName: const drift.Value([]),
-        audioName: const drift.Value([]),
-        videoName: const drift.Value([]),
-        tags: const drift.Value(['work', 'important']),
-        isDeleted: const drift.Value(false),
-      );
-
-      final note2 = NotesCompanion(
-        id: const drift.Value('tags-test-2'),
-        content: const drift.Value('Another note with tags'),
-        time: drift.Value(now),
-        lastModified: drift.Value(now),
-        imageName: const drift.Value([]),
-        audioName: const drift.Value([]),
-        videoName: const drift.Value([]),
-        tags: const drift.Value(['personal', 'work']), // 'work' is duplicate
-        isDeleted: const drift.Value(false),
-      );
-
-      await noteDao.insertNote(note1);
-      await noteDao.insertNote(note2);
-
-      final allTags = await noteDao.getAllTags();
-      expect(allTags, containsAll(['work', 'important', 'personal']));
-      expect(allTags.length, equals(3)); // Should not include duplicates
-    });
   });
 }

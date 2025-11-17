@@ -159,18 +159,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       return;
     }
 
-    // Tags have been removed in this refactor, so use empty list
-    final tags = <String>[];
-
     Note note;
     if (widget.isEdit && widget.initialNote != null) {
       // For edited notes, preserve the existing checklist states
-      // but update the tags based on the new content
       note = widget.initialNote!.copyWith(
         content: _controller.text.trim(),
         updatedAt: DateTime.now(),
-        tags: tags,
-        // Preserve existing pinned status and other values
       );
     } else {
       // For new notes, initialize with empty checklist states
@@ -179,10 +173,6 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         id: uuid.v7(),
         content: _controller.text.trim(),
         createdAt: DateTime.now(),
-        isPinned: false, // Default to not pinned
-        visibility: 'PRIVATE', // Default to private
-        tags: tags,
-        checklistStates: _extractChecklistStates(_controller.text.trim()),
       );
     }
 
@@ -196,23 +186,4 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     Navigator.pop(contextLocal);
   }
 
-  Map<int, bool> _extractChecklistStates(String content) {
-    final lines = content.split('\n');
-    final Map<int, bool> states = {};
-
-    for (int i = 0; i < lines.length; i++) {
-      final line = lines[i];
-      if (RegExp(r'^\s*[\-\*]\s+\[([ xX])\]\s+.*').hasMatch(line)) {
-        final match = RegExp(
-          r'^(\s*[\-\*]\s+)\[([ xX])\](.*)$',
-        ).firstMatch(line);
-        if (match != null) {
-          final isChecked = match.group(2)!.trim().toLowerCase() == 'x';
-          states[i] = isChecked;
-        }
-      }
-    }
-
-    return states;
-  }
 }

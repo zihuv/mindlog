@@ -26,14 +26,12 @@ void main() {
       final noteId = await service.createNote(
         content: 'Test note with media',
         imagesToCopy: [testImage.path],
-        tags: ['test', 'media'],
       );
 
       // Verify note was created
       final note = await service.getNoteById(noteId);
       expect(note, isNotNull);
       expect(note!.content, equals('Test note with media'));
-      expect(note.tags, containsAll(['test', 'media']));
 
       // Verify media was saved
       final media = await service.getNoteMedia(noteId);
@@ -53,7 +51,6 @@ void main() {
       final noteId = await service.createNote(
         content: 'Initial note content',
         imagesToCopy: [testImage1.path],
-        tags: ['initial'],
       );
 
       // Add new media to the note
@@ -116,12 +113,10 @@ void main() {
       // Create test notes
       await service.createNote(
         content: 'This is a Flutter development note',
-        tags: ['flutter', 'development'],
       );
 
       await service.createNote(
         content: 'Dart programming concepts note',
-        tags: ['dart', 'programming'],
       );
 
       // Search for Flutter note
@@ -145,26 +140,9 @@ void main() {
     });
 
     test('Get all tags', () async {
-      // Create notes with various tags
-      await service.createNote(content: 'Note 1', tags: ['work', 'important']);
-
-      await service.createNote(content: 'Note 2', tags: ['personal', 'todo']);
-
-      await service.createNote(content: 'Note 3', tags: ['work', 'project']);
-
-      // Get all unique tags
+      // Tags functionality has been removed from the app
       final allTags = await service.getAllTags();
-      expect(
-        allTags,
-        containsAll(['work', 'important', 'personal', 'todo', 'project']),
-      );
-      expect(allTags.length, equals(5));
-
-      // Clean up - delete all created notes
-      final allNotes = await service.getAllNotes();
-      for (final note in allNotes) {
-        await service.deleteNote(note.id);
-      }
+      expect(allTags, isEmpty);
     });
   });
 }

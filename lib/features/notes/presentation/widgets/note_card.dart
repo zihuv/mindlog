@@ -40,8 +40,6 @@ class NoteCard extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      if (note.isPinned)
-                        Icon(Icons.push_pin, size: 16, color: Colors.grey),
                       PopupMenuButton<String>(
                         icon: Icon(Icons.more_vert, color: Colors.grey[600]),
                         onSelected: (String result) {
@@ -81,33 +79,6 @@ class NoteCard extends StatelessWidget {
                   onChecklistChanged?.call(updatedNote);
                 },
               ),
-              if (note.tags.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 4.0,
-                  children: note.tags
-                      .map(
-                        (tag) => Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blue[100],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '#$tag',
-                            style: TextStyle(
-                              color: Colors.blue[800],
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      )
-                      .toList(),
-                ),
-              ],
             ],
           ),
         ),

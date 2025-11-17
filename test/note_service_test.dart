@@ -4,7 +4,6 @@ import 'package:mindlog/database/note_dao.dart';
 import 'package:mindlog/features/notes/data/note_service.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:uuid/uuid.dart';
-import 'package:drift/drift.dart' as drift;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +35,6 @@ void main() {
       images: ['image1.jpg', 'image2.png'],
       audios: ['voice_note.mp3'],
       videos: ['vacation_video.mp4'],
-      tags: ['生活'],
     );
 
     // Save the note
@@ -51,7 +49,6 @@ void main() {
     expect(retrievedNote.images, ['image1.jpg', 'image2.png']);
     expect(retrievedNote.audios, ['voice_note.mp3']);
     expect(retrievedNote.videos, ['vacation_video.mp4']);
-    expect(retrievedNote.tags, ['生活']);
   });
 
   test('Note CRUD operations via service', () async {
@@ -66,7 +63,6 @@ void main() {
       images: [],
       audios: [],
       videos: [],
-      tags: ['生活', '技术'],
     );
 
     // Save the note
@@ -76,7 +72,6 @@ void main() {
     final retrievedNote = await noteService.getNoteById(noteId);
     expect(retrievedNote, isNotNull);
     expect(retrievedNote!.content, 'Sample note content');
-    expect(retrievedNote.tags, ['生活', '技术']);
 
     // Update the note by saving it again with new content
     final updatedNote = Note(
@@ -87,14 +82,12 @@ void main() {
       images: [],
       audios: [],
       videos: [],
-      tags: ['更新', '测试'],
     );
     await noteService.updateNote(updatedNote);
 
     // Verify the update
     final updatedRetrievedNote = await noteService.getNoteById(noteId);
     expect(updatedRetrievedNote!.content, 'Updated note content');
-    expect(updatedRetrievedNote.tags, ['更新', '测试']);
 
     // Test delete
     await noteService.deleteNote(noteId);

@@ -49,7 +49,6 @@ class NoteDatabaseRepository implements NoteStorageRepository {
         imageName: drift.Value(note.images),
         audioName: drift.Value(note.audios),
         videoName: drift.Value(note.videos),
-        tags: drift.Value(note.tags),
         notebookId: drift.Value(note.notebookId),
         isDeleted: const drift.Value(false),
       ),
@@ -66,7 +65,6 @@ class NoteDatabaseRepository implements NoteStorageRepository {
         imageName: drift.Value(note.images),
         audioName: drift.Value(note.audios),
         videoName: drift.Value(note.videos),
-        tags: drift.Value(note.tags),
         notebookId: drift.Value(note.notebookId),
         // Note: isDeleted is a flag for soft delete, not the same as isPinned
       ),
@@ -100,7 +98,8 @@ class NoteDatabaseRepository implements NoteStorageRepository {
 
   @override
   Future<List<String>> getAllTags() async {
-    return await _noteDao.getAllTags();
+    // Tags functionality has been removed from the app
+    return [];
   }
 
   @override
@@ -117,14 +116,10 @@ class NoteDatabaseRepository implements NoteStorageRepository {
       updatedAt: noteData.lastModified != noteData.time
           ? noteData.lastModified
           : null,
-      isPinned: false, // Not stored in DB, default to false
-      visibility: 'PRIVATE', // Not stored in DB, default to PRIVATE
       notebookId: noteData.notebookId,
-      tags: noteData.tags,
       images: noteData.imageName,
       videos: noteData.videoName,
       audios: noteData.audioName,
-      checklistStates: const {}, // Not stored in DB, default to empty
     );
   }
 }

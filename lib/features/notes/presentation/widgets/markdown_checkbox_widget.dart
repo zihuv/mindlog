@@ -4,13 +4,11 @@ import 'package:markdown/markdown.dart' as md;
 
 class MarkdownWithCheckboxes extends StatelessWidget {
   final String data;
-  final Map<int, bool> checklistStates;
-  final Function(int, bool)? onCheckboxChanged;
+  final Function(int, String, bool)? onCheckboxChanged;
 
   const MarkdownWithCheckboxes({
     super.key,
     required this.data,
-    required this.checklistStates,
     this.onCheckboxChanged,
   });
 
@@ -21,7 +19,6 @@ class MarkdownWithCheckboxes extends StatelessWidget {
       selectable: true,
       builders: {
         'input': _TaskCheckboxBuilder(
-          checklistStates: checklistStates,
           onChanged: onCheckboxChanged,
         ),
       },
@@ -30,10 +27,9 @@ class MarkdownWithCheckboxes extends StatelessWidget {
 }
 
 class _TaskCheckboxBuilder extends MarkdownElementBuilder {
-  final Map<int, bool> checklistStates;
-  final Function(int, bool)? onChanged;
+  final Function(int, String, bool)? onChanged;
 
-  _TaskCheckboxBuilder({required this.checklistStates, this.onChanged});
+  _TaskCheckboxBuilder({this.onChanged});
 
   @override
   Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
@@ -43,6 +39,7 @@ class _TaskCheckboxBuilder extends MarkdownElementBuilder {
       // Extract checkbox information
       final isChecked = text.contains('[x]') || text.contains('[X]');
       final index = _getCheckboxIndex(text, element);
+      final content = _removeCheckboxSyntax(text);
 
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 1.0), // Minimal padding to match text line spacing
@@ -50,10 +47,10 @@ class _TaskCheckboxBuilder extends MarkdownElementBuilder {
           crossAxisAlignment: CrossAxisAlignment.center, // Center-align checkbox with text
           children: [
             Checkbox(
-              value: checklistStates[index] ?? isChecked,
+              value: isChecked,
               onChanged: (bool? value) {
                 if (value != null) {
-                  onChanged?.call(index, value);
+                  onChanged?.call(index, content, value);
                 }
               },
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // Reduce tap target size
@@ -65,11 +62,11 @@ class _TaskCheckboxBuilder extends MarkdownElementBuilder {
             const SizedBox(width: 4), // Better spacing to text
             Expanded(
               child: Text(
-                _removeCheckboxSyntax(text),
+                content,
                 style: TextStyle(
                   fontSize: 14.0, // Match default text size
-                  decoration: (checklistStates[index] ?? isChecked) ? TextDecoration.lineThrough : TextDecoration.none,
-                  color: (checklistStates[index] ?? isChecked) 
+                  decoration: isChecked ? TextDecoration.lineThrough : TextDecoration.none,
+                  color: isChecked
                     ? Colors.grey // Use grey color for checked items
                     : null, // Use default color for unchecked items
                 ),
@@ -100,13 +97,11 @@ class _TaskCheckboxBuilder extends MarkdownElementBuilder {
 // Alternative implementation using custom syntax parsing to handle mixed content
 class SimpleMarkdownCheckboxRenderer extends StatelessWidget {
   final String data;
-  final Map<int, bool> checklistStates;
-  final Function(int, bool)? onCheckboxChanged;
+  final Function(int, String, bool)? onCheckboxChanged;
 
   const SimpleMarkdownCheckboxRenderer({
     super.key,
     required this.data,
-    required this.checklistStates,
     this.onCheckboxChanged,
   });
 
@@ -121,7 +116,7 @@ class SimpleMarkdownCheckboxRenderer extends StatelessWidget {
       final line = lines[i];
 
       if (_isTaskListItem(line)) {
-        final taskInfo = _parseTaskListItem(line, i);
+        final taskInfo = _parseTaskListItem(line);
         final isChecked = taskInfo.isChecked;
         final index = i; // Use line index as the key
 
@@ -132,10 +127,10 @@ class SimpleMarkdownCheckboxRenderer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center, // Center-align checkbox with text
               children: [
                 Checkbox(
-                  value: checklistStates[index] ?? isChecked,
+                  value: isChecked,
                   onChanged: (bool? value) {
                     if (value != null) {
-                      onCheckboxChanged?.call(index, value);
+                      onCheckboxChanged?.call(index, taskInfo.content, value);
                     }
                   },
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // Reduce tap target size
@@ -150,8 +145,8 @@ class SimpleMarkdownCheckboxRenderer extends StatelessWidget {
                     taskInfo.content,
                     style: TextStyle(
                       fontSize: 14.0, // Match default text size
-                      decoration: (checklistStates[index] ?? taskInfo.isChecked) ? TextDecoration.lineThrough : TextDecoration.none,
-                      color: (checklistStates[index] ?? taskInfo.isChecked) 
+                      decoration: taskInfo.isChecked ? TextDecoration.lineThrough : TextDecoration.none,
+                      color: taskInfo.isChecked
                         ? Colors.grey // Use grey color for checked items
                         : null, // Use default color for unchecked items
                     ),
@@ -185,7 +180,7 @@ class SimpleMarkdownCheckboxRenderer extends StatelessWidget {
     return RegExp(r'^\s*[\-\*]\s+\[([ xX])\]\s+.*').hasMatch(line);
   }
 
-  _TaskInfo _parseTaskListItem(String line, int index) {
+  _TaskInfo _parseTaskListItem(String line) {
     final match = RegExp(r'^(\s*[\-\*]\s+)\[([ xX])\](.*)$').firstMatch(line);
     if (match != null) {
       final isChecked = match.group(2)!.trim().toLowerCase() == 'x';

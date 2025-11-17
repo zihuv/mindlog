@@ -18,14 +18,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   final TextEditingController _contentController = TextEditingController();
   late bool _isNewNote;
   bool _isLoading = false;
-  Map<int, bool> _checklistStates = {};
 
   @override
   void initState() {
     super.initState();
     _isNewNote = widget.noteId == null;
-
-    _contentController.addListener(_onContentChanged);
 
     if (!_isNewNote) {
       _loadNote();
@@ -43,7 +40,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
       if (note != null) {
         _contentController.text = note.content;
-        _checklistStates = Map.from(note.checklistStates);
       }
     } catch (e) {
       Get.showSnackbar(
@@ -130,20 +126,15 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     try {
       final controller = Get.find<NoteController>();
 
-      // Parse the content to update checklist states before saving
-      _updateChecklistStatesFromContent();
-
       if (_isNewNote) {
         await controller.createNote(
           content: _contentController.text,
-          checklistStates: _checklistStates,
           notebookId: widget.notebookId, // Associate note with notebook if provided
         );
       } else {
         await controller.updateNote(
           id: widget.noteId!,
           content: _contentController.text,
-          checklistStates: _checklistStates,
           notebookId: widget.notebookId, // Update notebook association if needed
         );
       }
@@ -310,44 +301,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   }
 
 
-  // Parse the content to update checklist states based on - [ ] and - [x] patterns
-  void _onContentChanged() {
-    // Update checklist states whenever the content changes
-    _updateChecklistStatesFromContent();
-  }
-
-  void _updateChecklistStatesFromContent() {
-    List<String> lines = _contentController.text.split('\n');
-    Map<int, bool> newChecklistStates = {};
-
-    for (int i = 0; i < lines.length; i++) {
-      String line = lines[i];
-      // Check for checklist format: "- [x] task" or "- [ ] task" (with optional indentation)
-      final checklistRegex = RegExp(r'^(\s*)[-*]\s+\[([ xX])\]\s+(.+)$');
-      final match = checklistRegex.firstMatch(line);
-
-      if (match != null) {
-        // Extract checkbox state
-        bool isChecked = match.group(2)!.trim().toLowerCase() == 'x';
-        String taskContent = match.group(3)!.trim(); // Get the task content after the checkbox
-
-        // Create a unique key for this checklist item based on content and position
-        int key = _generateChecklistKey(taskContent, i);
-        newChecklistStates[key] = isChecked;
-      }
-    }
-
-    _checklistStates = newChecklistStates;
-  }
-
-  // Helper function to generate consistent keys (same as in controller)
-  int _generateChecklistKey(String content, int position) {
-    return content.hashCode + position;
-  }
 
   @override
   void dispose() {
-    _contentController.removeListener(_onContentChanged);
     _contentController.dispose();
     super.dispose();
   }

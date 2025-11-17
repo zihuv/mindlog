@@ -83,14 +83,10 @@ class NoteController extends GetxController {
 
   Future<void> createNote({
     required String content,
-    List<String>? tags,
-    Map<int, bool>? checklistStates,
     String? notebookId,
   }) async {
     await _service.createNote(
       content: content,
-      tags: tags,
-      checklistStates: checklistStates,
       notebookId: notebookId,
     );
   }
@@ -98,15 +94,11 @@ class NoteController extends GetxController {
   Future<void> updateNote({
     required String id,
     String? content,
-    List<String>? tags,
-    Map<int, bool>? checklistStates,
     String? notebookId,
   }) async {
     await _service.updateNote(
       id: id,
       content: content,
-      tags: tags,
-      checklistStates: checklistStates,
       notebookId: notebookId,
     );
   }
@@ -168,15 +160,9 @@ class NoteController extends GetxController {
 
       String updatedContent = lines.join('\n');
 
-      // Also update checklistStates map
-      Map<int, bool> updatedChecklistStates = Map.from(note.checklistStates);
-      updatedChecklistStates[itemIndex] = newValue;
-
       await updateNote(
         id: noteId,
         content: updatedContent,
-        tags: note.tags,
-        checklistStates: updatedChecklistStates,
       );
     }
   }
