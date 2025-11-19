@@ -10,8 +10,8 @@ part 'app_database.g.dart';
 class Notes extends Table {
   TextColumn get id => text()();
   TextColumn get content => text()(); // Contains the note content for search
-  DateTimeColumn get time => dateTime()();
-  DateTimeColumn get lastModified => dateTime()();
+  DateTimeColumn get createTime => dateTime()();
+  DateTimeColumn get updateTime => dateTime()();
   TextColumn get imageName =>
       text().map(const ListToStringConverter())(); // JSON string
   TextColumn get audioName =>
@@ -29,8 +29,8 @@ class Notebooks extends Table {
   TextColumn get description => text().nullable()();
   TextColumn get coverImage => text().nullable()();
   TextColumn get type => text().withDefault(const Constant('standard'))();
-  DateTimeColumn get createdAt => dateTime()();
-  DateTimeColumn get updatedAt => dateTime().nullable()();
+  DateTimeColumn get createTime => dateTime()();
+  DateTimeColumn get updateTime => dateTime().nullable()();
 }
 
 // Converter to store List<String> as JSON in the database
@@ -73,7 +73,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -81,34 +81,8 @@ class AppDatabase extends _$AppDatabase {
       await m.createAll();
     },
     onUpgrade: (Migrator m, int from, int to) async {
-      if (from <= 1 && to >= 2) {
-        // Create the notebooks table when upgrading from schema version 1 to 2
-        await m.createTable(notebooks);
-
-        // Add the notebook_id column to the notes table
-        await m.addColumn(notes, notes.notebookId);
-      }
-
-      // For schema version 3, we're ensuring the database is properly upgraded
-      // and fixing any potential issues from previous migrations
-      if (to >= 3) {
-        // The notebook_id column should already exist from v2 migration
-        // but if not (due to any previous migration issues), we add it now
-        try {
-          await m.addColumn(notes, notes.notebookId);
-        } catch (e) {
-          // Column already exists, which is what we want
-          // Intentionally empty - just catching to prevent errors if column exists
-        }
-      }
-
-      // For schema version 4, we're removing the tags column
-      // For existing databases with the tags column, we'll provide a default value
-      // Note: Drift doesn't support dropping columns directly, so we handle it with migration
-      if (to >= 4) {
-        // For backward compatibility, ensure tags column doesn't cause issues
-        // Newer versions will handle empty tags gracefully
-      }
+      // For beta testing, we're starting fresh with schema version 1
+      // All tables will be created during onCreate
     },
   );
 

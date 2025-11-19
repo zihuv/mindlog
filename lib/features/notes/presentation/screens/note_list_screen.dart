@@ -71,7 +71,7 @@ class NoteListScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Modification time in top-left corner (creation time if no modifications)
+                          // Modification createTime in top-left corner (creation createTime if no modifications)
                           Container(
                             padding: EdgeInsets.fromLTRB(
                               AppPadding.medium.left,
@@ -80,7 +80,7 @@ class NoteListScreen extends StatelessWidget {
                               AppPadding.small.bottom, // Reduced bottom padding to reduce gap with content
                             ),
                             child: Text(
-                              _formatDateTime(note.updatedAt ?? note.createdAt),
+                              _formatDateTime(note.updateTime ?? note.createTime),
                               style: TextStyle(
                                 fontSize: AppFontSize.small,
                                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
@@ -94,7 +94,7 @@ class NoteListScreen extends StatelessWidget {
                               AppPadding.large.left, 
                               0.0, 
                               AppPadding.large.right, 
-                              AppPadding.medium.bottom, // No top padding to reduce gap from time
+                              AppPadding.medium.bottom, // No top padding to reduce gap from createTime
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

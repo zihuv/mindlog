@@ -112,8 +112,8 @@ class NoteDao extends DatabaseAccessor<AppDatabase> with _$NoteDaoMixin {
 class NoteData {
   final String id;
   final String content;
-  final DateTime time;
-  final DateTime lastModified;
+  final DateTime createTime; // mapped from 'createTime' column
+  final DateTime updateTime; // mapped from 'updateTime' column
   final List<String> imageName;
   final List<String> audioName;
   final List<String> videoName;
@@ -123,8 +123,8 @@ class NoteData {
   NoteData({
     required this.id,
     required this.content,
-    required this.time,
-    required this.lastModified,
+    required this.createTime,
+    required this.updateTime,
     required this.imageName,
     required this.audioName,
     required this.videoName,
@@ -136,8 +136,8 @@ class NoteData {
     return NoteData(
       id: row.id,
       content: row.content,
-      time: row.time,
-      lastModified: row.lastModified,
+      createTime: row.createTime, // map from 'createTime' column
+      updateTime: row.updateTime, // map from 'updateTime' column
       imageName: row.imageName,
       audioName: row.audioName,
       videoName: row.videoName,
@@ -151,8 +151,8 @@ class NoteData {
     return NotesCompanion(
       id: drift.Value(id),
       content: drift.Value(content),
-      time: drift.Value(time),
-      lastModified: drift.Value(lastModified),
+      createTime: drift.Value(createTime), // map to 'createTime' column
+      updateTime: drift.Value(updateTime), // map to 'updateTime' column
       imageName: Value(imageName),
       audioName: Value(audioName),
       videoName: Value(videoName),
@@ -169,8 +169,8 @@ class NotebookData {
   final String? description;
   final String? coverImage;
   final String type;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
+  final DateTime createTime;
+  final DateTime? updateTime;
 
   NotebookData({
     required this.id,
@@ -178,8 +178,8 @@ class NotebookData {
     this.description,
     this.coverImage,
     required this.type,
-    required this.createdAt,
-    this.updatedAt,
+    required this.createTime,
+    this.updateTime,
   });
 
   factory NotebookData.fromTable(Notebook row) {
@@ -189,8 +189,8 @@ class NotebookData {
       description: row.description,
       coverImage: row.coverImage,
       type: row.type,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
+      createTime: row.createTime,
+      updateTime: row.updateTime,
     );
   }
 
@@ -202,8 +202,8 @@ class NotebookData {
       description: drift.Value(description),
       coverImage: drift.Value(coverImage),
       type: drift.Value(type),
-      createdAt: drift.Value(createdAt),
-      updatedAt: drift.Value(updatedAt),
+      createTime: drift.Value(createTime),
+      updateTime: drift.Value(updateTime),
     );
   }
 }

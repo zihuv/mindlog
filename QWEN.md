@@ -106,7 +106,7 @@ The application includes an interactive checklist feature:
 - Users can create checklist items in notes using markdown syntax: `- [ ] task` or `- [x] task`
 - Checklist items render as interactive checkboxes in the note list view
 - Clicking checkboxes updates both the visual state and the underlying text content
-- Changes to checklists also update the modification time of notes
+- Changes to checklists also update the modification createTime of notes
 - The checklist state is properly preserved in the database
 
 ## Key Files and Directories

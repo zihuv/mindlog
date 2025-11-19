@@ -31,7 +31,7 @@ void main() {
     final note = Note(
       id: noteId,
       content: 'Test note content',
-      createdAt: now,
+      createTime: now,
       images: ['image1.jpg', 'image2.png'],
       audios: ['voice_note.mp3'],
       videos: ['vacation_video.mp4'],
@@ -59,7 +59,7 @@ void main() {
     final note = Note(
       id: noteId,
       content: 'Sample note content',
-      createdAt: now,
+      createTime: now,
       images: [],
       audios: [],
       videos: [],
@@ -77,8 +77,8 @@ void main() {
     final updatedNote = Note(
       id: noteId,
       content: 'Updated note content',
-      createdAt: now,
-      updatedAt: now,
+      createTime: now,
+      updateTime: now,
       images: [],
       audios: [],
       videos: [],

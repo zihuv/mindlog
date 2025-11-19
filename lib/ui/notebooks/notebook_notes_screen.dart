@@ -170,7 +170,7 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                                   ),
                                   subtitle: Text(
                                     _formatDateTime(
-                                      note.updatedAt ?? note.createdAt,
+                                      note.updateTime ?? note.createTime,
                                     ),
                                     style: TextStyle(
                                       fontSize: AppFontSize.caption,

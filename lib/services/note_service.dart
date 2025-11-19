@@ -41,8 +41,8 @@ class NoteService extends GetxService {
     final note = NotesCompanion(
       id: drift.Value(noteId),
       content: drift.Value(content),
-      time: drift.Value(now),
-      lastModified: drift.Value(now),
+      createTime: drift.Value(now),
+      updateTime: drift.Value(now),
       imageName: drift.Value(imageName ?? []),
       audioName: drift.Value(audioName ?? []),
       videoName: drift.Value(videoName ?? []),
@@ -80,7 +80,7 @@ class NoteService extends GetxService {
     final updatedNote = NotesCompanion(
       id: drift.Value(id),
       content: drift.Value(content ?? note.content),
-      lastModified: drift.Value(DateTime.now()),
+      updateTime: drift.Value(DateTime.now()),
       imageName: drift.Value(imageName ?? note.imageName),
       audioName: drift.Value(audioName ?? note.audioName),
       videoName: drift.Value(videoName ?? note.videoName),

@@ -24,8 +24,8 @@ void main() {
       final note = NotesCompanion(
         id: const drift.Value('test-id-1'),
         content: const drift.Value('Test content'),
-        time: drift.Value(now),
-        lastModified: drift.Value(now),
+        createTime: drift.Value(now),
+        updateTime: drift.Value(now),
         imageName: const drift.Value(['image1.jpg']),
         audioName: const drift.Value(['audio1.mp3']),
         videoName: const drift.Value(['video1.mp4']),
@@ -52,8 +52,8 @@ void main() {
       final note = NotesCompanion(
         id: const drift.Value('test-id-2'),
         content: const drift.Value('Original content'),
-        time: drift.Value(now),
-        lastModified: drift.Value(now),
+        createTime: drift.Value(now),
+        updateTime: drift.Value(now),
         imageName: const drift.Value([]),
         audioName: const drift.Value([]),
         videoName: const drift.Value([]),
@@ -67,7 +67,7 @@ void main() {
       final updatedNote = NotesCompanion(
         id: const drift.Value('test-id-2'),
         content: const drift.Value('Updated content'),
-        lastModified: drift.Value(DateTime.now()),
+        updateTime: drift.Value(DateTime.now()),
         imageName: const drift.Value([]),
         audioName: const drift.Value([]),
         videoName: const drift.Value([]),
@@ -88,8 +88,8 @@ void main() {
       final note = NotesCompanion(
         id: const drift.Value('test-id-3'),
         content: const drift.Value('To be deleted'),
-        time: drift.Value(now),
-        lastModified: drift.Value(now),
+        createTime: drift.Value(now),
+        updateTime: drift.Value(now),
         imageName: const drift.Value([]),
         audioName: const drift.Value([]),
         videoName: const drift.Value([]),
@@ -118,8 +118,8 @@ void main() {
       final note1 = NotesCompanion(
         id: const drift.Value('search-test-1'),
         content: const drift.Value('This is a test note about Flutter'),
-        time: drift.Value(now),
-        lastModified: drift.Value(now),
+        createTime: drift.Value(now),
+        updateTime: drift.Value(now),
         imageName: const drift.Value([]),
         audioName: const drift.Value([]),
         videoName: const drift.Value([]),
@@ -129,8 +129,8 @@ void main() {
       final note2 = NotesCompanion(
         id: const drift.Value('search-test-2'),
         content: const drift.Value('Another note about Dart programming'),
-        time: drift.Value(now),
-        lastModified: drift.Value(now),
+        createTime: drift.Value(now),
+        updateTime: drift.Value(now),
         imageName: const drift.Value([]),
         audioName: const drift.Value([]),
         videoName: const drift.Value([]),

@@ -23,6 +23,16 @@ class NotebookController extends GetxController {
     try {
       await _service.init();
       await loadNotebooks(); // Load notebooks after initialization
+    } on Exception catch (e) {
+      Get.log('Initialization error: $e');
+      if (Get.isSnackbarOpen) {
+        Get.closeAllSnackbars();
+      }
+      Get.rawSnackbar(
+        title: "Initialization Error",
+        message: "Failed to initialize notebook service: $e",
+        duration: const Duration(seconds: 3),
+      );
     } finally {
       _isLoading.value = false;
     }
@@ -32,8 +42,8 @@ class NotebookController extends GetxController {
     _isLoading.value = true;
     try {
       final notebooks = await _service.getAllNotebooks();
-      // Sort notebooks by creation time in descending order (newest first)
-      notebooks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      // Sort notebooks by creation createTime in descending order (newest first)
+      notebooks.sort((a, b) => b.createTime.compareTo(a.createTime));
       _notebooks.assignAll(notebooks);
     } catch (e) {
       Get.log('Error loading notebooks: $e');
@@ -66,7 +76,7 @@ class NotebookController extends GetxController {
       description: description,
       coverImage: coverImage,
       type: type,
-      createdAt: DateTime.now(),
+      createTime: DateTime.now(),
     );
     return await _service.saveNotebook(notebook);
   }
@@ -85,7 +95,7 @@ class NotebookController extends GetxController {
         description: description ?? existingNotebook.description,
         coverImage: coverImage ?? existingNotebook.coverImage,
         type: type ?? existingNotebook.type,
-        updatedAt: DateTime.now(),
+        updateTime: DateTime.now(),
       );
       await _service.updateNotebook(updatedNotebook);
     }

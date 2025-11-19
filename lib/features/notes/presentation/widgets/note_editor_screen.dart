@@ -164,7 +164,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       // For edited notes, preserve the existing checklist states
       note = widget.initialNote!.copyWith(
         content: _controller.text.trim(),
-        updatedAt: DateTime.now(),
+        updateTime: DateTime.now(),
       );
     } else {
       // For new notes, initialize with empty checklist states
@@ -172,7 +172,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       note = Note(
         id: uuid.v7(),
         content: _controller.text.trim(),
-        createdAt: DateTime.now(),
+        createTime: DateTime.now(),
       );
     }
 

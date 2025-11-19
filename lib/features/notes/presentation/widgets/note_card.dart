@@ -35,7 +35,7 @@ class NoteCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _formatDateTime(note.updatedAt ?? note.createdAt),
+                    _formatDateTime(note.updateTime ?? note.createTime),
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   Row(
@@ -64,7 +64,7 @@ class NoteCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 2), // Minimal spacing between time and content
+              const SizedBox(height: 2), // Minimal spacing between createTime and content
               // Note content with markdown support for checkboxes (interactive)
               MarkdownChecklist(
                 text: note.content,

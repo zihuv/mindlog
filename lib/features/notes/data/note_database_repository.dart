@@ -44,8 +44,8 @@ class NoteDatabaseRepository implements NoteStorageRepository {
       db.NotesCompanion(
         id: drift.Value(id),
         content: drift.Value(note.content),
-        time: drift.Value(note.createdAt),
-        lastModified: drift.Value(note.updatedAt ?? note.createdAt),
+        createTime: drift.Value(note.createTime),
+        updateTime: drift.Value(note.updateTime ?? note.createTime),
         imageName: drift.Value(note.images),
         audioName: drift.Value(note.audios),
         videoName: drift.Value(note.videos),
@@ -60,8 +60,8 @@ class NoteDatabaseRepository implements NoteStorageRepository {
     await _noteDao.updateNote(
       db.NotesCompanion(
         content: drift.Value(note.content),
-        time: drift.Value(note.createdAt), // Keep original creation time
-        lastModified: drift.Value(note.updatedAt ?? DateTime.now()),
+        createTime: drift.Value(note.createTime), // Keep original creation createTime
+        updateTime: drift.Value(note.updateTime ?? DateTime.now()),
         imageName: drift.Value(note.images),
         audioName: drift.Value(note.audios),
         videoName: drift.Value(note.videos),
@@ -112,9 +112,9 @@ class NoteDatabaseRepository implements NoteStorageRepository {
     return Note(
       id: noteData.id, // Use the string ID directly
       content: noteData.content,
-      createdAt: noteData.time,
-      updatedAt: noteData.lastModified != noteData.time
-          ? noteData.lastModified
+      createTime: noteData.createTime,
+      updateTime: noteData.updateTime != noteData.createTime
+          ? noteData.updateTime
           : null,
       notebookId: noteData.notebookId,
       images: noteData.imageName,

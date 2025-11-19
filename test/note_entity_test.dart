@@ -7,12 +7,12 @@ void main() {
       final note = Note(
         id: '123',
         content: 'Test content',
-        createdAt: DateTime.now(),
+        createTime: DateTime.now(),
       );
 
       expect(note.id, '123');
       expect(note.content, 'Test content');
-      expect(note.createdAt, isA<DateTime>());
+      expect(note.createTime, isA<DateTime>());
       expect(note.images, isEmpty);
       expect(note.videos, isEmpty);
       expect(note.audios, isEmpty);
@@ -24,8 +24,8 @@ void main() {
       final note = Note(
         id: '456',
         content: 'Test content with fields',
-        createdAt: now,
-        updatedAt: now.add(const Duration(hours: 1)),
+        createTime: now,
+        updateTime: now.add(const Duration(hours: 1)),
         notebookId: 'notebook1',
         images: ['image1.jpg', 'image2.png'],
         videos: ['video1.mp4'],
@@ -34,8 +34,8 @@ void main() {
 
       expect(note.id, '456');
       expect(note.content, 'Test content with fields');
-      expect(note.createdAt, now);
-      expect(note.updatedAt, now.add(const Duration(hours: 1)));
+      expect(note.createTime, now);
+      expect(note.updateTime, now.add(const Duration(hours: 1)));
       expect(note.notebookId, 'notebook1');
       expect(note.images, equals(['image1.jpg', 'image2.png']));
       expect(note.videos, equals(['video1.mp4']));
@@ -46,7 +46,7 @@ void main() {
       final originalNote = Note(
         id: 'original',
         content: 'Original content',
-        createdAt: DateTime.now(),
+        createTime: DateTime.now(),
       );
 
       final updatedNote = originalNote.copyWith(
@@ -62,8 +62,8 @@ void main() {
       final note = Note(
         id: 'json-test',
         content: 'JSON test content',
-        createdAt: now,
-        updatedAt: now.add(const Duration(minutes: 30)),
+        createTime: now,
+        updateTime: now.add(const Duration(minutes: 30)),
         notebookId: 'notebook-json',
         images: ['image.jpg'],
         videos: ['video.mp4'],
@@ -75,8 +75,8 @@ void main() {
 
       expect(deserializedNote.id, 'json-test');
       expect(deserializedNote.content, 'JSON test content');
-      expect(deserializedNote.createdAt.millisecondsSinceEpoch, note.createdAt.millisecondsSinceEpoch);
-      expect(deserializedNote.updatedAt!.millisecondsSinceEpoch, note.updatedAt!.millisecondsSinceEpoch);
+      expect(deserializedNote.createTime.millisecondsSinceEpoch, note.createTime.millisecondsSinceEpoch);
+      expect(deserializedNote.updateTime!.millisecondsSinceEpoch, note.updateTime!.millisecondsSinceEpoch);
       expect(deserializedNote.notebookId, 'notebook-json');
       expect(deserializedNote.images, equals(['image.jpg']));
       expect(deserializedNote.videos, equals(['video.mp4']));
@@ -88,19 +88,19 @@ void main() {
       final note1 = Note(
         id: 'eq-test',
         content: 'Equality test',
-        createdAt: now,
+        createTime: now,
       );
 
       final note2 = Note(
         id: 'eq-test',
         content: 'Equality test',
-        createdAt: now,
+        createTime: now,
       );
 
       final note3 = Note(
         id: 'different-id',
         content: 'Equality test',
-        createdAt: now,
+        createTime: now,
       );
 
       expect(note1, equals(note2)); // Same properties should be equal

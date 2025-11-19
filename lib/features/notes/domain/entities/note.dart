@@ -3,8 +3,8 @@ import 'package:equatable/equatable.dart';
 class Note extends Equatable {
   final String id;
   final String content;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
+  final DateTime createTime;
+  final DateTime? updateTime;
   final String? notebookId; // Foreign key to notebook
   final List<String> images;
   final List<String> videos;
@@ -13,8 +13,8 @@ class Note extends Equatable {
   const Note({
     required this.id,
     required this.content,
-    required this.createdAt,
-    this.updatedAt,
+    required this.createTime,
+    this.updateTime,
     this.notebookId,
     this.images = const [],
     this.videos = const [],
@@ -25,8 +25,8 @@ class Note extends Equatable {
   List<Object?> get props => [
     id,
     content,
-    createdAt,
-    updatedAt,
+    createTime,
+    updateTime,
     notebookId,
     images,
     videos,
@@ -36,8 +36,8 @@ class Note extends Equatable {
   Note copyWith({
     String? id,
     String? content,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    DateTime? createTime,
+    DateTime? updateTime,
     String? notebookId,
     List<String>? images,
     List<String>? videos,
@@ -46,8 +46,8 @@ class Note extends Equatable {
     return Note(
       id: id ?? this.id,
       content: content ?? this.content,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      createTime: createTime ?? this.createTime,
+      updateTime: updateTime ?? this.updateTime,
       notebookId: notebookId ?? this.notebookId,
       images: images ?? this.images,
       videos: videos ?? this.videos,
@@ -59,8 +59,8 @@ class Note extends Equatable {
     return {
       'id': id,
       'content': content,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      'createTime': createTime.toIso8601String(),
+      'updateTime': updateTime?.toIso8601String(),
       'notebookId': notebookId,
       'images': images,
       'videos': videos,
@@ -72,11 +72,11 @@ class Note extends Equatable {
     return Note(
       id: json['id'] ?? '',
       content: json['content'] ?? '',
-      createdAt: DateTime.parse(
-        json['createdAt'] ?? DateTime.now().toIso8601String(),
+      createTime: DateTime.parse(
+        json['createTime'] ?? DateTime.now().toIso8601String(),
       ),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
+      updateTime: json['updateTime'] != null
+          ? DateTime.parse(json['updateTime'])
           : null,
       notebookId: json['notebookId'],
       images: List<String>.from(json['images'] ?? []),

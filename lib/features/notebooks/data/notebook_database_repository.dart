@@ -45,11 +45,11 @@ class NotebookDatabaseRepository implements NotebookStorageRepository {
         description: Value(notebook.description),
         coverImage: Value(notebook.coverImage),
         type: Value(notebook.type.toString().split('.').last.toLowerCase()),
-        createdAt: Value(notebook.createdAt),
-        updatedAt: Value(notebook.updatedAt),
+        createTime: Value(notebook.createTime),
+        updateTime: Value(notebook.updateTime),
       ),
     );
-    
+
     return id;
   }
 
@@ -61,8 +61,8 @@ class NotebookDatabaseRepository implements NotebookStorageRepository {
         description: Value(notebook.description),
         coverImage: Value(notebook.coverImage),
         type: Value(notebook.type.toString().split('.').last.toLowerCase()),
-        createdAt: Value(notebook.createdAt), // Keep original creation time
-        updatedAt: Value(notebook.updatedAt ?? DateTime.now()),
+        createTime: Value(notebook.createTime), // Keep original creation createTime
+        updateTime: Value(notebook.updateTime ?? DateTime.now()),
       ),
       notebook.id,
     );
@@ -86,8 +86,8 @@ class NotebookDatabaseRepository implements NotebookStorageRepository {
       description: notebookData.description,
       coverImage: notebookData.coverImage,
       type: _getNotebookTypeFromString(notebookData.type),
-      createdAt: notebookData.createdAt,
-      updatedAt: notebookData.updatedAt,
+      createTime: notebookData.createTime,
+      updateTime: notebookData.updateTime,
     );
   }
 

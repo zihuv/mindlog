@@ -28,21 +28,23 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _timeMeta = const VerificationMeta('time');
+  static const VerificationMeta _createTimeMeta = const VerificationMeta(
+    'createTime',
+  );
   @override
-  late final GeneratedColumn<DateTime> time = GeneratedColumn<DateTime>(
-    'time',
+  late final GeneratedColumn<DateTime> createTime = GeneratedColumn<DateTime>(
+    'create_time',
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _lastModifiedMeta = const VerificationMeta(
-    'lastModified',
+  static const VerificationMeta _updateTimeMeta = const VerificationMeta(
+    'updateTime',
   );
   @override
-  late final GeneratedColumn<DateTime> lastModified = GeneratedColumn<DateTime>(
-    'last_modified',
+  late final GeneratedColumn<DateTime> updateTime = GeneratedColumn<DateTime>(
+    'update_time',
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
@@ -105,8 +107,8 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
   List<GeneratedColumn> get $columns => [
     id,
     content,
-    time,
-    lastModified,
+    createTime,
+    updateTime,
     imageName,
     audioName,
     videoName,
@@ -138,24 +140,21 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
     } else if (isInserting) {
       context.missing(_contentMeta);
     }
-    if (data.containsKey('time')) {
+    if (data.containsKey('create_time')) {
       context.handle(
-        _timeMeta,
-        time.isAcceptableOrUnknown(data['time']!, _timeMeta),
+        _createTimeMeta,
+        createTime.isAcceptableOrUnknown(data['create_time']!, _createTimeMeta),
       );
     } else if (isInserting) {
-      context.missing(_timeMeta);
+      context.missing(_createTimeMeta);
     }
-    if (data.containsKey('last_modified')) {
+    if (data.containsKey('update_time')) {
       context.handle(
-        _lastModifiedMeta,
-        lastModified.isAcceptableOrUnknown(
-          data['last_modified']!,
-          _lastModifiedMeta,
-        ),
+        _updateTimeMeta,
+        updateTime.isAcceptableOrUnknown(data['update_time']!, _updateTimeMeta),
       );
     } else if (isInserting) {
-      context.missing(_lastModifiedMeta);
+      context.missing(_updateTimeMeta);
     }
     if (data.containsKey('notebook_id')) {
       context.handle(
@@ -186,13 +185,13 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
         DriftSqlType.string,
         data['${effectivePrefix}content'],
       )!,
-      time: attachedDatabase.typeMapping.read(
+      createTime: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
-        data['${effectivePrefix}time'],
+        data['${effectivePrefix}create_time'],
       )!,
-      lastModified: attachedDatabase.typeMapping.read(
+      updateTime: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
-        data['${effectivePrefix}last_modified'],
+        data['${effectivePrefix}update_time'],
       )!,
       imageName: $NotesTable.$converterimageName.fromSql(
         attachedDatabase.typeMapping.read(
@@ -239,8 +238,8 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
 class Note extends DataClass implements Insertable<Note> {
   final String id;
   final String content;
-  final DateTime time;
-  final DateTime lastModified;
+  final DateTime createTime;
+  final DateTime updateTime;
   final List<String> imageName;
   final List<String> audioName;
   final List<String> videoName;
@@ -249,8 +248,8 @@ class Note extends DataClass implements Insertable<Note> {
   const Note({
     required this.id,
     required this.content,
-    required this.time,
-    required this.lastModified,
+    required this.createTime,
+    required this.updateTime,
     required this.imageName,
     required this.audioName,
     required this.videoName,
@@ -262,8 +261,8 @@ class Note extends DataClass implements Insertable<Note> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['content'] = Variable<String>(content);
-    map['time'] = Variable<DateTime>(time);
-    map['last_modified'] = Variable<DateTime>(lastModified);
+    map['create_time'] = Variable<DateTime>(createTime);
+    map['update_time'] = Variable<DateTime>(updateTime);
     {
       map['image_name'] = Variable<String>(
         $NotesTable.$converterimageName.toSql(imageName),
@@ -290,8 +289,8 @@ class Note extends DataClass implements Insertable<Note> {
     return NotesCompanion(
       id: Value(id),
       content: Value(content),
-      time: Value(time),
-      lastModified: Value(lastModified),
+      createTime: Value(createTime),
+      updateTime: Value(updateTime),
       imageName: Value(imageName),
       audioName: Value(audioName),
       videoName: Value(videoName),
@@ -310,8 +309,8 @@ class Note extends DataClass implements Insertable<Note> {
     return Note(
       id: serializer.fromJson<String>(json['id']),
       content: serializer.fromJson<String>(json['content']),
-      time: serializer.fromJson<DateTime>(json['time']),
-      lastModified: serializer.fromJson<DateTime>(json['lastModified']),
+      createTime: serializer.fromJson<DateTime>(json['createTime']),
+      updateTime: serializer.fromJson<DateTime>(json['updateTime']),
       imageName: serializer.fromJson<List<String>>(json['imageName']),
       audioName: serializer.fromJson<List<String>>(json['audioName']),
       videoName: serializer.fromJson<List<String>>(json['videoName']),
@@ -325,8 +324,8 @@ class Note extends DataClass implements Insertable<Note> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'content': serializer.toJson<String>(content),
-      'time': serializer.toJson<DateTime>(time),
-      'lastModified': serializer.toJson<DateTime>(lastModified),
+      'createTime': serializer.toJson<DateTime>(createTime),
+      'updateTime': serializer.toJson<DateTime>(updateTime),
       'imageName': serializer.toJson<List<String>>(imageName),
       'audioName': serializer.toJson<List<String>>(audioName),
       'videoName': serializer.toJson<List<String>>(videoName),
@@ -338,8 +337,8 @@ class Note extends DataClass implements Insertable<Note> {
   Note copyWith({
     String? id,
     String? content,
-    DateTime? time,
-    DateTime? lastModified,
+    DateTime? createTime,
+    DateTime? updateTime,
     List<String>? imageName,
     List<String>? audioName,
     List<String>? videoName,
@@ -348,8 +347,8 @@ class Note extends DataClass implements Insertable<Note> {
   }) => Note(
     id: id ?? this.id,
     content: content ?? this.content,
-    time: time ?? this.time,
-    lastModified: lastModified ?? this.lastModified,
+    createTime: createTime ?? this.createTime,
+    updateTime: updateTime ?? this.updateTime,
     imageName: imageName ?? this.imageName,
     audioName: audioName ?? this.audioName,
     videoName: videoName ?? this.videoName,
@@ -360,10 +359,12 @@ class Note extends DataClass implements Insertable<Note> {
     return Note(
       id: data.id.present ? data.id.value : this.id,
       content: data.content.present ? data.content.value : this.content,
-      time: data.time.present ? data.time.value : this.time,
-      lastModified: data.lastModified.present
-          ? data.lastModified.value
-          : this.lastModified,
+      createTime: data.createTime.present
+          ? data.createTime.value
+          : this.createTime,
+      updateTime: data.updateTime.present
+          ? data.updateTime.value
+          : this.updateTime,
       imageName: data.imageName.present ? data.imageName.value : this.imageName,
       audioName: data.audioName.present ? data.audioName.value : this.audioName,
       videoName: data.videoName.present ? data.videoName.value : this.videoName,
@@ -379,8 +380,8 @@ class Note extends DataClass implements Insertable<Note> {
     return (StringBuffer('Note(')
           ..write('id: $id, ')
           ..write('content: $content, ')
-          ..write('time: $time, ')
-          ..write('lastModified: $lastModified, ')
+          ..write('createTime: $createTime, ')
+          ..write('updateTime: $updateTime, ')
           ..write('imageName: $imageName, ')
           ..write('audioName: $audioName, ')
           ..write('videoName: $videoName, ')
@@ -394,8 +395,8 @@ class Note extends DataClass implements Insertable<Note> {
   int get hashCode => Object.hash(
     id,
     content,
-    time,
-    lastModified,
+    createTime,
+    updateTime,
     imageName,
     audioName,
     videoName,
@@ -408,8 +409,8 @@ class Note extends DataClass implements Insertable<Note> {
       (other is Note &&
           other.id == this.id &&
           other.content == this.content &&
-          other.time == this.time &&
-          other.lastModified == this.lastModified &&
+          other.createTime == this.createTime &&
+          other.updateTime == this.updateTime &&
           other.imageName == this.imageName &&
           other.audioName == this.audioName &&
           other.videoName == this.videoName &&
@@ -420,8 +421,8 @@ class Note extends DataClass implements Insertable<Note> {
 class NotesCompanion extends UpdateCompanion<Note> {
   final Value<String> id;
   final Value<String> content;
-  final Value<DateTime> time;
-  final Value<DateTime> lastModified;
+  final Value<DateTime> createTime;
+  final Value<DateTime> updateTime;
   final Value<List<String>> imageName;
   final Value<List<String>> audioName;
   final Value<List<String>> videoName;
@@ -431,8 +432,8 @@ class NotesCompanion extends UpdateCompanion<Note> {
   const NotesCompanion({
     this.id = const Value.absent(),
     this.content = const Value.absent(),
-    this.time = const Value.absent(),
-    this.lastModified = const Value.absent(),
+    this.createTime = const Value.absent(),
+    this.updateTime = const Value.absent(),
     this.imageName = const Value.absent(),
     this.audioName = const Value.absent(),
     this.videoName = const Value.absent(),
@@ -443,8 +444,8 @@ class NotesCompanion extends UpdateCompanion<Note> {
   NotesCompanion.insert({
     required String id,
     required String content,
-    required DateTime time,
-    required DateTime lastModified,
+    required DateTime createTime,
+    required DateTime updateTime,
     required List<String> imageName,
     required List<String> audioName,
     required List<String> videoName,
@@ -453,16 +454,16 @@ class NotesCompanion extends UpdateCompanion<Note> {
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        content = Value(content),
-       time = Value(time),
-       lastModified = Value(lastModified),
+       createTime = Value(createTime),
+       updateTime = Value(updateTime),
        imageName = Value(imageName),
        audioName = Value(audioName),
        videoName = Value(videoName);
   static Insertable<Note> custom({
     Expression<String>? id,
     Expression<String>? content,
-    Expression<DateTime>? time,
-    Expression<DateTime>? lastModified,
+    Expression<DateTime>? createTime,
+    Expression<DateTime>? updateTime,
     Expression<String>? imageName,
     Expression<String>? audioName,
     Expression<String>? videoName,
@@ -473,8 +474,8 @@ class NotesCompanion extends UpdateCompanion<Note> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (content != null) 'content': content,
-      if (time != null) 'time': time,
-      if (lastModified != null) 'last_modified': lastModified,
+      if (createTime != null) 'create_time': createTime,
+      if (updateTime != null) 'update_time': updateTime,
       if (imageName != null) 'image_name': imageName,
       if (audioName != null) 'audio_name': audioName,
       if (videoName != null) 'video_name': videoName,
@@ -487,8 +488,8 @@ class NotesCompanion extends UpdateCompanion<Note> {
   NotesCompanion copyWith({
     Value<String>? id,
     Value<String>? content,
-    Value<DateTime>? time,
-    Value<DateTime>? lastModified,
+    Value<DateTime>? createTime,
+    Value<DateTime>? updateTime,
     Value<List<String>>? imageName,
     Value<List<String>>? audioName,
     Value<List<String>>? videoName,
@@ -499,8 +500,8 @@ class NotesCompanion extends UpdateCompanion<Note> {
     return NotesCompanion(
       id: id ?? this.id,
       content: content ?? this.content,
-      time: time ?? this.time,
-      lastModified: lastModified ?? this.lastModified,
+      createTime: createTime ?? this.createTime,
+      updateTime: updateTime ?? this.updateTime,
       imageName: imageName ?? this.imageName,
       audioName: audioName ?? this.audioName,
       videoName: videoName ?? this.videoName,
@@ -519,11 +520,11 @@ class NotesCompanion extends UpdateCompanion<Note> {
     if (content.present) {
       map['content'] = Variable<String>(content.value);
     }
-    if (time.present) {
-      map['time'] = Variable<DateTime>(time.value);
+    if (createTime.present) {
+      map['create_time'] = Variable<DateTime>(createTime.value);
     }
-    if (lastModified.present) {
-      map['last_modified'] = Variable<DateTime>(lastModified.value);
+    if (updateTime.present) {
+      map['update_time'] = Variable<DateTime>(updateTime.value);
     }
     if (imageName.present) {
       map['image_name'] = Variable<String>(
@@ -557,8 +558,8 @@ class NotesCompanion extends UpdateCompanion<Note> {
     return (StringBuffer('NotesCompanion(')
           ..write('id: $id, ')
           ..write('content: $content, ')
-          ..write('time: $time, ')
-          ..write('lastModified: $lastModified, ')
+          ..write('createTime: $createTime, ')
+          ..write('updateTime: $updateTime, ')
           ..write('imageName: $imageName, ')
           ..write('audioName: $audioName, ')
           ..write('videoName: $videoName, ')
@@ -626,23 +627,23 @@ class $NotebooksTable extends Notebooks
     requiredDuringInsert: false,
     defaultValue: const Constant('standard'),
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
+  static const VerificationMeta _createTimeMeta = const VerificationMeta(
+    'createTime',
   );
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-    'created_at',
+  late final GeneratedColumn<DateTime> createTime = GeneratedColumn<DateTime>(
+    'create_time',
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
-    'updatedAt',
+  static const VerificationMeta _updateTimeMeta = const VerificationMeta(
+    'updateTime',
   );
   @override
-  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
-    'updated_at',
+  late final GeneratedColumn<DateTime> updateTime = GeneratedColumn<DateTime>(
+    'update_time',
     aliasedName,
     true,
     type: DriftSqlType.dateTime,
@@ -655,8 +656,8 @@ class $NotebooksTable extends Notebooks
     description,
     coverImage,
     type,
-    createdAt,
-    updatedAt,
+    createTime,
+    updateTime,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -704,18 +705,18 @@ class $NotebooksTable extends Notebooks
         type.isAcceptableOrUnknown(data['type']!, _typeMeta),
       );
     }
-    if (data.containsKey('created_at')) {
+    if (data.containsKey('create_time')) {
       context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+        _createTimeMeta,
+        createTime.isAcceptableOrUnknown(data['create_time']!, _createTimeMeta),
       );
     } else if (isInserting) {
-      context.missing(_createdAtMeta);
+      context.missing(_createTimeMeta);
     }
-    if (data.containsKey('updated_at')) {
+    if (data.containsKey('update_time')) {
       context.handle(
-        _updatedAtMeta,
-        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+        _updateTimeMeta,
+        updateTime.isAcceptableOrUnknown(data['update_time']!, _updateTimeMeta),
       );
     }
     return context;
@@ -747,13 +748,13 @@ class $NotebooksTable extends Notebooks
         DriftSqlType.string,
         data['${effectivePrefix}type'],
       )!,
-      createdAt: attachedDatabase.typeMapping.read(
+      createTime: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
+        data['${effectivePrefix}create_time'],
       )!,
-      updatedAt: attachedDatabase.typeMapping.read(
+      updateTime: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
-        data['${effectivePrefix}updated_at'],
+        data['${effectivePrefix}update_time'],
       ),
     );
   }
@@ -770,16 +771,16 @@ class Notebook extends DataClass implements Insertable<Notebook> {
   final String? description;
   final String? coverImage;
   final String type;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
+  final DateTime createTime;
+  final DateTime? updateTime;
   const Notebook({
     required this.id,
     required this.title,
     this.description,
     this.coverImage,
     required this.type,
-    required this.createdAt,
-    this.updatedAt,
+    required this.createTime,
+    this.updateTime,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -793,9 +794,9 @@ class Notebook extends DataClass implements Insertable<Notebook> {
       map['cover_image'] = Variable<String>(coverImage);
     }
     map['type'] = Variable<String>(type);
-    map['created_at'] = Variable<DateTime>(createdAt);
-    if (!nullToAbsent || updatedAt != null) {
-      map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['create_time'] = Variable<DateTime>(createTime);
+    if (!nullToAbsent || updateTime != null) {
+      map['update_time'] = Variable<DateTime>(updateTime);
     }
     return map;
   }
@@ -811,10 +812,10 @@ class Notebook extends DataClass implements Insertable<Notebook> {
           ? const Value.absent()
           : Value(coverImage),
       type: Value(type),
-      createdAt: Value(createdAt),
-      updatedAt: updatedAt == null && nullToAbsent
+      createTime: Value(createTime),
+      updateTime: updateTime == null && nullToAbsent
           ? const Value.absent()
-          : Value(updatedAt),
+          : Value(updateTime),
     );
   }
 
@@ -829,8 +830,8 @@ class Notebook extends DataClass implements Insertable<Notebook> {
       description: serializer.fromJson<String?>(json['description']),
       coverImage: serializer.fromJson<String?>(json['coverImage']),
       type: serializer.fromJson<String>(json['type']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      createTime: serializer.fromJson<DateTime>(json['createTime']),
+      updateTime: serializer.fromJson<DateTime?>(json['updateTime']),
     );
   }
   @override
@@ -842,8 +843,8 @@ class Notebook extends DataClass implements Insertable<Notebook> {
       'description': serializer.toJson<String?>(description),
       'coverImage': serializer.toJson<String?>(coverImage),
       'type': serializer.toJson<String>(type),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'createTime': serializer.toJson<DateTime>(createTime),
+      'updateTime': serializer.toJson<DateTime?>(updateTime),
     };
   }
 
@@ -853,16 +854,16 @@ class Notebook extends DataClass implements Insertable<Notebook> {
     Value<String?> description = const Value.absent(),
     Value<String?> coverImage = const Value.absent(),
     String? type,
-    DateTime? createdAt,
-    Value<DateTime?> updatedAt = const Value.absent(),
+    DateTime? createTime,
+    Value<DateTime?> updateTime = const Value.absent(),
   }) => Notebook(
     id: id ?? this.id,
     title: title ?? this.title,
     description: description.present ? description.value : this.description,
     coverImage: coverImage.present ? coverImage.value : this.coverImage,
     type: type ?? this.type,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    createTime: createTime ?? this.createTime,
+    updateTime: updateTime.present ? updateTime.value : this.updateTime,
   );
   Notebook copyWithCompanion(NotebooksCompanion data) {
     return Notebook(
@@ -875,8 +876,12 @@ class Notebook extends DataClass implements Insertable<Notebook> {
           ? data.coverImage.value
           : this.coverImage,
       type: data.type.present ? data.type.value : this.type,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      createTime: data.createTime.present
+          ? data.createTime.value
+          : this.createTime,
+      updateTime: data.updateTime.present
+          ? data.updateTime.value
+          : this.updateTime,
     );
   }
 
@@ -888,8 +893,8 @@ class Notebook extends DataClass implements Insertable<Notebook> {
           ..write('description: $description, ')
           ..write('coverImage: $coverImage, ')
           ..write('type: $type, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('createTime: $createTime, ')
+          ..write('updateTime: $updateTime')
           ..write(')'))
         .toString();
   }
@@ -901,8 +906,8 @@ class Notebook extends DataClass implements Insertable<Notebook> {
     description,
     coverImage,
     type,
-    createdAt,
-    updatedAt,
+    createTime,
+    updateTime,
   );
   @override
   bool operator ==(Object other) =>
@@ -913,8 +918,8 @@ class Notebook extends DataClass implements Insertable<Notebook> {
           other.description == this.description &&
           other.coverImage == this.coverImage &&
           other.type == this.type &&
-          other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.createTime == this.createTime &&
+          other.updateTime == this.updateTime);
 }
 
 class NotebooksCompanion extends UpdateCompanion<Notebook> {
@@ -923,8 +928,8 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
   final Value<String?> description;
   final Value<String?> coverImage;
   final Value<String> type;
-  final Value<DateTime> createdAt;
-  final Value<DateTime?> updatedAt;
+  final Value<DateTime> createTime;
+  final Value<DateTime?> updateTime;
   final Value<int> rowid;
   const NotebooksCompanion({
     this.id = const Value.absent(),
@@ -932,8 +937,8 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
     this.description = const Value.absent(),
     this.coverImage = const Value.absent(),
     this.type = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
+    this.createTime = const Value.absent(),
+    this.updateTime = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   NotebooksCompanion.insert({
@@ -942,20 +947,20 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
     this.description = const Value.absent(),
     this.coverImage = const Value.absent(),
     this.type = const Value.absent(),
-    required DateTime createdAt,
-    this.updatedAt = const Value.absent(),
+    required DateTime createTime,
+    this.updateTime = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
-       createdAt = Value(createdAt);
+       createTime = Value(createTime);
   static Insertable<Notebook> custom({
     Expression<String>? id,
     Expression<String>? title,
     Expression<String>? description,
     Expression<String>? coverImage,
     Expression<String>? type,
-    Expression<DateTime>? createdAt,
-    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? createTime,
+    Expression<DateTime>? updateTime,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -964,8 +969,8 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
       if (description != null) 'description': description,
       if (coverImage != null) 'cover_image': coverImage,
       if (type != null) 'type': type,
-      if (createdAt != null) 'created_at': createdAt,
-      if (updatedAt != null) 'updated_at': updatedAt,
+      if (createTime != null) 'create_time': createTime,
+      if (updateTime != null) 'update_time': updateTime,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -976,8 +981,8 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
     Value<String?>? description,
     Value<String?>? coverImage,
     Value<String>? type,
-    Value<DateTime>? createdAt,
-    Value<DateTime?>? updatedAt,
+    Value<DateTime>? createTime,
+    Value<DateTime?>? updateTime,
     Value<int>? rowid,
   }) {
     return NotebooksCompanion(
@@ -986,8 +991,8 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
       description: description ?? this.description,
       coverImage: coverImage ?? this.coverImage,
       type: type ?? this.type,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      createTime: createTime ?? this.createTime,
+      updateTime: updateTime ?? this.updateTime,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1010,11 +1015,11 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
     if (type.present) {
       map['type'] = Variable<String>(type.value);
     }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+    if (createTime.present) {
+      map['create_time'] = Variable<DateTime>(createTime.value);
     }
-    if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    if (updateTime.present) {
+      map['update_time'] = Variable<DateTime>(updateTime.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1030,8 +1035,8 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
           ..write('description: $description, ')
           ..write('coverImage: $coverImage, ')
           ..write('type: $type, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt, ')
+          ..write('createTime: $createTime, ')
+          ..write('updateTime: $updateTime, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1054,8 +1059,8 @@ typedef $$NotesTableCreateCompanionBuilder =
     NotesCompanion Function({
       required String id,
       required String content,
-      required DateTime time,
-      required DateTime lastModified,
+      required DateTime createTime,
+      required DateTime updateTime,
       required List<String> imageName,
       required List<String> audioName,
       required List<String> videoName,
@@ -1067,8 +1072,8 @@ typedef $$NotesTableUpdateCompanionBuilder =
     NotesCompanion Function({
       Value<String> id,
       Value<String> content,
-      Value<DateTime> time,
-      Value<DateTime> lastModified,
+      Value<DateTime> createTime,
+      Value<DateTime> updateTime,
       Value<List<String>> imageName,
       Value<List<String>> audioName,
       Value<List<String>> videoName,
@@ -1095,13 +1100,13 @@ class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get time => $composableBuilder(
-    column: $table.time,
+  ColumnFilters<DateTime> get createTime => $composableBuilder(
+    column: $table.createTime,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get lastModified => $composableBuilder(
-    column: $table.lastModified,
+  ColumnFilters<DateTime> get updateTime => $composableBuilder(
+    column: $table.updateTime,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1153,13 +1158,13 @@ class $$NotesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get time => $composableBuilder(
-    column: $table.time,
+  ColumnOrderings<DateTime> get createTime => $composableBuilder(
+    column: $table.createTime,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get lastModified => $composableBuilder(
-    column: $table.lastModified,
+  ColumnOrderings<DateTime> get updateTime => $composableBuilder(
+    column: $table.updateTime,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -1204,11 +1209,13 @@ class $$NotesTableAnnotationComposer
   GeneratedColumn<String> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get time =>
-      $composableBuilder(column: $table.time, builder: (column) => column);
+  GeneratedColumn<DateTime> get createTime => $composableBuilder(
+    column: $table.createTime,
+    builder: (column) => column,
+  );
 
-  GeneratedColumn<DateTime> get lastModified => $composableBuilder(
-    column: $table.lastModified,
+  GeneratedColumn<DateTime> get updateTime => $composableBuilder(
+    column: $table.updateTime,
     builder: (column) => column,
   );
 
@@ -1260,8 +1267,8 @@ class $$NotesTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> content = const Value.absent(),
-                Value<DateTime> time = const Value.absent(),
-                Value<DateTime> lastModified = const Value.absent(),
+                Value<DateTime> createTime = const Value.absent(),
+                Value<DateTime> updateTime = const Value.absent(),
                 Value<List<String>> imageName = const Value.absent(),
                 Value<List<String>> audioName = const Value.absent(),
                 Value<List<String>> videoName = const Value.absent(),
@@ -1271,8 +1278,8 @@ class $$NotesTableTableManager
               }) => NotesCompanion(
                 id: id,
                 content: content,
-                time: time,
-                lastModified: lastModified,
+                createTime: createTime,
+                updateTime: updateTime,
                 imageName: imageName,
                 audioName: audioName,
                 videoName: videoName,
@@ -1284,8 +1291,8 @@ class $$NotesTableTableManager
               ({
                 required String id,
                 required String content,
-                required DateTime time,
-                required DateTime lastModified,
+                required DateTime createTime,
+                required DateTime updateTime,
                 required List<String> imageName,
                 required List<String> audioName,
                 required List<String> videoName,
@@ -1295,8 +1302,8 @@ class $$NotesTableTableManager
               }) => NotesCompanion.insert(
                 id: id,
                 content: content,
-                time: time,
-                lastModified: lastModified,
+                createTime: createTime,
+                updateTime: updateTime,
                 imageName: imageName,
                 audioName: audioName,
                 videoName: videoName,
@@ -1333,8 +1340,8 @@ typedef $$NotebooksTableCreateCompanionBuilder =
       Value<String?> description,
       Value<String?> coverImage,
       Value<String> type,
-      required DateTime createdAt,
-      Value<DateTime?> updatedAt,
+      required DateTime createTime,
+      Value<DateTime?> updateTime,
       Value<int> rowid,
     });
 typedef $$NotebooksTableUpdateCompanionBuilder =
@@ -1344,8 +1351,8 @@ typedef $$NotebooksTableUpdateCompanionBuilder =
       Value<String?> description,
       Value<String?> coverImage,
       Value<String> type,
-      Value<DateTime> createdAt,
-      Value<DateTime?> updatedAt,
+      Value<DateTime> createTime,
+      Value<DateTime?> updateTime,
       Value<int> rowid,
     });
 
@@ -1383,13 +1390,13 @@ class $$NotebooksTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
+  ColumnFilters<DateTime> get createTime => $composableBuilder(
+    column: $table.createTime,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
+  ColumnFilters<DateTime> get updateTime => $composableBuilder(
+    column: $table.updateTime,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1428,13 +1435,13 @@ class $$NotebooksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
+  ColumnOrderings<DateTime> get createTime => $composableBuilder(
+    column: $table.createTime,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
+  ColumnOrderings<DateTime> get updateTime => $composableBuilder(
+    column: $table.updateTime,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -1467,11 +1474,15 @@ class $$NotebooksTableAnnotationComposer
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createTime => $composableBuilder(
+    column: $table.createTime,
+    builder: (column) => column,
+  );
 
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get updateTime => $composableBuilder(
+    column: $table.updateTime,
+    builder: (column) => column,
+  );
 }
 
 class $$NotebooksTableTableManager
@@ -1507,8 +1518,8 @@ class $$NotebooksTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<String?> coverImage = const Value.absent(),
                 Value<String> type = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<DateTime> createTime = const Value.absent(),
+                Value<DateTime?> updateTime = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => NotebooksCompanion(
                 id: id,
@@ -1516,8 +1527,8 @@ class $$NotebooksTableTableManager
                 description: description,
                 coverImage: coverImage,
                 type: type,
-                createdAt: createdAt,
-                updatedAt: updatedAt,
+                createTime: createTime,
+                updateTime: updateTime,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1527,8 +1538,8 @@ class $$NotebooksTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<String?> coverImage = const Value.absent(),
                 Value<String> type = const Value.absent(),
-                required DateTime createdAt,
-                Value<DateTime?> updatedAt = const Value.absent(),
+                required DateTime createTime,
+                Value<DateTime?> updateTime = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => NotebooksCompanion.insert(
                 id: id,
@@ -1536,8 +1547,8 @@ class $$NotebooksTableTableManager
                 description: description,
                 coverImage: coverImage,
                 type: type,
-                createdAt: createdAt,
-                updatedAt: updatedAt,
+                createTime: createTime,
+                updateTime: updateTime,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

@@ -8,8 +8,8 @@ class Notebook extends Equatable {
   final String? description;
   final String? coverImage;
   final NotebookType type;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
+  final DateTime createTime;
+  final DateTime? updateTime;
 
   const Notebook({
     required this.id,
@@ -17,8 +17,8 @@ class Notebook extends Equatable {
     this.description,
     this.coverImage,
     this.type = NotebookType.standard,
-    required this.createdAt,
-    this.updatedAt,
+    required this.createTime,
+    this.updateTime,
   });
 
   @override
@@ -28,8 +28,8 @@ class Notebook extends Equatable {
     description,
     coverImage,
     type,
-    createdAt,
-    updatedAt,
+    createTime,
+    updateTime,
   ];
 
   Notebook copyWith({
@@ -38,8 +38,8 @@ class Notebook extends Equatable {
     String? description,
     String? coverImage,
     NotebookType? type,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    DateTime? createTime,
+    DateTime? updateTime,
   }) {
     return Notebook(
       id: id ?? this.id,
@@ -47,8 +47,8 @@ class Notebook extends Equatable {
       description: description ?? this.description,
       coverImage: coverImage ?? this.coverImage,
       type: type ?? this.type,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      createTime: createTime ?? this.createTime,
+      updateTime: updateTime ?? this.updateTime,
     );
   }
 
@@ -59,8 +59,8 @@ class Notebook extends Equatable {
       'description': description,
       'coverImage': coverImage,
       'type': type.toString().split('.').last, // Get just the enum value
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      'createTime': createTime.toIso8601String(),
+      'updateTime': updateTime?.toIso8601String(),
     };
   }
 
@@ -71,11 +71,11 @@ class Notebook extends Equatable {
       description: json['description'],
       coverImage: json['coverImage'],
       type: _getNotebookTypeFromString(json['type'] ?? 'standard'),
-      createdAt: DateTime.parse(
-        json['createdAt'] ?? DateTime.now().toIso8601String(),
+      createTime: DateTime.parse(
+        json['createTime'] ?? DateTime.now().toIso8601String(),
       ),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
+      updateTime: json['updateTime'] != null
+          ? DateTime.parse(json['updateTime'])
           : null,
     );
   }

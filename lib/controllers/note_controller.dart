@@ -30,8 +30,8 @@ class NoteController extends GetxController {
     _isLoading.value = true;
     try {
       final notes = await _service.getAllNotes();
-      // Sort notes by creation time in descending order (newest first)
-      notes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      // Sort notes by creation createTime in descending order (newest first)
+      notes.sort((a, b) => b.createTime.compareTo(a.createTime));
       _notes.assignAll(notes);
     } catch (e) {
       Get.log('Error loading notes: $e');
@@ -59,8 +59,8 @@ class NoteController extends GetxController {
           ? await _service.getAllNotes()
           : await _service.searchNotes(query);
 
-      // Sort notes by creation time in descending order (newest first)
-      notes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      // Sort notes by creation createTime in descending order (newest first)
+      notes.sort((a, b) => b.createTime.compareTo(a.createTime));
       _notes.assignAll(notes);
     } catch (e) {
       Get.log('Error searching notes: $e');

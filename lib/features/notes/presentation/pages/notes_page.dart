@@ -42,7 +42,7 @@ class _NotesPageState extends State<NotesPage> {
   void _sortNotes() {
     // Sort by creation date (newest first) - isPinned has been removed
     _allNotes.sort((a, b) {
-      return b.createdAt.compareTo(a.createdAt);
+      return b.createTime.compareTo(a.createTime);
     });
   }
 

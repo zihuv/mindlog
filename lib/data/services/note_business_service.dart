@@ -24,8 +24,8 @@ class NoteBusinessService {
     final note = Note(
       id: noteId,
       content: content,
-      createdAt: now,
-      updatedAt: now,
+      createTime: now,
+      updateTime: now,
       notebookId: notebookId,
       images: imageName ?? [],
       videos: videoName ?? [],
@@ -63,8 +63,8 @@ class NoteBusinessService {
     final updatedNote = Note(
       id: id,
       content: content ?? existingNote.content,
-      createdAt: existingNote.createdAt,
-      updatedAt: DateTime.now(),
+      createTime: existingNote.createTime,
+      updateTime: DateTime.now(),
       notebookId: notebookId ?? existingNote.notebookId,
       images: imageName ?? existingNote.images,
       videos: videoName ?? existingNote.videos,
