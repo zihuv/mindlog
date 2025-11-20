@@ -118,7 +118,9 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                           style: TextStyle(
                             fontSize: AppFontSize.large,
                             fontWeight: AppFontWeight.medium,
-                            color: Theme.of(context).appBarTheme.titleTextStyle?.color,
+                            color: Theme.of(
+                              context,
+                            ).appBarTheme.titleTextStyle?.color,
                           ),
                         ),
                       ),
@@ -160,7 +162,9 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                                             : note.content,
                                         style: TextStyle(
                                           fontSize: AppFontSize.body,
-                                          color: Theme.of(context).colorScheme.onSurface,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
                                         ),
                                         onTextChange: (updatedText) {
                                           // Don't allow changes from this view

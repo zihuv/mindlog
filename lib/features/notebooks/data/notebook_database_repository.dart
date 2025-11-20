@@ -1,7 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:mindlog/database/app_database.dart';
 import 'package:mindlog/database/note_dao.dart';
-import 'package:mindlog/features/notebooks/domain/entities/notebook.dart' as domain_notebook;
+import 'package:mindlog/features/notebooks/domain/entities/notebook.dart'
+    as domain_notebook;
 import 'package:uuid/uuid.dart';
 
 import 'notebook_storage_repository.dart';
@@ -61,7 +62,9 @@ class NotebookDatabaseRepository implements NotebookStorageRepository {
         description: Value(notebook.description),
         coverImage: Value(notebook.coverImage),
         type: Value(notebook.type.toString().split('.').last.toLowerCase()),
-        createTime: Value(notebook.createTime), // Keep original creation createTime
+        createTime: Value(
+          notebook.createTime,
+        ), // Keep original creation createTime
         updateTime: Value(notebook.updateTime ?? DateTime.now()),
       ),
       notebook.id,
@@ -79,7 +82,9 @@ class NotebookDatabaseRepository implements NotebookStorageRepository {
     // The database will be closed by the DatabaseProvider when appropriate
   }
 
-  domain_notebook.Notebook _mapNotebookDataToNotebook(NotebookData notebookData) {
+  domain_notebook.Notebook _mapNotebookDataToNotebook(
+    NotebookData notebookData,
+  ) {
     return domain_notebook.Notebook(
       id: notebookData.id,
       title: notebookData.title,

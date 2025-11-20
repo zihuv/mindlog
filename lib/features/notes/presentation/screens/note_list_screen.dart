@@ -77,13 +77,17 @@ class NoteListScreen extends StatelessWidget {
                               AppPadding.medium.left,
                               AppPadding.medium.top,
                               AppPadding.medium.right,
-                              AppPadding.small.bottom, // Reduced bottom padding to reduce gap with content
+                              AppPadding
+                                  .small
+                                  .bottom, // Reduced bottom padding to reduce gap with content
                             ),
                             child: Text(
-                              _formatDateTime(note.updateTime ?? note.createTime),
+                              _formatDateTime(note.createTime),
                               style: TextStyle(
                                 fontSize: AppFontSize.small,
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.6),
                                 fontWeight: AppFontWeight.medium,
                               ),
                             ),
@@ -91,10 +95,12 @@ class NoteListScreen extends StatelessWidget {
                           // Content area with consistent padding
                           Container(
                             padding: EdgeInsets.fromLTRB(
-                              AppPadding.large.left, 
-                              0.0, 
-                              AppPadding.large.right, 
-                              AppPadding.medium.bottom, // No top padding to reduce gap from createTime
+                              AppPadding.large.left,
+                              0.0,
+                              AppPadding.large.right,
+                              AppPadding
+                                  .medium
+                                  .bottom, // No top padding to reduce gap from createTime
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,13 +112,14 @@ class NoteListScreen extends StatelessWidget {
                                       : note.content,
                                   style: TextStyle(
                                     fontSize: AppFontSize.body,
-                                    color: Theme.of(context).colorScheme.onSurface,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
                                   ),
                                   onTextChange: (updatedText) {
                                     _updateNoteContent(note.id, updatedText);
                                   },
                                 ),
-
                               ],
                             ),
                           ),
@@ -147,15 +154,11 @@ class NoteListScreen extends StatelessWidget {
     return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
-
   // Update the note content when checklist items are toggled
   Future<void> _updateNoteContent(String noteId, String newContent) async {
     try {
       final controller = Get.find<NoteController>();
-      await controller.updateNote(
-        id: noteId,
-        content: newContent,
-      );
+      await controller.updateNote(id: noteId, content: newContent);
       // Refresh the notes list to reflect the updated content
       await controller.loadNotes();
     } on Exception catch (e) {
@@ -176,7 +179,6 @@ class NoteListScreen extends StatelessWidget {
       );
     }
   }
-
 }
 
 class _NoteSearchDelegate extends SearchDelegate<String> {

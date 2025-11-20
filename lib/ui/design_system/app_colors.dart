@@ -34,10 +34,14 @@ class AppColors {
   static const Color darkOnSurface = Colors.white;
 
   // Additional colors for UI elements
-  static const Color cardBackground = Color(0xFFF8F9FA); // Very light grey for subtle contrast
+  static const Color cardBackground = Color(
+    0xFFF8F9FA,
+  ); // Very light grey for subtle contrast
   static const Color appBarBackground = Color(0xFFFFFFFF);
   static const Color appBarText = Color(0xFF1A1A1A);
-  static const Color checkedBox = Color(0xFF34A853); // Clean green for checklists
+  static const Color checkedBox = Color(
+    0xFF34A853,
+  ); // Clean green for checklists
   static const Color uncheckedBox = Color(0xFFCCCCCC);
   static const Color disabled = Color(0xFFE0E0E0);
 

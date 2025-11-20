@@ -49,7 +49,10 @@ class NoteController extends GetxController {
   }
 
   Future<List<Note>> getNotesByNotebookId(String notebookId) async {
-    return await _service.getNotesByNotebookId(notebookId);
+    final notes = await _service.getNotesByNotebookId(notebookId);
+    // Sort notes by creation createTime in descending order (newest first)
+    notes.sort((a, b) => b.createTime.compareTo(a.createTime));
+    return notes;
   }
 
   Future<void> searchNotes(String query) async {
@@ -81,14 +84,8 @@ class NoteController extends GetxController {
     return await _service.getNoteById(id);
   }
 
-  Future<void> createNote({
-    required String content,
-    String? notebookId,
-  }) async {
-    await _service.createNote(
-      content: content,
-      notebookId: notebookId,
-    );
+  Future<void> createNote({required String content, String? notebookId}) async {
+    await _service.createNote(content: content, notebookId: notebookId);
   }
 
   Future<void> updateNote({
@@ -96,11 +93,7 @@ class NoteController extends GetxController {
     String? content,
     String? notebookId,
   }) async {
-    await _service.updateNote(
-      id: id,
-      content: content,
-      notebookId: notebookId,
-    );
+    await _service.updateNote(id: id, content: content, notebookId: notebookId);
   }
 
   Future<void> deleteNote(String id) async {
@@ -160,11 +153,34 @@ class NoteController extends GetxController {
 
       String updatedContent = lines.join('\n');
 
-      await updateNote(
-        id: noteId,
-        content: updatedContent,
-      );
+      await updateNote(id: noteId, content: updatedContent);
     }
+  }
+
+  // Add image to a note
+  Future<void> addImageToNote({
+    required String noteId,
+    required String imagePath,
+    required String content,
+  }) async {
+    await _service.updateNote(
+      id: noteId,
+      content: content,
+      newImagesToCopy: [imagePath],
+    );
+  }
+
+  // Create a note with an image
+  Future<String> createNoteWithImage({
+    required String content,
+    required String imagePath,
+    String? notebookId,
+  }) async {
+    return await _service.createNote(
+      content: content,
+      imagesToCopy: [imagePath],
+      notebookId: notebookId,
+    );
   }
 
   // Helper function to generate consistent keys (same as in UI)

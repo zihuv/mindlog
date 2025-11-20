@@ -17,26 +17,27 @@ void main() {
       Get.reset();
     });
 
-    testWidgets('NotebookNotesScreen builds without AppBar and has proper layout', (WidgetTester tester) async {
-      // Build our app and trigger a frame
-      await tester.pumpWidget(
-        GetMaterialApp(
-          home: NotebookNotesScreen(notebookId: 'test-id'),
-        ),
-      );
+    testWidgets(
+      'NotebookNotesScreen builds without AppBar and has proper layout',
+      (WidgetTester tester) async {
+        // Build our app and trigger a frame
+        await tester.pumpWidget(
+          GetMaterialApp(home: NotebookNotesScreen(notebookId: 'test-id')),
+        );
 
-      // Verify that there is no AppBar in the screen
-      expect(find.byType(AppBar), findsNothing);
+        // Verify that there is no AppBar in the screen
+        expect(find.byType(AppBar), findsNothing);
 
-      // Verify that the notebook title is displayed in a header (when loading)
-      // This will be visible while the loading indicator is shown
-      expect(find.byType(Column), findsOneWidget);
+        // Verify that the notebook title is displayed in a header (when loading)
+        // This will be visible while the loading indicator is shown
+        expect(find.byType(Column), findsOneWidget);
 
-      // The screen should show a loading indicator initially
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        // The screen should show a loading indicator initially
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-      // Verify that the FAB is present
-      expect(find.byType(FloatingActionButton), findsOneWidget);
-    });
+        // Verify that the FAB is present
+        expect(find.byType(FloatingActionButton), findsOneWidget);
+      },
+    );
   });
 }

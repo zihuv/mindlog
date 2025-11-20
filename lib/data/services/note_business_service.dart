@@ -92,7 +92,6 @@ class NoteBusinessService {
     return await NoteService.instance.getNotesByNotebookId(notebookId);
   }
 
-
   // Get all unique tags
   Future<List<String>> getAllTags() async {
     return await NoteService.instance.getAllTags();

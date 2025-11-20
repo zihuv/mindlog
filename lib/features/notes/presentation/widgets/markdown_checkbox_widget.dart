@@ -17,11 +17,7 @@ class MarkdownWithCheckboxes extends StatelessWidget {
     return MarkdownBody(
       data: data,
       selectable: true,
-      builders: {
-        'input': _TaskCheckboxBuilder(
-          onChanged: onCheckboxChanged,
-        ),
-      },
+      builders: {'input': _TaskCheckboxBuilder(onChanged: onCheckboxChanged)},
     );
   }
 }
@@ -42,9 +38,12 @@ class _TaskCheckboxBuilder extends MarkdownElementBuilder {
       final content = _removeCheckboxSyntax(text);
 
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 1.0), // Minimal padding to match text line spacing
+        padding: const EdgeInsets.symmetric(
+          vertical: 1.0,
+        ), // Minimal padding to match text line spacing
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center, // Center-align checkbox with text
+          crossAxisAlignment:
+              CrossAxisAlignment.center, // Center-align checkbox with text
           children: [
             Checkbox(
               value: isChecked,
@@ -53,9 +52,11 @@ class _TaskCheckboxBuilder extends MarkdownElementBuilder {
                   onChanged?.call(index, content, value);
                 }
               },
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // Reduce tap target size
+              materialTapTargetSize:
+                  MaterialTapTargetSize.shrinkWrap, // Reduce tap target size
               visualDensity: VisualDensity.compact, // Reduce checkbox size
-              shape: RoundedRectangleBorder( // Smaller checkbox shape
+              shape: RoundedRectangleBorder(
+                // Smaller checkbox shape
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -65,10 +66,13 @@ class _TaskCheckboxBuilder extends MarkdownElementBuilder {
                 content,
                 style: TextStyle(
                   fontSize: 14.0, // Match default text size
-                  decoration: isChecked ? TextDecoration.lineThrough : TextDecoration.none,
+                  decoration: isChecked
+                      ? TextDecoration.lineThrough
+                      : TextDecoration.none,
                   color: isChecked
-                    ? Colors.grey // Use grey color for checked items
-                    : null, // Use default color for unchecked items
+                      ? Colors
+                            .grey // Use grey color for checked items
+                      : null, // Use default color for unchecked items
                 ),
               ),
             ),
@@ -122,9 +126,12 @@ class SimpleMarkdownCheckboxRenderer extends StatelessWidget {
 
         widgets.add(
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 1.0), // Minimal padding to match text line spacing
+            padding: const EdgeInsets.symmetric(
+              vertical: 1.0,
+            ), // Minimal padding to match text line spacing
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center, // Center-align checkbox with text
+              crossAxisAlignment:
+                  CrossAxisAlignment.center, // Center-align checkbox with text
               children: [
                 Checkbox(
                   value: isChecked,
@@ -133,9 +140,11 @@ class SimpleMarkdownCheckboxRenderer extends StatelessWidget {
                       onCheckboxChanged?.call(index, taskInfo.content, value);
                     }
                   },
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // Reduce tap target size
+                  materialTapTargetSize: MaterialTapTargetSize
+                      .shrinkWrap, // Reduce tap target size
                   visualDensity: VisualDensity.compact, // Reduce checkbox size
-                  shape: RoundedRectangleBorder( // Smaller checkbox shape
+                  shape: RoundedRectangleBorder(
+                    // Smaller checkbox shape
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
@@ -145,10 +154,13 @@ class SimpleMarkdownCheckboxRenderer extends StatelessWidget {
                     taskInfo.content,
                     style: TextStyle(
                       fontSize: 14.0, // Match default text size
-                      decoration: taskInfo.isChecked ? TextDecoration.lineThrough : TextDecoration.none,
+                      decoration: taskInfo.isChecked
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
                       color: taskInfo.isChecked
-                        ? Colors.grey // Use grey color for checked items
-                        : null, // Use default color for unchecked items
+                          ? Colors
+                                .grey // Use grey color for checked items
+                          : null, // Use default color for unchecked items
                     ),
                   ),
                 ),
@@ -160,11 +172,10 @@ class SimpleMarkdownCheckboxRenderer extends StatelessWidget {
         // For non-checklist lines, use a more integrated approach
         widgets.add(
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 1.0), // Match checklist item spacing
-            child: SelectableText(
-              line,
-              style: const TextStyle(fontSize: 14.0),
-            ),
+            padding: const EdgeInsets.symmetric(
+              vertical: 1.0,
+            ), // Match checklist item spacing
+            child: SelectableText(line, style: const TextStyle(fontSize: 14.0)),
           ),
         );
       }

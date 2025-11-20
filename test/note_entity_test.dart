@@ -49,9 +49,7 @@ void main() {
         createTime: DateTime.now(),
       );
 
-      final updatedNote = originalNote.copyWith(
-        content: 'Updated content',
-      );
+      final updatedNote = originalNote.copyWith(content: 'Updated content');
 
       expect(updatedNote.id, 'original'); // Should remain unchanged
       expect(updatedNote.content, 'Updated content'); // Should be updated
@@ -75,8 +73,14 @@ void main() {
 
       expect(deserializedNote.id, 'json-test');
       expect(deserializedNote.content, 'JSON test content');
-      expect(deserializedNote.createTime.millisecondsSinceEpoch, note.createTime.millisecondsSinceEpoch);
-      expect(deserializedNote.updateTime!.millisecondsSinceEpoch, note.updateTime!.millisecondsSinceEpoch);
+      expect(
+        deserializedNote.createTime.millisecondsSinceEpoch,
+        note.createTime.millisecondsSinceEpoch,
+      );
+      expect(
+        deserializedNote.updateTime!.millisecondsSinceEpoch,
+        note.updateTime!.millisecondsSinceEpoch,
+      );
       expect(deserializedNote.notebookId, 'notebook-json');
       expect(deserializedNote.images, equals(['image.jpg']));
       expect(deserializedNote.videos, equals(['video.mp4']));

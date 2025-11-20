@@ -17,7 +17,7 @@ class AppBorderRadius {
   static const BorderRadius floatingActionButton = large;
   static const BorderRadius dialog = xLarge;
   static const BorderRadius chip = full;
-  
+
   // Circular radius
   static const Radius circular = Radius.circular(999.0);
 }

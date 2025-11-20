@@ -48,12 +48,19 @@ class MarkdownChecklist extends StatelessWidget {
         final originalLine = part.originalLine!;
 
         // Extract the indentation and task content
-        final match = RegExp(r'^(\s*)[-*]\s+\[([ xX])\]\s+(.+)$').firstMatch(originalLine);
+        final match = RegExp(
+          r'^(\s*)[-*]\s+\[([ xX])\]\s+(.+)$',
+        ).firstMatch(originalLine);
         if (match == null) continue;
 
         // Use the current text style for sizing but override color for the checkbox
-        final iconColor = style?.color ?? Theme.of(context).colorScheme.onSurface;
-        final iconSize = (style?.fontSize ?? Theme.of(context).textTheme.bodyLarge?.fontSize ?? 14.0) * 0.85;
+        final iconColor =
+            style?.color ?? Theme.of(context).colorScheme.onSurface;
+        final iconSize =
+            (style?.fontSize ??
+                Theme.of(context).textTheme.bodyLarge?.fontSize ??
+                14.0) *
+            0.85;
 
         // Create the entire checklist item as a clickable widget
         textSpans.add(
@@ -71,23 +78,26 @@ class MarkdownChecklist extends StatelessWidget {
                       children: [
                         Container(
                           // Add a container with proper padding to increase tap area
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4.0,
+                            vertical: 2.0,
+                          ),
                           child: Icon(
                             isChecked
-                              ? Icons.check_box
-                              : Icons.check_box_outline_blank,
+                                ? Icons.check_box
+                                : Icons.check_box_outline_blank,
                             size: iconSize,
                             color: isChecked
-                              ? Theme.of(context).colorScheme.primary
-                              : iconColor,
+                                ? Theme.of(context).colorScheme.primary
+                                : iconColor,
                           ),
                         ),
                         Text(
                           ' ${match.group(3)!}',
                           style: style?.copyWith(
                             decoration: isChecked
-                              ? TextDecoration.lineThrough
-                              : TextDecoration.none,
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
                           ),
                         ),
                       ],
@@ -103,10 +113,7 @@ class MarkdownChecklist extends StatelessWidget {
     }
 
     return RichText(
-      text: TextSpan(
-        style: style,
-        children: textSpans,
-      ),
+      text: TextSpan(style: style, children: textSpans),
       textAlign: textAlign ?? TextAlign.start,
       textDirection: textDirection,
       softWrap: softWrap,
@@ -125,7 +132,10 @@ class MarkdownChecklist extends StatelessWidget {
     final parts = <_TextPart>[];
 
     // Use regex to find markdown checklist items (supporting both - and * for lists)
-    final checklistRegex = RegExp(r'^(\s*)[-*]\s+\[([ xX])\]\s+(.+)$', multiLine: true);
+    final checklistRegex = RegExp(
+      r'^(\s*)[-*]\s+\[([ xX])\]\s+(.+)$',
+      multiLine: true,
+    );
     final lines = input.split('\n');
 
     for (int i = 0; i < lines.length; i++) {
@@ -137,18 +147,22 @@ class MarkdownChecklist extends StatelessWidget {
         final isChecked = match.group(2)!.trim().toLowerCase() == 'x';
 
         // Add the checklist part
-        parts.add(_TextPart(
-          type: _PartType.checklist,
-          content: line,
-          isChecked: isChecked,
-          originalLine: line,
-        ));
+        parts.add(
+          _TextPart(
+            type: _PartType.checklist,
+            content: line,
+            isChecked: isChecked,
+            originalLine: line,
+          ),
+        );
       } else {
         // This is regular text
-        parts.add(_TextPart(
-          type: _PartType.text,
-          content: '$line${i < lines.length - 1 ? '\n' : ''}',
-        ));
+        parts.add(
+          _TextPart(
+            type: _PartType.text,
+            content: '$line${i < lines.length - 1 ? '\n' : ''}',
+          ),
+        );
       }
     }
 

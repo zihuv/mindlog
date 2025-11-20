@@ -1,5 +1,3 @@
-
-
 class AppFlex {
   // Standard flex values
   static const int flex1 = 1;

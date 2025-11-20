@@ -108,7 +108,6 @@ class NoteService extends GetxService {
     return await _noteDao.searchNotes(query);
   }
 
-
   // Add a media file to a note
   Future<String?> addMediaToNote(
     String noteId,

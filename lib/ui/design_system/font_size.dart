@@ -1,5 +1,3 @@
-
-
 class AppFontSize {
   // Typography scale - following Material Design guidelines
   static const double extraSmall = 10.0;

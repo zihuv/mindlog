@@ -14,25 +14,26 @@ class AppTheme {
       primaryColor: AppColors.primary,
       primaryColorLight: AppColors.primaryVariant,
       primaryColorDark: AppColors.primaryVariant,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primary,
-        primary: AppColors.primary,
-        onPrimary: AppColors.onPrimary,
-        primaryContainer: AppColors.primaryVariant,
-        onPrimaryContainer: AppColors.onPrimary,
-        secondary: AppColors.secondary,
-        onSecondary: AppColors.onSecondary,
-        secondaryContainer: AppColors.secondaryVariant,
-        onSecondaryContainer: AppColors.onSecondary,
-        surface: AppColors.surface,
-        onSurface: AppColors.onSurface,
-        error: AppColors.error,
-        onError: AppColors.onError,
-      ).copyWith(
-        brightness: Brightness.light,
-        surface: AppColors.surface,
-        onSurface: AppColors.onSurface,
-      ),
+      colorScheme:
+          ColorScheme.fromSeed(
+            seedColor: AppColors.primary,
+            primary: AppColors.primary,
+            onPrimary: AppColors.onPrimary,
+            primaryContainer: AppColors.primaryVariant,
+            onPrimaryContainer: AppColors.onPrimary,
+            secondary: AppColors.secondary,
+            onSecondary: AppColors.onSecondary,
+            secondaryContainer: AppColors.secondaryVariant,
+            onSecondaryContainer: AppColors.onSecondary,
+            surface: AppColors.surface,
+            onSurface: AppColors.onSurface,
+            error: AppColors.error,
+            onError: AppColors.onError,
+          ).copyWith(
+            brightness: Brightness.light,
+            surface: AppColors.surface,
+            onSurface: AppColors.onSurface,
+          ),
 
       // Text theme
       textTheme: _textTheme,
@@ -40,9 +41,7 @@ class AppTheme {
       // Card theme
       cardTheme: CardThemeData(
         color: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppBorderRadius.card,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.card),
         elevation: 1.0, // Reduced for a cleaner look
         shadowColor: Colors.black12, // More subtle shadow
       ),
@@ -57,9 +56,7 @@ class AppTheme {
           fontWeight: AppFontWeight.appBarTitle,
           color: AppColors.appBarText,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: AppBorderRadius.appBar,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.appBar),
         elevation: 0, // No elevation for cleaner look
       ),
 
@@ -68,9 +65,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppBorderRadius.button,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.button),
           padding: AppPadding.button,
           textStyle: TextStyle(
             fontSize: AppFontSize.buttonLabel,
@@ -94,19 +89,14 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppBorderRadius.inputField,
-          borderSide: BorderSide(
-            color: AppColors.primary,
-            width: 2.0,
-          ),
+          borderSide: BorderSide(color: AppColors.primary, width: 2.0),
         ),
       ),
 
       // Dialog theme
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppBorderRadius.dialog,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.dialog),
         titleTextStyle: TextStyle(
           fontSize: AppFontSize.dialogTitle,
           fontWeight: AppFontWeight.dialogTitle,
@@ -134,9 +124,7 @@ class AppTheme {
           fontWeight: AppFontWeight.chipLabel,
           color: AppColors.onPrimary,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: AppBorderRadius.chip,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.chip),
       ),
 
       // Tooltip theme
@@ -179,25 +167,26 @@ class AppTheme {
       primaryColor: AppColors.primary,
       primaryColorLight: AppColors.primaryVariant,
       primaryColorDark: AppColors.primaryVariant,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primary,
-        primary: AppColors.primary,
-        onPrimary: AppColors.onPrimary,
-        primaryContainer: AppColors.primaryVariant,
-        onPrimaryContainer: AppColors.onPrimary,
-        secondary: AppColors.secondary,
-        onSecondary: AppColors.onSecondary,
-        secondaryContainer: AppColors.secondaryVariant,
-        onSecondaryContainer: AppColors.onSecondary,
-        surface: AppColors.darkSurface,
-        onSurface: AppColors.darkOnSurface,
-        error: AppColors.error,
-        onError: AppColors.onError,
-      ).copyWith(
-        brightness: Brightness.dark,
-        surface: AppColors.darkSurface,
-        onSurface: AppColors.darkOnSurface,
-      ),
+      colorScheme:
+          ColorScheme.fromSeed(
+            seedColor: AppColors.primary,
+            primary: AppColors.primary,
+            onPrimary: AppColors.onPrimary,
+            primaryContainer: AppColors.primaryVariant,
+            onPrimaryContainer: AppColors.onPrimary,
+            secondary: AppColors.secondary,
+            onSecondary: AppColors.onSecondary,
+            secondaryContainer: AppColors.secondaryVariant,
+            onSecondaryContainer: AppColors.onSecondary,
+            surface: AppColors.darkSurface,
+            onSurface: AppColors.darkOnSurface,
+            error: AppColors.error,
+            onError: AppColors.onError,
+          ).copyWith(
+            brightness: Brightness.dark,
+            surface: AppColors.darkSurface,
+            onSurface: AppColors.darkOnSurface,
+          ),
 
       // Text theme
       textTheme: _textTheme.apply(
@@ -208,9 +197,7 @@ class AppTheme {
       // Card theme
       cardTheme: CardThemeData(
         color: AppColors.darkSurface,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppBorderRadius.card,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.card),
         elevation: 4.0,
         shadowColor: Colors.black38,
       ),
@@ -225,9 +212,7 @@ class AppTheme {
           fontWeight: AppFontWeight.appBarTitle,
           color: AppColors.onPrimary,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: AppBorderRadius.appBar,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.appBar),
         elevation: 4.0,
       ),
 
@@ -236,9 +221,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppBorderRadius.button,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.button),
           padding: AppPadding.button,
           textStyle: TextStyle(
             fontSize: AppFontSize.buttonLabel,
@@ -262,19 +245,14 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppBorderRadius.inputField,
-          borderSide: BorderSide(
-            color: AppColors.primary,
-            width: 2.0,
-          ),
+          borderSide: BorderSide(color: AppColors.primary, width: 2.0),
         ),
       ),
 
       // Dialog theme
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.darkSurface,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppBorderRadius.dialog,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.dialog),
         titleTextStyle: TextStyle(
           fontSize: AppFontSize.dialogTitle,
           fontWeight: AppFontWeight.dialogTitle,
@@ -302,9 +280,7 @@ class AppTheme {
           fontWeight: AppFontWeight.chipLabel,
           color: AppColors.onPrimary,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: AppBorderRadius.chip,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.chip),
       ),
 
       // Tooltip theme

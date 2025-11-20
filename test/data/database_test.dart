@@ -150,6 +150,5 @@ void main() {
       expect(programmingResults.length, equals(1));
       expect(programmingResults.first.id, equals('search-test-2'));
     });
-
   });
 }

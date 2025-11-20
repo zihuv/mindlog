@@ -80,7 +80,6 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
     }
   }
 
-
   Future<void> _saveNotebook() async {
     if (_titleController.text.trim().isEmpty) {
       Get.showSnackbar(
@@ -250,7 +249,9 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
                       height: 150,
                       decoration: BoxDecoration(
                         borderRadius: AppBorderRadius.card,
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         border: Border.all(
                           color: Theme.of(context).dividerColor,
                           width: 0.5,
@@ -337,7 +338,6 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
             ),
     );
   }
-
 
   @override
   void dispose() {

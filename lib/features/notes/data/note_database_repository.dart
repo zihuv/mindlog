@@ -60,7 +60,9 @@ class NoteDatabaseRepository implements NoteStorageRepository {
     await _noteDao.updateNote(
       db.NotesCompanion(
         content: drift.Value(note.content),
-        createTime: drift.Value(note.createTime), // Keep original creation createTime
+        createTime: drift.Value(
+          note.createTime,
+        ), // Keep original creation createTime
         updateTime: drift.Value(note.updateTime ?? DateTime.now()),
         imageName: drift.Value(note.images),
         audioName: drift.Value(note.audios),

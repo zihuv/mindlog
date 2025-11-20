@@ -26,7 +26,8 @@ class NotebookService {
     if (_repository == null) {
       // Create database repository for UUID support
       _repository = NotebookDatabaseRepository();
-      await _repository!.initialize(); // The repository is not null at this point, so using ! is safe
+      await _repository!
+          .initialize(); // The repository is not null at this point, so using ! is safe
     }
   }
 
@@ -72,6 +73,7 @@ class NotebookService {
     }
     return repository.deleteNotebook(id);
   }
+
   Future<void> close() async {
     // Don't close the repository since it uses shared database
     // The shared database will be closed separately

@@ -38,7 +38,6 @@ class _NotesPageState extends State<NotesPage> {
     }
   }
 
-
   void _sortNotes() {
     // Sort by creation date (newest first) - isPinned has been removed
     _allNotes.sort((a, b) {
@@ -190,7 +189,6 @@ class _NotesPageState extends State<NotesPage> {
       ),
       body: Column(
         children: [
-
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -213,7 +211,6 @@ class _NotesPageState extends State<NotesPage> {
                       ],
                     ),
                   )
-
                 : RefreshIndicator(
                     onRefresh: () async {
                       await _loadNotes();

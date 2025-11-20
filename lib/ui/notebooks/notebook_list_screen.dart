@@ -54,7 +54,10 @@ class NotebookListScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final notebook = controller.notebooks[index];
                   return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0), // Reduced margins
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 12.0,
+                      vertical: 6.0,
+                    ), // Reduced margins
                     shape: RoundedRectangleBorder(
                       borderRadius: AppBorderRadius.card,
                       side: BorderSide(
@@ -66,13 +69,13 @@ class NotebookListScreen extends StatelessWidget {
                       borderRadius: AppBorderRadius.card,
                       onTap: () {
                         Get.to(
-                          () => NotebookNotesScreen(
-                            notebookId: notebook.id,
-                          ),
+                          () => NotebookNotesScreen(notebookId: notebook.id),
                         );
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(8.0), // Small padding for the whole item
+                        padding: const EdgeInsets.all(
+                          8.0,
+                        ), // Small padding for the whole item
                         child: Row(
                           children: [
                             // Cover image with minimal size
@@ -80,15 +83,20 @@ class NotebookListScreen extends StatelessWidget {
                               width: 50, // Small fixed width
                               height: 50, // Small fixed height
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(6.0), // Small border radius
+                                borderRadius: BorderRadius.circular(
+                                  6.0,
+                                ), // Small border radius
                                 color: Theme.of(
                                   context,
                                 ).colorScheme.surfaceContainerHighest,
                               ),
-                              child: notebook.coverImage != null &&
-                                  notebook.coverImage!.isNotEmpty
+                              child:
+                                  notebook.coverImage != null &&
+                                      notebook.coverImage!.isNotEmpty
                                   ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(6.0), // Small border radius
+                                      borderRadius: BorderRadius.circular(
+                                        6.0,
+                                      ), // Small border radius
                                       child: Image.network(
                                         notebook.coverImage!,
                                         fit: BoxFit.cover,
@@ -114,7 +122,9 @@ class NotebookListScreen extends StatelessWidget {
                                       ).colorScheme.primary,
                                     ),
                             ),
-                            const SizedBox(width: 8), // Small gap between image and text
+                            const SizedBox(
+                              width: 8,
+                            ), // Small gap between image and text
                             // Notebook title and type
                             Expanded(
                               child: Column(
@@ -123,9 +133,12 @@ class NotebookListScreen extends StatelessWidget {
                                   Text(
                                     notebook.title,
                                     style: TextStyle(
-                                      fontSize: AppFontSize.small, // Small font size
+                                      fontSize:
+                                          AppFontSize.small, // Small font size
                                       fontWeight: AppFontWeight.medium,
-                                      color: Theme.of(context).colorScheme.onSurface,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -134,7 +147,8 @@ class NotebookListScreen extends StatelessWidget {
                                   Text(
                                     notebook.type.toString().split('.').last,
                                     style: TextStyle(
-                                      fontSize: AppFontSize.extraSmall, // Small text for category
+                                      fontSize: AppFontSize
+                                          .extraSmall, // Small text for category
                                       color: Theme.of(
                                         context,
                                       ).colorScheme.onSurfaceVariant,

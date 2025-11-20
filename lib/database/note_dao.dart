@@ -77,10 +77,13 @@ class NoteDao extends DatabaseAccessor<AppDatabase> with _$NoteDaoMixin {
   }
 
   // Notebook operations
-  Future<int> insertNotebook(NotebooksCompanion notebook) => into(notebooks).insert(notebook);
+  Future<int> insertNotebook(NotebooksCompanion notebook) =>
+      into(notebooks).insert(notebook);
 
   Future<int> updateNotebook(NotebooksCompanion notebook, String id) {
-    return (update(notebooks)..where((tbl) => tbl.id.equals(id))).write(notebook);
+    return (update(
+      notebooks,
+    )..where((tbl) => tbl.id.equals(id))).write(notebook);
   }
 
   Future<List<NotebookData>> getAllNotebooks() {
@@ -90,7 +93,9 @@ class NoteDao extends DatabaseAccessor<AppDatabase> with _$NoteDaoMixin {
   }
 
   Future<NotebookData?> getNotebookById(String id) async {
-    final result = await (select(notebooks)..where((tbl) => tbl.id.equals(id))).get();
+    final result = await (select(
+      notebooks,
+    )..where((tbl) => tbl.id.equals(id))).get();
     if (result.isNotEmpty) {
       return NotebookData.fromTable(result.first);
     }
@@ -102,7 +107,10 @@ class NoteDao extends DatabaseAccessor<AppDatabase> with _$NoteDaoMixin {
   }
 
   Future<List<NoteData>> getNotesByNotebookId(String notebookId) {
-    return (select(notes)..where((tbl) => tbl.notebookId.equals(notebookId) & tbl.isDeleted.equals(false)))
+    return (select(notes)..where(
+          (tbl) =>
+              tbl.notebookId.equals(notebookId) & tbl.isDeleted.equals(false),
+        ))
         .get()
         .then((rows) => rows.map((row) => NoteData.fromTable(row)).toList());
   }

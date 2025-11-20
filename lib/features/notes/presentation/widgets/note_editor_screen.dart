@@ -185,5 +185,4 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     // Navigate back
     Navigator.pop(contextLocal);
   }
-
 }

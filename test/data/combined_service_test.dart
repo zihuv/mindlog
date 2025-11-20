@@ -111,13 +111,9 @@ void main() {
 
     test('Search notes', () async {
       // Create test notes
-      await service.createNote(
-        content: 'This is a Flutter development note',
-      );
+      await service.createNote(content: 'This is a Flutter development note');
 
-      await service.createNote(
-        content: 'Dart programming concepts note',
-      );
+      await service.createNote(content: 'Dart programming concepts note');
 
       // Search for Flutter note
       final flutterResults = await service.searchNotes('Flutter');
