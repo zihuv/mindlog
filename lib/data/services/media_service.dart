@@ -12,6 +12,18 @@ class MediaService {
     return directory;
   }
 
+  Future<Directory> _getAppCacheDirectory() async {
+    final directory = await getApplicationCacheDirectory();
+    return directory;
+  }
+
+  // Check if the provided path is in the cache directory
+  Future<bool> _isCachePath(String filePath) async {
+    final cacheDir = await _getAppCacheDirectory();
+    final cachePath = cacheDir.path;
+    return filePath.startsWith(cachePath);
+  }
+
   Future<Directory> _getNoteDirectory(String noteId, String mediaType) async {
     final appDir = await _getAppDirectory();
     final noteDir = Directory(path.join(appDir.path, mediaType, noteId));
@@ -33,10 +45,24 @@ class MediaService {
     final noteDir = await _getNoteDirectory(noteId, _imagesDirName);
     final destinationPath = path.join(noteDir.path, fileName);
 
-    final sourceFile = File(sourcePath);
-    final destinationFile = await sourceFile.copy(destinationPath);
+    // Check if the source file is in the cache directory
+    bool isCachePath = await _isCachePath(sourcePath);
+    print('Saving image: sourcePath=$sourcePath, isCachePath=$isCachePath, destinationPath=$destinationPath');
 
-    return destinationFile.path;
+    if (isCachePath) {
+      // If the source file is in cache, copy it from the cache to the note directory
+      final sourceFile = File(sourcePath);
+      final destinationFile = await sourceFile.copy(destinationPath);
+      print('Copied from cache to storage: ${sourceFile.path} -> ${destinationFile.path}');
+      return destinationFile.path;
+    } else {
+      // If the source file is not in cache, it might be a file that already exists in our storage
+      // We should still copy it to the correct location for this note
+      final sourceFile = File(sourcePath);
+      final destinationFile = await sourceFile.copy(destinationPath);
+      print('Copied from source to storage: ${sourceFile.path} -> ${destinationFile.path}');
+      return destinationFile.path;
+    }
   }
 
   // Save video file to the appropriate note directory
@@ -48,10 +74,24 @@ class MediaService {
     final noteDir = await _getNoteDirectory(noteId, _videosDirName);
     final destinationPath = path.join(noteDir.path, fileName);
 
-    final sourceFile = File(sourcePath);
-    final destinationFile = await sourceFile.copy(destinationPath);
+    // Check if the source file is in the cache directory
+    bool isCachePath = await _isCachePath(sourcePath);
+    print('Saving video: sourcePath=$sourcePath, isCachePath=$isCachePath, destinationPath=$destinationPath');
 
-    return destinationFile.path;
+    if (isCachePath) {
+      // If the source file is in cache, copy it from the cache to the note directory
+      final sourceFile = File(sourcePath);
+      final destinationFile = await sourceFile.copy(destinationPath);
+      print('Copied from cache to storage: ${sourceFile.path} -> ${destinationFile.path}');
+      return destinationFile.path;
+    } else {
+      // If the source file is not in cache, it might be a file that already exists in our storage
+      // We should still copy it to the correct location for this note
+      final sourceFile = File(sourcePath);
+      final destinationFile = await sourceFile.copy(destinationPath);
+      print('Copied from source to storage: ${sourceFile.path} -> ${destinationFile.path}');
+      return destinationFile.path;
+    }
   }
 
   // Save audio file to the appropriate note directory
@@ -63,10 +103,24 @@ class MediaService {
     final noteDir = await _getNoteDirectory(noteId, _audiosDirName);
     final destinationPath = path.join(noteDir.path, fileName);
 
-    final sourceFile = File(sourcePath);
-    final destinationFile = await sourceFile.copy(destinationPath);
+    // Check if the source file is in the cache directory
+    bool isCachePath = await _isCachePath(sourcePath);
+    print('Saving audio: sourcePath=$sourcePath, isCachePath=$isCachePath, destinationPath=$destinationPath');
 
-    return destinationFile.path;
+    if (isCachePath) {
+      // If the source file is in cache, copy it from the cache to the note directory
+      final sourceFile = File(sourcePath);
+      final destinationFile = await sourceFile.copy(destinationPath);
+      print('Copied from cache to storage: ${sourceFile.path} -> ${destinationFile.path}');
+      return destinationFile.path;
+    } else {
+      // If the source file is not in cache, it might be a file that already exists in our storage
+      // We should still copy it to the correct location for this note
+      final sourceFile = File(sourcePath);
+      final destinationFile = await sourceFile.copy(destinationPath);
+      print('Copied from source to storage: ${sourceFile.path} -> ${destinationFile.path}');
+      return destinationFile.path;
+    }
   }
 
   // Get all image paths for a specific note
@@ -181,5 +235,23 @@ class MediaService {
       }
     }
     return totalSize;
+  }
+
+  // Clean up cache files after they have been properly saved to the note directory
+  Future<void> cleanupCacheFiles(List<String> cacheFilePaths) async {
+    for (final cachePath in cacheFilePaths) {
+      final isCachePath = await _isCachePath(cachePath);
+      if (isCachePath) {
+        final file = File(cachePath);
+        if (await file.exists()) {
+          try {
+            await file.delete();
+          } catch (e) {
+            // If we can't delete the file, log the error but continue
+            print('Could not delete cache file $cachePath: $e');
+          }
+        }
+      }
+    }
   }
 }

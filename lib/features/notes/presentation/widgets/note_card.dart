@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/presentation/components/components/markdown_checklist.dart';
+import 'package:mindlog/features/notes/presentation/widgets/image_display.dart';
 
 class NoteCard extends StatelessWidget {
   final Note note;
@@ -79,6 +80,26 @@ class NoteCard extends StatelessWidget {
                   onChecklistChanged?.call(updatedNote);
                 },
               ),
+              // Display attached images as thumbnails if any
+              if (note.images.isNotEmpty)
+                Container(
+                  height: 80, // Fixed height for image thumbnail container
+                  margin: const EdgeInsets.only(top: 8.0),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: note.images.length > 3 ? 3 : note.images.length, // Show max 3 thumbnails
+                    itemBuilder: (context, index) {
+                      return Container(
+                        margin: const EdgeInsets.only(right: 8.0),
+                        child: ImageDisplay(
+                          imagePath: note.images[index],
+                          thumbnailHeight: 80,
+                          thumbnailWidth: 80,
+                        ),
+                      );
+                    },
+                  ),
+                ),
             ],
           ),
         ),

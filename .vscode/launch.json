@@ -1,42 +1,40 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        
-        {
-            "name": "Flutter (Web)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "cwd": "${workspaceFolder}",
-            "flutterMode": "debug",
-            "flutterWebRenderer": "html",
-            "flutterWebBrowser": "chrome"
-        },
-        {
-            "name": "Flutter",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "cwd": "${workspaceFolder}",
-            "flutterMode": "debug"
-        },
-        {
-            "name": "Flutter (Profile Mode)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "cwd": "${workspaceFolder}",
-            "flutterMode": "profile"
-        },
-        {
-            "name": "Flutter (Release Mode)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "cwd": "${workspaceFolder}",
-            "flutterMode": "release"
-        }
-    ],
-    "compounds": [],
-    "inputs": []
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter (Android Emulator)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "${workspaceFolder}",
+      "flutterMode": "debug",
+      "deviceId": "emulator-5554"
+    },
+    {
+      "name": "Flutter",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "${workspaceFolder}",
+      "flutterMode": "debug"
+    },
+    {
+      "name": "Flutter (Profile Mode)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "${workspaceFolder}",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "Flutter (Release Mode)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "${workspaceFolder}",
+      "flutterMode": "release"
+    }
+  ],
+  "compounds": [],
+  "inputs": []
 }

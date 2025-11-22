@@ -4,6 +4,9 @@ import 'note_detail_screen.dart';
 import '../../../../controllers/note_controller.dart';
 import '../../../../ui/design_system/design_system.dart';
 import '../components/components/markdown_checklist.dart';
+import 'dart:io';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 class NoteListScreen extends StatelessWidget {
   const NoteListScreen({super.key});
@@ -105,6 +108,55 @@ class NoteListScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // Display image thumbnails if available
+                                if (note.images.isNotEmpty)
+                                  Container(
+                                    height: 80, // Fixed height for image container
+                                    margin: const EdgeInsets.only(bottom: 8.0),
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: note.images.length,
+                                      itemBuilder: (context, index) {
+                                        return Container(
+                                          margin: const EdgeInsets.only(right: 8.0),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(8.0),
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                // Navigate to detail view to see the image
+                                                Get.to(() => NoteDetailScreen(noteId: note.id));
+                                              },
+                                              child: FutureBuilder<String?>(
+                                                future: _getImagePath(note.id, note.images[index]),
+                                                builder: (context, snapshot) {
+                                                  print('Image FutureBuilder - Note: ${note.id}, Index: $index, HasData: ${snapshot.hasData}, Data: ${snapshot.data}');
+                                                  if (snapshot.hasData && snapshot.data != null) {
+                                                    return Image.file(
+                                                      File(snapshot.data!),
+                                                      width: 80,
+                                                      height: 80,
+                                                      fit: BoxFit.cover,
+                                                    );
+                                                  } else {
+                                                    print('Image FutureBuilder - No data for note: ${note.id}, image: ${note.images[index]}');
+                                                    return Container(
+                                                      width: 80,
+                                                      height: 80,
+                                                      color: Theme.of(context).dividerColor,
+                                                      child: Icon(
+                                                        Icons.image,
+                                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
                                 // Main content with markdown checklist support
                                 MarkdownChecklist(
                                   text: note.content.length > 200
@@ -255,5 +307,24 @@ class _NoteSearchDelegate extends SearchDelegate<String> {
         ),
       );
     }
+  }
+}
+
+// Helper function to get the full path of an image
+Future<String?> _getImagePath(String noteId, String imageName) async {
+  try {
+    // According to MediaService implementation, images are stored in {appDir}/{mediaType}/{noteId}/{imageName}
+    final appDir = await getApplicationDocumentsDirectory();
+    String imagePath = path.join(appDir.path, 'images', noteId, imageName);
+
+    // Debugging: Print the path being checked
+    print('Checking for image at path: $imagePath');
+    bool exists = File(imagePath).existsSync();
+    print('Image exists: $exists');
+
+    return exists ? imagePath : null;
+  } on Exception catch (e) {
+    print('Error getting image path: $e');
+    return null;
   }
 }

@@ -58,6 +58,16 @@ class CombinedNoteService {
       }
     }
 
+    // Clean up cache files after they have been saved to the note directory
+    if (imagesToCopy != null || videosToCopy != null || audiosToCopy != null) {
+      final allMediaPaths = <String>[];
+      if (imagesToCopy != null) allMediaPaths.addAll(imagesToCopy);
+      if (videosToCopy != null) allMediaPaths.addAll(videosToCopy);
+      if (audiosToCopy != null) allMediaPaths.addAll(audiosToCopy);
+
+      await _mediaService.cleanupCacheFiles(allMediaPaths);
+    }
+
     return noteId;
   }
 
@@ -90,30 +100,56 @@ class CombinedNoteService {
       throw Exception('Note with id $id does not exist');
     }
 
-    // Update the note
-    await _noteService.updateNote(
-      id: id,
-      content: content,
-      notebookId: notebookId,
-    );
-
     // Add new media files if provided
+    List<String>? updatedImageNames = existingNote.images;
+    List<String>? updatedVideoNames = existingNote.videos;
+    List<String>? updatedAudioNames = existingNote.audios;
+
     if (newImagesToCopy != null) {
+      List<String> newImageNames = [];
       for (final imagePath in newImagesToCopy) {
         await _mediaService.saveImage(id, imagePath.split('/').last, imagePath);
+        newImageNames.add(imagePath.split('/').last);
       }
+      updatedImageNames = [...existingNote.images, ...newImageNames];
     }
 
     if (newVideosToCopy != null) {
+      List<String> newVideoNames = [];
       for (final videoPath in newVideosToCopy) {
         await _mediaService.saveVideo(id, videoPath.split('/').last, videoPath);
+        newVideoNames.add(videoPath.split('/').last);
       }
+      updatedVideoNames = [...existingNote.videos, ...newVideoNames];
     }
 
     if (newAudiosToCopy != null) {
+      List<String> newAudioNames = [];
       for (final audioPath in newAudiosToCopy) {
         await _mediaService.saveAudio(id, audioPath.split('/').last, audioPath);
+        newAudioNames.add(audioPath.split('/').last);
       }
+      updatedAudioNames = [...existingNote.audios, ...newAudioNames];
+    }
+
+    // Update the note with all the information
+    await _noteService.updateNote(
+      id: id,
+      content: content,
+      imageName: updatedImageNames,
+      audioName: updatedAudioNames,
+      videoName: updatedVideoNames,
+      notebookId: notebookId,
+    );
+
+    // Clean up cache files after they have been saved to the note directory
+    if (newImagesToCopy != null || newVideosToCopy != null || newAudiosToCopy != null) {
+      final allMediaPaths = <String>[];
+      if (newImagesToCopy != null) allMediaPaths.addAll(newImagesToCopy);
+      if (newVideosToCopy != null) allMediaPaths.addAll(newVideosToCopy);
+      if (newAudiosToCopy != null) allMediaPaths.addAll(newAudiosToCopy);
+
+      await _mediaService.cleanupCacheFiles(allMediaPaths);
     }
   }
 
