@@ -173,6 +173,24 @@ class MediaService {
     }
   }
 
+  // Delete a specific image file for a note
+  Future<void> deleteImage(String noteId, String imageName) async {
+    final imagePath = await getMediaPath(noteId, _imagesDirName, imageName);
+    await deleteMediaFile(imagePath);
+  }
+
+  // Delete a specific video file for a note
+  Future<void> deleteVideo(String noteId, String videoName) async {
+    final videoPath = await getMediaPath(noteId, _videosDirName, videoName);
+    await deleteMediaFile(videoPath);
+  }
+
+  // Delete a specific audio file for a note
+  Future<void> deleteAudio(String noteId, String audioName) async {
+    final audioPath = await getMediaPath(noteId, _audiosDirName, audioName);
+    await deleteMediaFile(audioPath);
+  }
+
   // Delete all media for a specific note
   Future<void> deleteNoteMedia(String noteId) async {
     // Delete images directory for the note

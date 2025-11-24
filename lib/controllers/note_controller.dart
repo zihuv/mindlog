@@ -183,6 +183,25 @@ class NoteController extends GetxController {
     );
   }
 
+  // Update note media (for deletion/replacement)
+  Future<void> updateNoteMedia({
+    required String noteId,
+    List<String>? imageNames,
+    List<String>? videoNames,
+    List<String>? audioNames,
+    String? noteContent,
+    String? notebookId,
+  }) async {
+    await _service.updateNoteMedia(
+      id: noteId,
+      imageNames: imageNames,
+      videoNames: videoNames,
+      audioNames: audioNames,
+      noteContent: noteContent,
+      notebookId: notebookId,
+    );
+  }
+
   // Create a note with an image
   Future<String> createNoteWithImage({
     required String content,

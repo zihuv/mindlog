@@ -101,7 +101,7 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                 // Notebook title as a header with back button
                 Container(
                   width: double.infinity,
-                  padding: AppPadding.medium,
+                  padding: AppPadding.small, // Reduced padding
                   decoration: BoxDecoration(
                     color: Theme.of(context).appBarTheme.backgroundColor,
                     boxShadow: AppBoxShadow.appBar,
@@ -119,7 +119,7 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                         child: Text(
                           _notebook?.title ?? 'Notes',
                           style: TextStyle(
-                            fontSize: AppFontSize.large,
+                            fontSize: AppFontSize.medium, // Smaller font size
                             fontWeight: AppFontWeight.medium,
                             color: Theme.of(
                               context,
@@ -176,7 +176,7 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                                       children: [
                                         // Content area (always shown)
                                         Container(
-                                          padding: AppPadding.medium,
+                                          padding: AppPadding.small, // Reduced padding
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
@@ -199,13 +199,13 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                                                   },
                                                 ),
                                               ),
-                                              const SizedBox(height: 4),
+                                              const SizedBox(height: 2), // Reduced spacing
                                               Text(
                                                 _formatDateTime(
                                                   note.updateTime ?? note.createTime,
                                                 ),
                                                 style: TextStyle(
-                                                  fontSize: AppFontSize.caption,
+                                                  fontSize: AppFontSize.small, // Smaller font size
                                                   color: Theme.of(
                                                     context,
                                                   ).colorScheme.onSurfaceVariant,
@@ -292,24 +292,14 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
   }
 
   Widget _buildImagesGrid(List<String> imagePaths) {
-    // Show up to 9 images in a grid (3x3 max)
+    // Show up to 9 images in a grid with consistent 3x3 layout
     final imagesToShow = imagePaths.length > 9 ? imagePaths.take(9).toList() : imagePaths;
-
-    // Calculate how many columns based on number of images
-    int crossAxisCount;
-    if (imagesToShow.length == 1) {
-      crossAxisCount = 1; // Single image full width
-    } else if (imagesToShow.length <= 4) {
-      crossAxisCount = 2; // 2x2 grid for up to 4 images
-    } else {
-      crossAxisCount = 3; // 3x3 grid for more than 4 images
-    }
 
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(), // Disable scrolling in the grid
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
+        crossAxisCount: 3, // Always use 3 columns for consistent layout
         crossAxisSpacing: 4.0,
         mainAxisSpacing: 4.0,
         childAspectRatio: 1.0, // Square aspect ratio

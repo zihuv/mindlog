@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import '../../../../controllers/note_controller.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../ui/design_system/design_system.dart';
-import '../widgets/image_display.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
@@ -25,6 +24,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   List<String> _images = [];
   bool _noteCreated = false; // Track if a new note has been created
   String? _currentNoteId; // Store the current note ID after creation
+  bool _selectingImages = false;
+  final Set<int> _selectedImageIndices = <int>{};
 
   @override
   void initState() {
@@ -167,6 +168,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
     try {
       final controller = Get.find<NoteController>();
+      List<Future> futures = [];
 
       if (_isNewNote && !_noteCreated) {
         // For a new note that hasn't been created yet
@@ -179,13 +181,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           );
           _noteCreated = true; // Mark that note is now created
 
-          // Add any additional images to the note
+          // Add any additional images to the note as futures
           for (int i = 1; i < _images.length; i++) {
-            await controller.addImageToNote(
+            futures.add(controller.addImageToNote(
               noteId: _currentNoteId!,
               imagePath: _images[i],
               content: _contentController.text,
-            );
+            ));
           }
         } else {
           // If no images, create a regular note
@@ -208,11 +210,12 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           return;
         }
 
-        await controller.updateNote(
+        // Add the note update to the futures list
+        futures.add(controller.updateNote(
           id: noteId,
           content: _contentController.text,
           notebookId: widget.notebookId,
-        );
+        ));
 
         // Add any new images to the existing note
         // First, get the current note to check for existing images
@@ -223,24 +226,36 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         for (final imagePath in _images) {
           String imageName = imagePath.split('/').last;
           if (!existingImageNames.contains(imageName)) {
-            await controller.addImageToNote(
+            futures.add(controller.addImageToNote(
               noteId: noteId,
               imagePath: imagePath,
               content: _contentController.text,
-            );
+            ));
           }
         }
 
-        // Reload the note to get the updated list of images only if it's not a new note
-        if (!_isNewNote) {
+        // Reload the note to get the updated list of images only if new images were added
+        bool imagesAdded = _images.any((imagePath) =>
+            !existingImageNames.contains(imagePath.split('/').last));
+        if (imagesAdded) {
           await _loadNote();
-        } else if (_noteCreated && _currentNoteId != null) {
-          // If it's a new note that has been created, load the created note
-          await _loadNoteForId(_currentNoteId!);
         }
       }
 
+      // Wait for all asynchronous operations to complete
+      if (futures.isNotEmpty) {
+        await Future.wait(futures);
+      }
+
+      // Ensure we have the latest note data before navigating back
       if (mounted) {
+        // Final check to make sure the note data is updated
+        if (_isNewNote && _currentNoteId != null && !_noteCreated) {
+          await _loadNoteForId(_currentNoteId!);
+        } else if (!_isNewNote) {
+          await _loadNote();
+        }
+
         Get.back(result: true); // Indicate success
       }
     } on Exception catch (e) {
@@ -284,61 +299,84 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       });
 
       try {
-        // For both new and existing notes, just add the image to the local list
-        _images.add(image.path);
+        // Verify that the image file is accessible before adding it
+        final file = File(image.path);
+        if (await file.exists()) {
+          // For both new and existing notes, just add the image to the local list
+          _images.add(image.path);
 
-        // If it's a new note that hasn't been created yet, save the image path for later
-        if (_isNewNote && !_noteCreated) {
-          // Just add the image to the pending list, don't create the note yet
+          // If it's a new note that hasn't been created yet, save the image path for later
+          if (_isNewNote && !_noteCreated) {
+            // Just add the image to the pending list, don't create the note yet
+            if (mounted) {
+              Get.showSnackbar(
+                GetSnackBar(
+                  message: 'Image added. Save note to store image.',
+                  duration: const Duration(seconds: 2),
+                  snackPosition: SnackPosition.BOTTOM,
+                ),
+              );
+            }
+          } else {
+            // If it's an existing note or a note that's already been created,
+            // add the image to the existing note
+            final controller = Get.find<NoteController>();
+            await controller.addImageToNote(
+              noteId: _currentNoteId ?? widget.noteId!,
+              imagePath: image.path, // Add the new image to existing note
+              content: _contentController.text,
+            );
+
+            // Reload the note to get the updated list of images
+            if (!_isNewNote) {
+              await _loadNote();
+            } else if (_noteCreated && _currentNoteId != null) {
+              // If it's a new note that has been created, load the created note
+              await _loadNoteForId(_currentNoteId!);
+            }
+
+            // Show success message after reloading to ensure UI is updated
+            if (mounted) {
+              Get.showSnackbar(
+                const GetSnackBar(
+                  message: 'Image added to note successfully',
+                  duration: Duration(seconds: 2),
+                  snackPosition: SnackPosition.BOTTOM,
+                ),
+              );
+            }
+          }
+        } else {
+          if (mounted) {
+            Get.showSnackbar(
+              GetSnackBar(
+                message: 'Could not access the selected image. Please try again.',
+                duration: const Duration(seconds: 2),
+                snackPosition: SnackPosition.BOTTOM,
+              ),
+            );
+          }
+        }
+      } on Exception catch (e) {
+        if (mounted) {
           Get.showSnackbar(
             GetSnackBar(
-              message: 'Image added. Save note to store image.',
+              message: 'Error adding image: $e',
               duration: const Duration(seconds: 2),
               snackPosition: SnackPosition.BOTTOM,
             ),
           );
-        } else {
-          // If it's an existing note or a note that's already been created,
-          // add the image to the existing note
-          final controller = Get.find<NoteController>();
-          await controller.addImageToNote(
-            noteId: _currentNoteId ?? widget.noteId!,
-            imagePath: image.path, // Add the new image to existing note
-            content: _contentController.text,
-          );
-
-          // Reload the note to get the updated list of images
-          if (!_isNewNote) {
-            await _loadNote();
-          } else if (_noteCreated && _currentNoteId != null) {
-            // If it's a new note that has been created, load the created note
-            await _loadNoteForId(_currentNoteId!);
-          }
-
+        }
+      } catch (e) {
+        if (mounted) {
           Get.showSnackbar(
-            const GetSnackBar(
-              message: 'Image added to note successfully',
-              duration: Duration(seconds: 2),
+            GetSnackBar(
+              message: 'Unexpected error adding image: $e',
+              duration: const Duration(seconds: 2),
               snackPosition: SnackPosition.BOTTOM,
             ),
           );
         }
-      } on Exception catch (e) {
-        Get.showSnackbar(
-          GetSnackBar(
-            message: 'Error adding image: $e',
-            duration: const Duration(seconds: 2),
-            snackPosition: SnackPosition.BOTTOM,
-          ),
-        );
-      } catch (e) {
-        Get.showSnackbar(
-          GetSnackBar(
-            message: 'Unexpected error adding image: $e',
-            duration: const Duration(seconds: 2),
-            snackPosition: SnackPosition.BOTTOM,
-          ),
-        );
       } finally {
         setState(() {
           _isLoading = false;
@@ -450,65 +488,303 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     );
   }
 
-  Widget _buildImagesGrid() {
-    // Show up to 9 images in a grid (3x3 max)
-    final imagesToShow = _images.length > 9 ? _images.take(9).toList() : _images;
+  Future<void> _deleteSelectedImages() async {
+    if (_selectedImageIndices.isEmpty) return;
 
-    // Calculate how many columns based on number of images
-    int crossAxisCount;
-    if (imagesToShow.length == 1) {
-      crossAxisCount = 1; // Single image full width
-    } else if (imagesToShow.length <= 4) {
-      crossAxisCount = 2; // 2x2 grid for up to 4 images
-    } else {
-      crossAxisCount = 3; // 3x3 grid for more than 4 images
+    // Show confirmation dialog
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Images'),
+          content: Text('Are you sure you want to delete ${_selectedImageIndices.length} image(s)?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final controller = Get.find<NoteController>();
+      String? noteId = widget.noteId ?? _currentNoteId;
+
+      if (noteId != null) {
+        // Sort indices in descending order to avoid index shifting during removal
+        List<int> indicesToDelete = _selectedImageIndices.toList()..sort((a, b) => b.compareTo(a));
+
+        for (int index in indicesToDelete) {
+          if (index < _images.length) {
+            String imagePath = _images[index];
+
+            // Delete the image file
+            final file = File(imagePath);
+            if (await file.exists()) {
+              await file.delete();
+            }
+          }
+        }
+
+        // Update the local list of images
+        List<String> remainingImages = [];
+        for (int i = 0; i < _images.length; i++) {
+          if (!_selectedImageIndices.contains(i)) {
+            remainingImages.add(_images[i]);
+          }
+        }
+        _images = remainingImages;
+
+        // Update the note in the database with the new list of images
+        List<String> updatedImageNames = _images.map((path) => path.split('/').last).toList();
+
+        // Update note media (passing the same content to update images)
+        await controller.updateNoteMedia(
+          noteId: noteId,
+          imageNames: updatedImageNames,
+          noteContent: _contentController.text,
+          notebookId: widget.notebookId,
+        );
+      }
+
+      Get.showSnackbar(
+        const GetSnackBar(
+          message: 'Images deleted successfully',
+          duration: Duration(seconds: 2),
+          snackPosition: SnackPosition.BOTTOM,
+        ),
+      );
+    } catch (e) {
+      Get.showSnackbar(
+        GetSnackBar(
+          message: 'Error deleting images: $e',
+          duration: const Duration(seconds: 2),
+          snackPosition: SnackPosition.BOTTOM,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
+  }
+
+  Future<void> _confirmAndDeleteSingleImage(int index) async {
+    // Show confirmation dialog
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Image'),
+          content: const Text('Are you sure you want to delete this image?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      String imagePath = _images[index];
+
+      // Delete the image file
+      final file = File(imagePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+
+      // Remove from the local list
+      _images.removeAt(index);
+
+      // Update the note in the database with the new list of images
+      final controller = Get.find<NoteController>();
+      String? noteId = widget.noteId ?? _currentNoteId;
+
+      if (noteId != null) {
+        List<String> updatedImageNames = _images.map((path) => path.split('/').last).toList();
+
+        // Update note media (passing the same content to update images)
+        await controller.updateNoteMedia(
+          noteId: noteId,
+          imageNames: updatedImageNames,
+          noteContent: _contentController.text,
+          notebookId: widget.notebookId,
+        );
+      }
+
+      Get.showSnackbar(
+        const GetSnackBar(
+          message: 'Image deleted successfully',
+          duration: Duration(seconds: 2),
+          snackPosition: SnackPosition.BOTTOM,
+        ),
+      );
+    } catch (e) {
+      Get.showSnackbar(
+        GetSnackBar(
+          message: 'Error deleting image: $e',
+          duration: const Duration(seconds: 2),
+          snackPosition: SnackPosition.BOTTOM,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Widget _buildImagesGrid() {
+    // Show up to 9 images in a grid with consistent 3x3 layout
+    final imagesToShow = _images.length > 9 ? _images.take(9).toList() : _images;
 
     return GridView.builder(
       shrinkWrap: true,
+      padding: EdgeInsets.zero, // Remove default padding
       physics: const NeverScrollableScrollPhysics(), // Disable scrolling in the grid
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
+        crossAxisCount: 3, // Always use 3 columns for consistent layout
         crossAxisSpacing: 8.0,
         mainAxisSpacing: 8.0,
         childAspectRatio: 1.0, // Square aspect ratio
       ),
       itemCount: imagesToShow.length,
       itemBuilder: (context, index) {
+        bool isSelected = _selectedImageIndices.contains(index);
         return GestureDetector(
           onTap: () {
             // Show image in fullscreen when tapped
-            _showFullscreenImage(context, imagesToShow[index]);
+            if (_selectingImages) {
+              setState(() {
+                if (_selectedImageIndices.contains(index)) {
+                  _selectedImageIndices.remove(index);
+                } else {
+                  _selectedImageIndices.add(index);
+                }
+              });
+            } else {
+              _showFullscreenImage(context, imagesToShow[index]);
+            }
+          },
+          onLongPress: () {
+            if (!_selectingImages && !_isNewNote) {
+              setState(() {
+                _selectingImages = true;
+                _selectedImageIndices.add(index);
+              });
+            }
           },
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.0),
               border: Border.all(
-                color: Theme.of(context).dividerColor,
-                width: 0.5,
+                color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).dividerColor,
+                width: isSelected ? 2.0 : 0.5,
               ),
+              color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2) : null,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: FutureBuilder<bool>(
-                future: _isFileAccessible(imagesToShow[index]),
-                builder: (context, snapshot) {
-                  if (snapshot.data == true) {
-                    return Image.file(
-                      File(imagesToShow[index]),
-                      fit: BoxFit.cover,
-                    );
-                  } else {
-                    return Container(
-                      color: Theme.of(context).dividerColor,
-                      child: const Icon(
-                        Icons.broken_image,
-                        color: Colors.grey,
+            child: Stack(
+              fit: StackFit.expand, // Make stack fill the container
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: FutureBuilder<bool>(
+                    future: _isFileAccessible(imagesToShow[index]),
+                    builder: (context, snapshot) {
+                      if (snapshot.data == true) {
+                        return Image.file(
+                          File(imagesToShow[index]),
+                          fit: BoxFit.cover, // Make image fill the container
+                        );
+                      } else {
+                        return Container(
+                          color: Theme.of(context).dividerColor,
+                          child: const Icon(
+                            Icons.broken_image,
+                            color: Colors.grey,
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+                // Always show delete button for individual image deletion
+                if (!_selectingImages)
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: GestureDetector(
+                      onTap: () {
+                        // Directly delete this image
+                        _confirmAndDeleteSingleImage(index);
+                      },
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white,
+                            width: 2,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 16,
+                        ),
                       ),
-                    );
-                  }
-                },
-              ),
+                    ),
+                  ),
+                // Show selection indicator when in selection mode
+                if (_selectingImages)
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.grey,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.check,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         );
@@ -520,28 +796,51 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isNewNote ? 'New Note' : 'Edit Note'),
+        title: Text(_isNewNote ? 'New Note' : _selectingImages ? 'Select Images to Delete' : 'Edit Note'),
         actions: [
-          if (!_isNewNote) ...[
+          if (_selectingImages)
+            IconButton(
+              icon: const Icon(Icons.delete_forever),
+              onPressed: _selectedImageIndices.isEmpty
+                ? null
+                : () {
+                    _deleteSelectedImages();
+                    setState(() {
+                      _selectingImages = false;
+                      _selectedImageIndices.clear();
+                    });
+                  },
+            ),
+          if (_selectingImages)
+            IconButton(
+              icon: const Icon(Icons.cancel),
+              onPressed: () {
+                setState(() {
+                  _selectingImages = false;
+                  _selectedImageIndices.clear();
+                });
+              },
+            ),
+          if (!_selectingImages && !_isNewNote)
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _isLoading ? null : _deleteNote,
             ),
-          ],
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _isLoading ? null : _saveNote,
-          ),
+          if (!_selectingImages)
+            IconButton(
+              icon: const Icon(Icons.save),
+              onPressed: _isLoading ? null : _saveNote,
+            ),
         ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
               padding: AppPadding.large,
-              child: Column(
-                children: [
-                  Flexible(
-                    child: TextField(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    TextField(
                       controller: _contentController,
                       decoration: InputDecoration(
                         labelText: 'Note Content',
@@ -551,44 +850,42 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                         hintText: 'Write your note here...',
                       ),
                       minLines: 3,
-                      maxLines:
-                          10, // Set a maximum number of lines to prevent infinite height
+                      maxLines: 8, // Set a reasonable maximum to allow scrolling
                       keyboardType: TextInputType.multiline,
                     ),
-                  ),
-                  const SizedBox(height: 16.0),
-                  // Display attached images in a grid (up to 9 images)
-                  if (_images.isNotEmpty)
+                    const SizedBox(height: 16.0),
+                    // Display attached images in a grid (up to 9 images)
+                    if (_images.isNotEmpty)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: _buildImagesGrid(),
+                      ),
+                    // Toolbar for formatting options
                     Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: _buildImagesGrid(),
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.image),
+                            tooltip: 'Add Image',
+                            onPressed: _pickImage,
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.check_box_outlined),
+                            tooltip: 'Insert Checklist',
+                            onPressed: _insertChecklist,
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.format_list_bulleted),
+                            tooltip: 'Insert Unordered List',
+                            onPressed: _insertBulletList,
+                          ),
+                        ],
+                      ),
                     ),
-                  // Toolbar for formatting options
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.image),
-                          tooltip: 'Add Image',
-                          onPressed: _pickImage,
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.check_box_outlined),
-                          tooltip: 'Insert Checklist',
-                          onPressed: _insertChecklist,
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.format_list_bulleted),
-                          tooltip: 'Insert Unordered List',
-                          onPressed: _insertBulletList,
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Additional media buttons could be added here
-                ],
+                  ],
+                ),
               ),
             ),
     );

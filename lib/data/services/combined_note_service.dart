@@ -153,6 +153,66 @@ class CombinedNoteService {
     }
   }
 
+  // Update the media of a note (for deletion or replacement)
+  Future<void> updateNoteMedia({
+    required String id,
+    List<String>? imageNames, // New list of image names
+    List<String>? videoNames, // New list of video names
+    List<String>? audioNames, // New list of audio names
+    String? noteContent,      // Content to update with (optional)
+    String? notebookId,       // Notebook ID to update with (optional)
+  }) async {
+    final existingNote = await _noteService.getNoteById(id);
+    if (existingNote == null) {
+      throw Exception('Note with id $id does not exist');
+    }
+
+    // Get current media names
+    List<String> updatedImageNames = imageNames ?? existingNote.images;
+    List<String> updatedVideoNames = videoNames ?? existingNote.videos;
+    List<String> updatedAudioNames = audioNames ?? existingNote.audios;
+
+    // Update the note with the new media lists
+    await _noteService.updateNote(
+      id: id,
+      content: noteContent ?? existingNote.content,
+      imageName: updatedImageNames,
+      audioName: updatedAudioNames,
+      videoName: updatedVideoNames,
+      notebookId: notebookId ?? existingNote.notebookId,
+    );
+
+    // Clean up media files that are no longer associated with this note
+    await _cleanupOrphanedMedia(id, existingNote, updatedImageNames, updatedVideoNames, updatedAudioNames);
+  }
+
+  // Helper method to clean up media files that are no longer associated with a note
+  Future<void> _cleanupOrphanedMedia(
+    String noteId,
+    Note existingNote,
+    List<String> newImageNames,
+    List<String> newVideoNames,
+    List<String> newAudioNames,
+  ) async {
+    // Get a list of files to delete by comparing with old list
+    List<String> deletedImages = existingNote.images.where((name) => !newImageNames.contains(name)).toList();
+    List<String> deletedVideos = existingNote.videos.where((name) => !newVideoNames.contains(name)).toList();
+    List<String> deletedAudios = existingNote.audios.where((name) => !newAudioNames.contains(name)).toList();
+
+    // Delete the media files that are no longer needed
+    for (String imageName in deletedImages) {
+      await _mediaService.deleteImage(noteId, imageName);
+    }
+
+    for (String videoName in deletedVideos) {
+      await _mediaService.deleteVideo(noteId, videoName);
+    }
+
+    for (String audioName in deletedAudios) {
+      await _mediaService.deleteAudio(noteId, audioName);
+    }
+  }
+
   // Delete a note and its associated media
   Future<void> deleteNote(String id) async {
     // Delete all associated media files

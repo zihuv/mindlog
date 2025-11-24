@@ -1,0 +1,25 @@
+{
+  "ide": {
+    "hasSeenNudge": true
+  },
+  "mcpServers": {
+    "dart": {
+      "command": "dart",
+      "args": [
+        "mcp-server"
+      ]
+    }
+  },
+  "security": {
+    "auth": {
+      "selectedType": "qwen-oauth"
+    }
+  },
+  "tools": {
+    "approvalMode": "yolo"
+  },
+  "experimental": {
+    "vlmSwitchMode": "once"
+  },
+  "$version": 2
+}
