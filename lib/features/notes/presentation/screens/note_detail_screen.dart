@@ -255,15 +255,15 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         await Future.wait(futures);
       }
 
-      // Ensure we have the latest note data before navigating back
-      if (mounted) {
-        // Final check to make sure the note data is updated
-        if (_isNewNote && _currentNoteId != null && !_noteCreated) {
-          await _loadNoteForId(_currentNoteId!);
-        } else if (!_isNewNote) {
-          await _loadNote();
-        }
+      // Final check to make sure the note data is updated
+      if (_isNewNote && _currentNoteId != null && !_noteCreated) {
+        await _loadNoteForId(_currentNoteId!);
+      } else if (!_isNewNote) {
+        await _loadNote();
+      }
 
+      // Only navigate back if the widget is still mounted
+      if (mounted) {
         Get.back(result: true); // Indicate success
       }
     } on Exception catch (e) {
