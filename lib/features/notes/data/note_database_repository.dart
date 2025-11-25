@@ -40,7 +40,9 @@ class NoteDatabaseRepository implements NoteStorageRepository {
     // Generate a UUID if the note doesn't have an ID yet
     final id = note.id.isEmpty ? _uuid.v7() : note.id;
 
-    print('Saving note to database: id=$id, images=${note.images}, content length=${note.content.length}');
+    print(
+      'Saving note to database: id=$id, images=${note.images}, content length=${note.content.length}',
+    );
 
     await _noteDao.insertNote(
       db.NotesCompanion(
@@ -59,7 +61,9 @@ class NoteDatabaseRepository implements NoteStorageRepository {
 
   @override
   Future<void> updateNote(Note note) async {
-    print('Updating note in database: id=${note.id}, images=${note.images}, content length=${note.content.length}');
+    print(
+      'Updating note in database: id=${note.id}, images=${note.images}, content length=${note.content.length}',
+    );
 
     await _noteDao.updateNote(
       db.NotesCompanion(
@@ -115,7 +119,9 @@ class NoteDatabaseRepository implements NoteStorageRepository {
   }
 
   Note _mapNoteDataToNote(NoteData noteData) {
-    print('Mapping note from database: id=${noteData.id}, images=${noteData.imageName}, content length=${noteData.content.length}');
+    print(
+      'Mapping note from database: id=${noteData.id}, images=${noteData.imageName}, content length=${noteData.content.length}',
+    );
     return Note(
       id: noteData.id, // Use the string ID directly
       content: noteData.content,

@@ -183,11 +183,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
           // Add any additional images to the note as futures
           for (int i = 1; i < _images.length; i++) {
-            futures.add(controller.addImageToNote(
-              noteId: _currentNoteId!,
-              imagePath: _images[i],
-              content: _contentController.text,
-            ));
+            futures.add(
+              controller.addImageToNote(
+                noteId: _currentNoteId!,
+                imagePath: _images[i],
+                content: _contentController.text,
+              ),
+            );
           }
         } else {
           // If no images, create a regular note
@@ -211,11 +213,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         }
 
         // Add the note update to the futures list
-        futures.add(controller.updateNote(
-          id: noteId,
-          content: _contentController.text,
-          notebookId: widget.notebookId,
-        ));
+        futures.add(
+          controller.updateNote(
+            id: noteId,
+            content: _contentController.text,
+            notebookId: widget.notebookId,
+          ),
+        );
 
         // Add any new images to the existing note
         // First, get the current note to check for existing images
@@ -226,17 +230,21 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         for (final imagePath in _images) {
           String imageName = imagePath.split('/').last;
           if (!existingImageNames.contains(imageName)) {
-            futures.add(controller.addImageToNote(
-              noteId: noteId,
-              imagePath: imagePath,
-              content: _contentController.text,
-            ));
+            futures.add(
+              controller.addImageToNote(
+                noteId: noteId,
+                imagePath: imagePath,
+                content: _contentController.text,
+              ),
+            );
           }
         }
 
         // Reload the note to get the updated list of images only if new images were added
-        bool imagesAdded = _images.any((imagePath) =>
-            !existingImageNames.contains(imagePath.split('/').last));
+        bool imagesAdded = _images.any(
+          (imagePath) =>
+              !existingImageNames.contains(imagePath.split('/').last),
+        );
         if (imagesAdded) {
           await _loadNote();
         }
@@ -350,7 +358,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           if (mounted) {
             Get.showSnackbar(
               GetSnackBar(
-                message: 'Could not access the selected image. Please try again.',
+                message:
+                    'Could not access the selected image. Please try again.',
                 duration: const Duration(seconds: 2),
                 snackPosition: SnackPosition.BOTTOM,
               ),
@@ -424,7 +433,10 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   }
 
   // Convert image names to full file paths
-  Future<List<String>> _getImagePaths(String noteId, List<String> imageNames) async {
+  Future<List<String>> _getImagePaths(
+    String noteId,
+    List<String> imageNames,
+  ) async {
     final paths = <String>[];
     for (final imageName in imageNames) {
       try {
@@ -468,10 +480,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                 future: _isFileAccessible(imagePath),
                 builder: (context, snapshot) {
                   if (snapshot.data == true) {
-                    return Image.file(
-                      File(imagePath),
-                      fit: BoxFit.contain,
-                    );
+                    return Image.file(File(imagePath), fit: BoxFit.contain);
                   } else {
                     return const Icon(
                       Icons.broken_image,
@@ -497,7 +506,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Delete Images'),
-          content: Text('Are you sure you want to delete ${_selectedImageIndices.length} image(s)?'),
+          content: Text(
+            'Are you sure you want to delete ${_selectedImageIndices.length} image(s)?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -524,7 +535,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
       if (noteId != null) {
         // Sort indices in descending order to avoid index shifting during removal
-        List<int> indicesToDelete = _selectedImageIndices.toList()..sort((a, b) => b.compareTo(a));
+        List<int> indicesToDelete = _selectedImageIndices.toList()
+          ..sort((a, b) => b.compareTo(a));
 
         for (int index in indicesToDelete) {
           if (index < _images.length) {
@@ -548,7 +560,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         _images = remainingImages;
 
         // Update the note in the database with the new list of images
-        List<String> updatedImageNames = _images.map((path) => path.split('/').last).toList();
+        List<String> updatedImageNames = _images
+            .map((path) => path.split('/').last)
+            .toList();
 
         // Update note media (passing the same content to update images)
         await controller.updateNoteMedia(
@@ -626,7 +640,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       String? noteId = widget.noteId ?? _currentNoteId;
 
       if (noteId != null) {
-        List<String> updatedImageNames = _images.map((path) => path.split('/').last).toList();
+        List<String> updatedImageNames = _images
+            .map((path) => path.split('/').last)
+            .toList();
 
         // Update note media (passing the same content to update images)
         await controller.updateNoteMedia(
@@ -661,12 +677,15 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
   Widget _buildImagesGrid() {
     // Show up to 9 images in a grid with consistent 3x3 layout
-    final imagesToShow = _images.length > 9 ? _images.take(9).toList() : _images;
+    final imagesToShow = _images.length > 9
+        ? _images.take(9).toList()
+        : _images;
 
     return GridView.builder(
       shrinkWrap: true,
       padding: EdgeInsets.zero, // Remove default padding
-      physics: const NeverScrollableScrollPhysics(), // Disable scrolling in the grid
+      physics:
+          const NeverScrollableScrollPhysics(), // Disable scrolling in the grid
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3, // Always use 3 columns for consistent layout
         crossAxisSpacing: 8.0,
@@ -704,11 +723,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
               borderRadius: BorderRadius.circular(8.0),
               border: Border.all(
                 color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).dividerColor,
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).dividerColor,
                 width: isSelected ? 2.0 : 0.5,
               ),
-              color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2) : null,
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
+                  : null,
             ),
             child: Stack(
               fit: StackFit.expand, // Make stack fill the container
@@ -751,10 +772,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                         decoration: BoxDecoration(
                           color: Colors.red,
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white,
-                            width: 2,
-                          ),
+                          border: Border.all(color: Colors.white, width: 2),
                         ),
                         child: const Icon(
                           Icons.close,
@@ -773,15 +791,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
                         color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.grey,
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.grey,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.check,
-                        size: 16,
-                        color: Colors.white,
-                      ),
+                      child: Icon(Icons.check, size: 16, color: Colors.white),
                     ),
                   ),
               ],
@@ -796,20 +810,26 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isNewNote ? 'New Note' : _selectingImages ? 'Select Images to Delete' : 'Edit Note'),
+        title: Text(
+          _isNewNote
+              ? 'New Note'
+              : _selectingImages
+              ? 'Select Images to Delete'
+              : 'Edit Note',
+        ),
         actions: [
           if (_selectingImages)
             IconButton(
               icon: const Icon(Icons.delete_forever),
               onPressed: _selectedImageIndices.isEmpty
-                ? null
-                : () {
-                    _deleteSelectedImages();
-                    setState(() {
-                      _selectingImages = false;
-                      _selectedImageIndices.clear();
-                    });
-                  },
+                  ? null
+                  : () {
+                      _deleteSelectedImages();
+                      setState(() {
+                        _selectingImages = false;
+                        _selectedImageIndices.clear();
+                      });
+                    },
             ),
           if (_selectingImages)
             IconButton(
@@ -850,7 +870,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                         hintText: 'Write your note here...',
                       ),
                       minLines: 3,
-                      maxLines: 8, // Set a reasonable maximum to allow scrolling
+                      maxLines:
+                          8, // Set a reasonable maximum to allow scrolling
                       keyboardType: TextInputType.multiline,
                     ),
                     const SizedBox(height: 16.0),

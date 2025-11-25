@@ -76,13 +76,22 @@ class NoteListScreen extends StatelessWidget {
                         children: [
                           // Modification createTime in top-left corner (creation createTime if no modifications)
                           Container(
+                            width: double.infinity, // Make it span the full width of the card
                             padding: EdgeInsets.fromLTRB(
-                              AppPadding.medium.left,
-                              AppPadding.medium.top,
-                              AppPadding.medium.right,
+                              AppPadding.large.left,
                               AppPadding
                                   .small
+                                  .top, // Reduced top padding to decrease banner height
+                              AppPadding.large.right,
+                              AppPadding
+                                  .extraSmall
                                   .bottom, // Reduced bottom padding to reduce gap with content
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surfaceVariant,
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(12), // Match the card's top border radius
+                              ),
                             ),
                             child: Text(
                               _formatDateTime(note.createTime),
@@ -111,26 +120,41 @@ class NoteListScreen extends StatelessWidget {
                                 // Display image thumbnails if available
                                 if (note.images.isNotEmpty)
                                   Container(
-                                    height: 80, // Fixed height for image container
+                                    height:
+                                        80, // Fixed height for image container
                                     margin: const EdgeInsets.only(bottom: 8.0),
                                     child: ListView.builder(
                                       scrollDirection: Axis.horizontal,
                                       itemCount: note.images.length,
                                       itemBuilder: (context, index) {
                                         return Container(
-                                          margin: const EdgeInsets.only(right: 8.0),
+                                          margin: const EdgeInsets.only(
+                                            right: 8.0,
+                                          ),
                                           child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(8.0),
+                                            borderRadius: BorderRadius.circular(
+                                              8.0,
+                                            ),
                                             child: GestureDetector(
                                               onTap: () {
                                                 // Navigate to detail view to see the image
-                                                Get.to(() => NoteDetailScreen(noteId: note.id));
+                                                Get.to(
+                                                  () => NoteDetailScreen(
+                                                    noteId: note.id,
+                                                  ),
+                                                );
                                               },
                                               child: FutureBuilder<String?>(
-                                                future: _getImagePath(note.id, note.images[index]),
+                                                future: _getImagePath(
+                                                  note.id,
+                                                  note.images[index],
+                                                ),
                                                 builder: (context, snapshot) {
-                                                  print('Image FutureBuilder - Note: ${note.id}, Index: $index, HasData: ${snapshot.hasData}, Data: ${snapshot.data}');
-                                                  if (snapshot.hasData && snapshot.data != null) {
+                                                  print(
+                                                    'Image FutureBuilder - Note: ${note.id}, Index: $index, HasData: ${snapshot.hasData}, Data: ${snapshot.data}',
+                                                  );
+                                                  if (snapshot.hasData &&
+                                                      snapshot.data != null) {
                                                     return Image.file(
                                                       File(snapshot.data!),
                                                       width: 80,
@@ -138,14 +162,23 @@ class NoteListScreen extends StatelessWidget {
                                                       fit: BoxFit.cover,
                                                     );
                                                   } else {
-                                                    print('Image FutureBuilder - No data for note: ${note.id}, image: ${note.images[index]}');
+                                                    print(
+                                                      'Image FutureBuilder - No data for note: ${note.id}, image: ${note.images[index]}',
+                                                    );
                                                     return Container(
                                                       width: 80,
                                                       height: 80,
-                                                      color: Theme.of(context).dividerColor,
+                                                      color: Theme.of(
+                                                        context,
+                                                      ).dividerColor,
                                                       child: Icon(
                                                         Icons.image,
-                                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurface
+                                                            .withValues(
+                                                              alpha: 0.4,
+                                                            ),
                                                       ),
                                                     );
                                                   }

@@ -143,7 +143,9 @@ class CombinedNoteService {
     );
 
     // Clean up cache files after they have been saved to the note directory
-    if (newImagesToCopy != null || newVideosToCopy != null || newAudiosToCopy != null) {
+    if (newImagesToCopy != null ||
+        newVideosToCopy != null ||
+        newAudiosToCopy != null) {
       final allMediaPaths = <String>[];
       if (newImagesToCopy != null) allMediaPaths.addAll(newImagesToCopy);
       if (newVideosToCopy != null) allMediaPaths.addAll(newVideosToCopy);
@@ -159,8 +161,8 @@ class CombinedNoteService {
     List<String>? imageNames, // New list of image names
     List<String>? videoNames, // New list of video names
     List<String>? audioNames, // New list of audio names
-    String? noteContent,      // Content to update with (optional)
-    String? notebookId,       // Notebook ID to update with (optional)
+    String? noteContent, // Content to update with (optional)
+    String? notebookId, // Notebook ID to update with (optional)
   }) async {
     final existingNote = await _noteService.getNoteById(id);
     if (existingNote == null) {
@@ -183,7 +185,13 @@ class CombinedNoteService {
     );
 
     // Clean up media files that are no longer associated with this note
-    await _cleanupOrphanedMedia(id, existingNote, updatedImageNames, updatedVideoNames, updatedAudioNames);
+    await _cleanupOrphanedMedia(
+      id,
+      existingNote,
+      updatedImageNames,
+      updatedVideoNames,
+      updatedAudioNames,
+    );
   }
 
   // Helper method to clean up media files that are no longer associated with a note
@@ -195,9 +203,15 @@ class CombinedNoteService {
     List<String> newAudioNames,
   ) async {
     // Get a list of files to delete by comparing with old list
-    List<String> deletedImages = existingNote.images.where((name) => !newImageNames.contains(name)).toList();
-    List<String> deletedVideos = existingNote.videos.where((name) => !newVideoNames.contains(name)).toList();
-    List<String> deletedAudios = existingNote.audios.where((name) => !newAudioNames.contains(name)).toList();
+    List<String> deletedImages = existingNote.images
+        .where((name) => !newImageNames.contains(name))
+        .toList();
+    List<String> deletedVideos = existingNote.videos
+        .where((name) => !newVideoNames.contains(name))
+        .toList();
+    List<String> deletedAudios = existingNote.audios
+        .where((name) => !newAudioNames.contains(name))
+        .toList();
 
     // Delete the media files that are no longer needed
     for (String imageName in deletedImages) {

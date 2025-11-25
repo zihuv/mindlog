@@ -87,7 +87,9 @@ class NoteCard extends StatelessWidget {
                   margin: const EdgeInsets.only(top: 8.0),
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: note.images.length > 3 ? 3 : note.images.length, // Show max 3 thumbnails
+                    itemCount: note.images.length > 3
+                        ? 3
+                        : note.images.length, // Show max 3 thumbnails
                     itemBuilder: (context, index) {
                       return Container(
                         margin: const EdgeInsets.only(right: 8.0),

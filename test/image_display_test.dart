@@ -9,7 +9,8 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: ImageDisplay(
-            imagePath: 'nonexistent_image.jpg', // This doesn't exist but will show error icon
+            imagePath:
+                'nonexistent_image.jpg', // This doesn't exist but will show error icon
           ),
         ),
       ),

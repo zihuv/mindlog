@@ -94,154 +94,191 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: null, // Remove the AppBar as requested
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                // Notebook title as a header with back button
-                Container(
-                  width: double.infinity,
-                  padding: AppPadding.small, // Reduced padding
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).appBarTheme.backgroundColor,
-                    boxShadow: AppBoxShadow.appBar,
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back),
-                        onPressed: () {
-                          Get.back(); // Navigate back to previous screen
-                        },
-                      ),
-                      const SizedBox(width: 8.0),
-                      Expanded(
-                        child: Text(
-                          _notebook?.title ?? 'Notes',
-                          style: TextStyle(
-                            fontSize: AppFontSize.medium, // Smaller font size
-                            fontWeight: AppFontWeight.medium,
-                            color: Theme.of(
-                              context,
-                            ).appBarTheme.titleTextStyle?.color,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Notes list
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () async {
-                      await _loadNotes();
-                    },
-                    child: _notes.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'No notes yet',
-                              style: TextStyle(
-                                fontSize: AppFontSize.body,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: _notes.length,
-                            itemBuilder: (context, index) {
-                              final note = _notes[index];
-                              return Card(
-                                margin: AppPadding.small,
-                                child: Stack(
-                                  children: [
-                                    // Full card tap gesture
-                                    Positioned.fill(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          Get.to(
-                                            () => NoteDetailScreen(noteId: note.id),
-                                          )?.then((value) {
-                                            if (value == true) {
-                                              _loadNotes(); // Refresh the notes list after editing
-                                            }
-                                          });
-                                        },
-                                        // This allows the gesture detector to be behind other widgets
-                                        behavior: HitTestBehavior.translucent,
-                                      ),
-                                    ),
-                                    // Content and images
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        // Content area (always shown)
-                                        Container(
-                                          padding: AppPadding.small, // Reduced padding
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Container(
-                                                constraints: const BoxConstraints(
-                                                  maxHeight: 60, // Limit height to 2 lines
-                                                ),
-                                                child: MarkdownChecklist(
-                                                  text: note.content.length > 50
-                                                      ? '${note.content.substring(0, 50)}...'
-                                                      : note.content,
-                                                  style: TextStyle(
-                                                    fontSize: AppFontSize.body,
-                                                    color: Theme.of(
-                                                      context,
-                                                    ).colorScheme.onSurface,
-                                                  ),
-                                                  onTextChange: (updatedText) {
-                                                    // Don't allow changes from this view
-                                                  },
-                                                ),
-                                              ),
-                                              const SizedBox(height: 2), // Reduced spacing
-                                              Text(
-                                                _formatDateTime(
-                                                  note.updateTime ?? note.createTime,
-                                                ),
-                                                style: TextStyle(
-                                                  fontSize: AppFontSize.small, // Smaller font size
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).colorScheme.onSurfaceVariant,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        // Image thumbnails grid if available (up to 9 images in 3x3 grid)
-                                        if (note.images.isNotEmpty)
-                                          FutureBuilder<List<String>>(
-                                            future: _getImagePaths(note.id, note.images.take(9).toList()), // Limit to first 9 images
-                                            builder: (context, snapshot) {
-                                              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                                                final imagePaths = snapshot.data!;
-                                                return Container(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  child: _buildImagesGrid(imagePaths),
-                                                );
-                                              } else {
-                                                // If image paths couldn't be retrieved, don't show any images
-                                                return const SizedBox.shrink();
-                                              }
-                                            },
-                                          ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              );
+      body: SafeArea(
+        bottom: false,
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  // Notebook title as a header with back button
+                  Container(
+                    width: double.infinity,
+                    height: 40, // Very compact height
+                    padding: EdgeInsets.zero,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).appBarTheme.backgroundColor,
+                      boxShadow: AppBoxShadow.appBar,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            iconSize: 20,
+                            icon: const Icon(Icons.arrow_back),
+                            onPressed: () {
+                              Get.back(); // Navigate back to previous screen
                             },
                           ),
+                        ),
+                        const SizedBox(width: 4.0),
+                        Expanded(
+                          child: Text(
+                            _notebook?.title ?? 'Notes',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: AppFontWeight.medium,
+                              color: Theme.of(
+                                context,
+                              ).appBarTheme.titleTextStyle?.color,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                        const SizedBox(width: 8.0),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                  // Notes list
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: () async {
+                        await _loadNotes();
+                      },
+                      child: _notes.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No notes yet',
+                                style: TextStyle(
+                                  fontSize: AppFontSize.body,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: _notes.length,
+                              itemBuilder: (context, index) {
+                                final note = _notes[index];
+                                return Card(
+                                  margin: AppPadding.small,
+                                  child: Stack(
+                                    children: [
+                                      // Full card tap gesture
+                                      Positioned.fill(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Get.to(
+                                              () => NoteDetailScreen(
+                                                noteId: note.id,
+                                              ),
+                                            )?.then((value) {
+                                              if (value == true) {
+                                                _loadNotes(); // Refresh the notes list after editing
+                                              }
+                                            });
+                                          },
+                                          // This allows the gesture detector to be behind other widgets
+                                          behavior: HitTestBehavior.translucent,
+                                        ),
+                                      ),
+                                      // Content and images
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // Content area (always shown)
+                                          Container(
+                                            padding: AppPadding
+                                                .small, // Reduced padding
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Container(
+                                                  constraints: const BoxConstraints(
+                                                    maxHeight:
+                                                        60, // Limit height to 2 lines
+                                                  ),
+                                                  child: MarkdownChecklist(
+                                                    text:
+                                                        note.content.length > 50
+                                                        ? '${note.content.substring(0, 50)}...'
+                                                        : note.content,
+                                                    style: TextStyle(
+                                                      fontSize:
+                                                          AppFontSize.body,
+                                                      color: Theme.of(
+                                                        context,
+                                                      ).colorScheme.onSurface,
+                                                    ),
+                                                    onTextChange: (updatedText) {
+                                                      // Don't allow changes from this view
+                                                    },
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  height: 2,
+                                                ), // Reduced spacing
+                                                Text(
+                                                  _formatDateTime(
+                                                    note.updateTime ??
+                                                        note.createTime,
+                                                  ),
+                                                  style: TextStyle(
+                                                    fontSize: AppFontSize
+                                                        .small, // Smaller font size
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurfaceVariant,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          // Image thumbnails grid if available (up to 9 images in 3x3 grid)
+                                          if (note.images.isNotEmpty)
+                                            FutureBuilder<List<String>>(
+                                              future: _getImagePaths(
+                                                note.id,
+                                                note.images.take(9).toList(),
+                                              ), // Limit to first 9 images
+                                              builder: (context, snapshot) {
+                                                if (snapshot.hasData &&
+                                                    snapshot.data!.isNotEmpty) {
+                                                  final imagePaths =
+                                                      snapshot.data!;
+                                                  return Container(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                          8.0,
+                                                        ),
+                                                    child: _buildImagesGrid(
+                                                      imagePaths,
+                                                    ),
+                                                  );
+                                                } else {
+                                                  // If image paths couldn't be retrieved, don't show any images
+                                                  return const SizedBox.shrink();
+                                                }
+                                              },
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Navigate to the note detail screen with the current notebook ID
@@ -266,7 +303,10 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
   }
 
   // Convert image names to full file paths
-  Future<List<String>> _getImagePaths(String noteId, List<String> imageNames) async {
+  Future<List<String>> _getImagePaths(
+    String noteId,
+    List<String> imageNames,
+  ) async {
     final paths = <String>[];
     for (final imageName in imageNames) {
       try {
@@ -293,11 +333,14 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
 
   Widget _buildImagesGrid(List<String> imagePaths) {
     // Show up to 9 images in a grid with consistent 3x3 layout
-    final imagesToShow = imagePaths.length > 9 ? imagePaths.take(9).toList() : imagePaths;
+    final imagesToShow = imagePaths.length > 9
+        ? imagePaths.take(9).toList()
+        : imagePaths;
 
     return GridView.builder(
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(), // Disable scrolling in the grid
+      physics:
+          const NeverScrollableScrollPhysics(), // Disable scrolling in the grid
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3, // Always use 3 columns for consistent layout
         crossAxisSpacing: 4.0,
@@ -332,10 +375,7 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                   } else {
                     return Container(
                       color: Theme.of(context).dividerColor,
-                      child: const Icon(
-                        Icons.broken_image,
-                        color: Colors.grey,
-                      ),
+                      child: const Icon(Icons.broken_image, color: Colors.grey),
                     );
                   }
                 },
@@ -366,10 +406,7 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                 future: _isFileAccessible(imagePath),
                 builder: (context, snapshot) {
                   if (snapshot.data == true) {
-                    return Image.file(
-                      File(imagePath),
-                      fit: BoxFit.contain,
-                    );
+                    return Image.file(File(imagePath), fit: BoxFit.contain);
                   } else {
                     return const Icon(
                       Icons.broken_image,

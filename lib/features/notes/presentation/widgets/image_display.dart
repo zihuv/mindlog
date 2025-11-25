@@ -53,10 +53,7 @@ class _ImageDisplayState extends State<ImageDisplay> {
       File(widget.imagePath),
       fit: widget.fit,
       errorBuilder: (context, error, stackTrace) {
-        return const Icon(
-          Icons.broken_image,
-          color: Colors.grey,
-        );
+        return const Icon(Icons.broken_image, color: Colors.grey);
       },
     );
   }

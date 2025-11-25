@@ -58,6 +58,7 @@ class AppTheme {
         ),
         shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.appBar),
         elevation: 0, // No elevation for cleaner look
+        titleSpacing: 20.0, // Adjust spacing around the title
       ),
 
       // Button theme
@@ -214,6 +215,7 @@ class AppTheme {
         ),
         shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.appBar),
         elevation: 4.0,
+        titleSpacing: 20.0, // Adjust spacing around the title
       ),
 
       // Button theme

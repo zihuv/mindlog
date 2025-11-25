@@ -47,20 +47,26 @@ class MediaService {
 
     // Check if the source file is in the cache directory
     bool isCachePath = await _isCachePath(sourcePath);
-    print('Saving image: sourcePath=$sourcePath, isCachePath=$isCachePath, destinationPath=$destinationPath');
+    print(
+      'Saving image: sourcePath=$sourcePath, isCachePath=$isCachePath, destinationPath=$destinationPath',
+    );
 
     if (isCachePath) {
       // If the source file is in cache, copy it from the cache to the note directory
       final sourceFile = File(sourcePath);
       final destinationFile = await sourceFile.copy(destinationPath);
-      print('Copied from cache to storage: ${sourceFile.path} -> ${destinationFile.path}');
+      print(
+        'Copied from cache to storage: ${sourceFile.path} -> ${destinationFile.path}',
+      );
       return destinationFile.path;
     } else {
       // If the source file is not in cache, it might be a file that already exists in our storage
       // We should still copy it to the correct location for this note
       final sourceFile = File(sourcePath);
       final destinationFile = await sourceFile.copy(destinationPath);
-      print('Copied from source to storage: ${sourceFile.path} -> ${destinationFile.path}');
+      print(
+        'Copied from source to storage: ${sourceFile.path} -> ${destinationFile.path}',
+      );
       return destinationFile.path;
     }
   }
@@ -76,20 +82,26 @@ class MediaService {
 
     // Check if the source file is in the cache directory
     bool isCachePath = await _isCachePath(sourcePath);
-    print('Saving video: sourcePath=$sourcePath, isCachePath=$isCachePath, destinationPath=$destinationPath');
+    print(
+      'Saving video: sourcePath=$sourcePath, isCachePath=$isCachePath, destinationPath=$destinationPath',
+    );
 
     if (isCachePath) {
       // If the source file is in cache, copy it from the cache to the note directory
       final sourceFile = File(sourcePath);
       final destinationFile = await sourceFile.copy(destinationPath);
-      print('Copied from cache to storage: ${sourceFile.path} -> ${destinationFile.path}');
+      print(
+        'Copied from cache to storage: ${sourceFile.path} -> ${destinationFile.path}',
+      );
       return destinationFile.path;
     } else {
       // If the source file is not in cache, it might be a file that already exists in our storage
       // We should still copy it to the correct location for this note
       final sourceFile = File(sourcePath);
       final destinationFile = await sourceFile.copy(destinationPath);
-      print('Copied from source to storage: ${sourceFile.path} -> ${destinationFile.path}');
+      print(
+        'Copied from source to storage: ${sourceFile.path} -> ${destinationFile.path}',
+      );
       return destinationFile.path;
     }
   }
@@ -105,20 +117,26 @@ class MediaService {
 
     // Check if the source file is in the cache directory
     bool isCachePath = await _isCachePath(sourcePath);
-    print('Saving audio: sourcePath=$sourcePath, isCachePath=$isCachePath, destinationPath=$destinationPath');
+    print(
+      'Saving audio: sourcePath=$sourcePath, isCachePath=$isCachePath, destinationPath=$destinationPath',
+    );
 
     if (isCachePath) {
       // If the source file is in cache, copy it from the cache to the note directory
       final sourceFile = File(sourcePath);
       final destinationFile = await sourceFile.copy(destinationPath);
-      print('Copied from cache to storage: ${sourceFile.path} -> ${destinationFile.path}');
+      print(
+        'Copied from cache to storage: ${sourceFile.path} -> ${destinationFile.path}',
+      );
       return destinationFile.path;
     } else {
       // If the source file is not in cache, it might be a file that already exists in our storage
       // We should still copy it to the correct location for this note
       final sourceFile = File(sourcePath);
       final destinationFile = await sourceFile.copy(destinationPath);
-      print('Copied from source to storage: ${sourceFile.path} -> ${destinationFile.path}');
+      print(
+        'Copied from source to storage: ${sourceFile.path} -> ${destinationFile.path}',
+      );
       return destinationFile.path;
     }
   }

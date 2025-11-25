@@ -34,7 +34,9 @@ class NoteController extends GetxController {
       print('NoteController.loadNotes: Retrieved ${notes.length} notes');
       for (int i = 0; i < notes.length; i++) {
         final note = notes[i];
-        print('Note ${i+1}: id=${note.id}, images=${note.images}, content length=${note.content.length}');
+        print(
+          'Note ${i + 1}: id=${note.id}, images=${note.images}, content length=${note.content.length}',
+        );
       }
       // Sort notes by creation createTime in descending order (newest first)
       notes.sort((a, b) => b.createTime.compareTo(a.createTime));
@@ -90,14 +92,19 @@ class NoteController extends GetxController {
     print('NoteController.getNoteById: $id');
     final note = await _service.getNoteById(id);
     if (note != null) {
-      print('NoteController.getNoteById result: id=${note.id}, images=${note.images}, content length=${note.content.length}');
+      print(
+        'NoteController.getNoteById result: id=${note.id}, images=${note.images}, content length=${note.content.length}',
+      );
     } else {
       print('NoteController.getNoteById: note not found');
     }
     return note;
   }
 
-  Future<String> createNote({required String content, String? notebookId}) async {
+  Future<String> createNote({
+    required String content,
+    String? notebookId,
+  }) async {
     return await _service.createNote(content: content, notebookId: notebookId);
   }
 
