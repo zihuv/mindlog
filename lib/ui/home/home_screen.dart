@@ -19,8 +19,6 @@ class _HomeScreenState extends State<HomeScreen> {
     const SettingsScreen(),
   ];
 
-  final List<String> _titles = ['Notebooks', 'Calendar', 'Settings'];
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;

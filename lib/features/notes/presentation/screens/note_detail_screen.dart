@@ -53,13 +53,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         _images = await _getImagePaths(noteId, note.images);
       }
     } catch (e) {
-      Get.showSnackbar(
-        GetSnackBar(
-          message: 'Error loading note: $e',
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.BOTTOM,
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Get.showSnackbar(
+            GetSnackBar(
+              message: 'Error loading note: $e',
+              duration: const Duration(seconds: 2),
+              snackPosition: SnackPosition.BOTTOM,
+            ),
+          );
+        }
+      });
     } finally {
       setState(() {
         _isLoading = false;
@@ -83,13 +87,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         _images = await _getImagePaths(widget.noteId!, note.images);
       }
     } catch (e) {
-      Get.showSnackbar(
-        GetSnackBar(
-          message: 'Error loading note: $e',
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.BOTTOM,
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Get.showSnackbar(
+            GetSnackBar(
+              message: 'Error loading note: $e',
+              duration: const Duration(seconds: 2),
+              snackPosition: SnackPosition.BOTTOM,
+            ),
+          );
+        }
+      });
     } finally {
       setState(() {
         _isLoading = false;
@@ -134,15 +142,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           Get.back(result: true); // Indicate success and navigate back
         }
       } catch (e) {
-        if (mounted) {
-          Get.showSnackbar(
-            GetSnackBar(
-              message: 'Error deleting note: $e',
-              duration: const Duration(seconds: 2),
-              snackPosition: SnackPosition.BOTTOM,
-            ),
-          );
-        }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            Get.showSnackbar(
+              GetSnackBar(
+                message: 'Error deleting note: $e',
+                duration: const Duration(seconds: 2),
+                snackPosition: SnackPosition.BOTTOM,
+              ),
+            );
+          }
+        });
       } finally {
         setState(() {
           _isLoading = false;
@@ -153,12 +163,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
   Future<void> _saveNote() async {
     if (_contentController.text.trim().isEmpty && _images.isEmpty) {
-      Get.showSnackbar(
-        const GetSnackBar(
-          message: 'Please enter some content or add an image',
-          duration: Duration(seconds: 2),
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Get.showSnackbar(
+            const GetSnackBar(
+              message: 'Please enter some content or add an image',
+              duration: Duration(seconds: 2),
+              snackPosition: SnackPosition.BOTTOM,
+            ),
+          );
+        }
+      });
       return;
     }
 
@@ -202,13 +217,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         // For existing notes or notes that have already been created
         String? noteId = widget.noteId ?? _currentNoteId;
         if (noteId == null) {
-          Get.showSnackbar(
-            const GetSnackBar(
-              message: 'Note ID is not available',
-              duration: Duration(seconds: 2),
-              snackPosition: SnackPosition.BOTTOM,
-            ),
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              Get.showSnackbar(
+                const GetSnackBar(
+                  message: 'Note ID is not available',
+                  duration: Duration(seconds: 2),
+                  snackPosition: SnackPosition.BOTTOM,
+                ),
+              );
+            }
+          });
           return;
         }
 
@@ -267,25 +286,29 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         Get.back(result: true); // Indicate success
       }
     } on Exception catch (e) {
-      if (mounted) {
-        Get.showSnackbar(
-          GetSnackBar(
-            message: 'Error saving note: $e',
-            duration: const Duration(seconds: 2),
-            snackPosition: SnackPosition.BOTTOM,
-          ),
-        );
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Get.showSnackbar(
+            GetSnackBar(
+              message: 'Error saving note: $e',
+              duration: const Duration(seconds: 2),
+              snackPosition: SnackPosition.BOTTOM,
+            ),
+          );
+        }
+      });
     } catch (e) {
-      if (mounted) {
-        Get.showSnackbar(
-          GetSnackBar(
-            message: 'Unexpected error saving note: $e',
-            duration: const Duration(seconds: 2),
-            snackPosition: SnackPosition.BOTTOM,
-          ),
-        );
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Get.showSnackbar(
+            GetSnackBar(
+              message: 'Unexpected error saving note: $e',
+              duration: const Duration(seconds: 2),
+              snackPosition: SnackPosition.BOTTOM,
+            ),
+          );
+        }
+      });
     } finally {
       setState(() {
         _isLoading = false;
@@ -316,15 +339,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           // If it's a new note that hasn't been created yet, save the image path for later
           if (_isNewNote && !_noteCreated) {
             // Just add the image to the pending list, don't create the note yet
-            if (mounted) {
-              Get.showSnackbar(
-                GetSnackBar(
-                  message: 'Image added. Save note to store image.',
-                  duration: const Duration(seconds: 2),
-                  snackPosition: SnackPosition.BOTTOM,
-                ),
-              );
-            }
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                Get.showSnackbar(
+                  GetSnackBar(
+                    message: 'Image added. Save note to store image.',
+                    duration: const Duration(seconds: 2),
+                    snackPosition: SnackPosition.BOTTOM,
+                  ),
+                );
+              }
+            });
           } else {
             // If it's an existing note or a note that's already been created,
             // add the image to the existing note
@@ -344,48 +369,56 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             }
 
             // Show success message after reloading to ensure UI is updated
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                Get.showSnackbar(
+                  const GetSnackBar(
+                    message: 'Image added to note successfully',
+                    duration: Duration(seconds: 2),
+                    snackPosition: SnackPosition.BOTTOM,
+                  ),
+                );
+              }
+            });
+          }
+        } else {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               Get.showSnackbar(
-                const GetSnackBar(
-                  message: 'Image added to note successfully',
-                  duration: Duration(seconds: 2),
+                GetSnackBar(
+                  message:
+                      'Could not access the selected image. Please try again.',
+                  duration: const Duration(seconds: 2),
                   snackPosition: SnackPosition.BOTTOM,
                 ),
               );
             }
-          }
-        } else {
+          });
+        }
+      } on Exception catch (e) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             Get.showSnackbar(
               GetSnackBar(
-                message:
-                    'Could not access the selected image. Please try again.',
+                message: 'Error adding image: $e',
                 duration: const Duration(seconds: 2),
                 snackPosition: SnackPosition.BOTTOM,
               ),
             );
           }
-        }
-      } on Exception catch (e) {
-        if (mounted) {
-          Get.showSnackbar(
-            GetSnackBar(
-              message: 'Error adding image: $e',
-              duration: const Duration(seconds: 2),
-              snackPosition: SnackPosition.BOTTOM,
-            ),
-          );
-        }
+        });
       } catch (e) {
-        if (mounted) {
-          Get.showSnackbar(
-            GetSnackBar(
-              message: 'Unexpected error adding image: $e',
-              duration: const Duration(seconds: 2),
-              snackPosition: SnackPosition.BOTTOM,
-            ),
-          );
-        }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            Get.showSnackbar(
+              GetSnackBar(
+                message: 'Unexpected error adding image: $e',
+                duration: const Duration(seconds: 2),
+                snackPosition: SnackPosition.BOTTOM,
+              ),
+            );
+          }
+        });
       } finally {
         setState(() {
           _isLoading = false;
@@ -573,21 +606,29 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         );
       }
 
-      Get.showSnackbar(
-        const GetSnackBar(
-          message: 'Images deleted successfully',
-          duration: Duration(seconds: 2),
-          snackPosition: SnackPosition.BOTTOM,
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Get.showSnackbar(
+            const GetSnackBar(
+              message: 'Images deleted successfully',
+              duration: Duration(seconds: 2),
+              snackPosition: SnackPosition.BOTTOM,
+            ),
+          );
+        }
+      });
     } catch (e) {
-      Get.showSnackbar(
-        GetSnackBar(
-          message: 'Error deleting images: $e',
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.BOTTOM,
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Get.showSnackbar(
+            GetSnackBar(
+              message: 'Error deleting images: $e',
+              duration: const Duration(seconds: 2),
+              snackPosition: SnackPosition.BOTTOM,
+            ),
+          );
+        }
+      });
     } finally {
       setState(() {
         _isLoading = false;
@@ -653,21 +694,29 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         );
       }
 
-      Get.showSnackbar(
-        const GetSnackBar(
-          message: 'Image deleted successfully',
-          duration: Duration(seconds: 2),
-          snackPosition: SnackPosition.BOTTOM,
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Get.showSnackbar(
+            const GetSnackBar(
+              message: 'Image deleted successfully',
+              duration: Duration(seconds: 2),
+              snackPosition: SnackPosition.BOTTOM,
+            ),
+          );
+        }
+      });
     } catch (e) {
-      Get.showSnackbar(
-        GetSnackBar(
-          message: 'Error deleting image: $e',
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.BOTTOM,
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Get.showSnackbar(
+            GetSnackBar(
+              message: 'Error deleting image: $e',
+              duration: const Duration(seconds: 2),
+              snackPosition: SnackPosition.BOTTOM,
+            ),
+          );
+        }
+      });
     } finally {
       setState(() {
         _isLoading = false;

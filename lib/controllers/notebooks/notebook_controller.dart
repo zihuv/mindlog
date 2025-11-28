@@ -1,7 +1,11 @@
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:mindlog/features/notebooks/notebook_service.dart';
 import 'package:mindlog/features/notebooks/domain/entities/notebook.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 class NotebookController extends GetxController {
   final NotebookService _service = NotebookService();
@@ -28,11 +32,13 @@ class NotebookController extends GetxController {
       if (Get.isSnackbarOpen) {
         Get.closeAllSnackbars();
       }
-      Get.rawSnackbar(
-        title: "Initialization Error",
-        message: "Failed to initialize notebook service: $e",
-        duration: const Duration(seconds: 3),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.rawSnackbar(
+          title: "Initialization Error",
+          message: "Failed to initialize notebook service: $e",
+          duration: const Duration(seconds: 3),
+        );
+      });
     } finally {
       _isLoading.value = false;
     }
@@ -50,11 +56,13 @@ class NotebookController extends GetxController {
       if (Get.isSnackbarOpen) {
         Get.closeAllSnackbars();
       }
-      Get.rawSnackbar(
-        title: "Error",
-        message: "Error loading notebooks: $e",
-        duration: const Duration(seconds: 3),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.rawSnackbar(
+          title: "Error",
+          message: "Error loading notebooks: $e",
+          duration: const Duration(seconds: 3),
+        );
+      });
     } finally {
       _isLoading.value = false;
     }
@@ -112,9 +120,26 @@ class NotebookController extends GetxController {
     );
 
     if (image != null) {
-      // In a real implementation, you would save the image and return the path
-      // For now, we just return the path of the picked image
-      return image.path;
+      try {
+        // Copy image to app documents directory
+        final appDir = await getApplicationDocumentsDirectory();
+        final notebookImagesDir = Directory('${appDir.path}/notebook_images');
+        
+        // Create directory if it doesn't exist
+        if (!notebookImagesDir.existsSync()) {
+          notebookImagesDir.createSync(recursive: true);
+        }
+        
+        // Generate a unique filename
+        final filename = '${DateTime.now().millisecondsSinceEpoch}_${path.basename(image.path)}';
+        final savedImage = await File(image.path).copy('${notebookImagesDir.path}/$filename');
+        
+        return savedImage.path;
+      } catch (e) {
+        Get.log('Error copying image: $e');
+        // If copying fails, return the original path anyway
+        return image.path;
+      }
     }
     return null;
   }

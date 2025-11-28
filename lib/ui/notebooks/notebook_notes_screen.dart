@@ -54,13 +54,15 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
         _notebook = notebook;
       }
     } catch (e) {
-      Get.showSnackbar(
-        GetSnackBar(
-          message: 'Error loading notebook info: $e',
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.BOTTOM,
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.showSnackbar(
+          GetSnackBar(
+            message: 'Error loading notebook info: $e',
+            duration: const Duration(seconds: 2),
+            snackPosition: SnackPosition.BOTTOM,
+          ),
+        );
+      });
     } finally {
       setState(() {
         _isLoading = false;
@@ -76,13 +78,15 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
     try {
       _notes = await _noteController.getNotesByNotebookId(widget.notebookId);
     } catch (e) {
-      Get.showSnackbar(
-        GetSnackBar(
-          message: 'Error loading notes: $e',
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.BOTTOM,
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.showSnackbar(
+          GetSnackBar(
+            message: 'Error loading notes: $e',
+            duration: const Duration(seconds: 2),
+            snackPosition: SnackPosition.BOTTOM,
+          ),
+        );
+      });
     } finally {
       setState(() {
         _isLoading = false;

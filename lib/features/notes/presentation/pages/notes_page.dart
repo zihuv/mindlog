@@ -108,6 +108,9 @@ class _NotesPageState extends State<NotesPage> {
     );
 
     if (confirm == true) {
+      // Check if the context is still valid before proceeding
+      if (!contextLocal.mounted) return;
+
       try {
         await NoteService.instance.deleteNote(note.id);
         setState(() {
@@ -115,13 +118,15 @@ class _NotesPageState extends State<NotesPage> {
         });
       } catch (e) {
         print('Error deleting note: $e');
-        // Show error snackbar
-        ScaffoldMessenger.of(contextLocal).showSnackBar(
-          SnackBar(
-            content: Text('Error deleting note: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // Show error snackbar only if context is still valid
+        if (contextLocal.mounted) {
+          ScaffoldMessenger.of(contextLocal).showSnackBar(
+            SnackBar(
+              content: Text('Error deleting note: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }

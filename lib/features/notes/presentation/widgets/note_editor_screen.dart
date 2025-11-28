@@ -150,12 +150,14 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
     if (_controller.text.trim().isEmpty) {
       // Show error message if content is empty
-      ScaffoldMessenger.of(contextLocal).showSnackBar(
-        const SnackBar(
-          content: Text('Note content cannot be empty'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (contextLocal.mounted) {
+        ScaffoldMessenger.of(contextLocal).showSnackBar(
+          const SnackBar(
+            content: Text('Note content cannot be empty'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
@@ -179,10 +181,15 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     // Save to storage
     await NoteService.instance.saveNote(note);
 
+    // Check if the context is still valid before proceeding
+    if (!contextLocal.mounted) return;
+
     // Call the onSave callback if provided
     widget.onSave?.call(note);
 
     // Navigate back
-    Navigator.pop(contextLocal);
+    if (contextLocal.mounted) {
+      Navigator.pop(contextLocal);
+    }
   }
 }

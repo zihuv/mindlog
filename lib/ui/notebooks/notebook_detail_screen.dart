@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mindlog/features/notebooks/domain/entities/notebook.dart';
 import 'package:mindlog/controllers/notebooks/notebook_controller.dart';
-import 'package:mindlog/controllers/note_controller.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
 import 'dart:io';
 
@@ -22,7 +21,6 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
   String? _coverImage;
   NotebookType _type = NotebookType.standard;
   late NotebookController _notebookController;
-  late NoteController _noteController;
   bool _isLoading = false;
 
   bool get _isNewNotebook =>
@@ -34,9 +32,6 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
     _notebookController = Get.isRegistered<NotebookController>()
         ? Get.find<NotebookController>()
         : Get.put(NotebookController());
-    _noteController = Get.isRegistered<NoteController>()
-        ? Get.find<NoteController>()
-        : Get.put(NoteController());
 
     if (!_isNewNotebook) {
       // Editing an existing notebook
@@ -66,13 +61,15 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
         _type = notebook.type;
       }
     } catch (e) {
-      Get.showSnackbar(
-        GetSnackBar(
-          message: 'Error loading notebook: $e',
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.BOTTOM,
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.showSnackbar(
+          GetSnackBar(
+            message: 'Error loading notebook: $e',
+            duration: const Duration(seconds: 2),
+            snackPosition: SnackPosition.BOTTOM,
+          ),
+        );
+      });
     } finally {
       setState(() {
         _isLoading = false;
@@ -82,12 +79,14 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
 
   Future<void> _saveNotebook() async {
     if (_titleController.text.trim().isEmpty) {
-      Get.showSnackbar(
-        const GetSnackBar(
-          message: 'Please enter a title for the notebook',
-          duration: Duration(seconds: 2),
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.showSnackbar(
+          const GetSnackBar(
+            message: 'Please enter a title for the notebook',
+            duration: Duration(seconds: 2),
+          ),
+        );
+      });
       return;
     }
 
@@ -96,6 +95,28 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
     });
 
     try {
+      // Validate cover image if present
+      if (_coverImage != null && _coverImage!.isNotEmpty) {
+        final imageFile = File(_coverImage!);
+        if (!imageFile.existsSync()) {
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Get.showSnackbar(
+                const GetSnackBar(
+                  message: 'Selected image file not found',
+                  duration: Duration(seconds: 2),
+                  snackPosition: SnackPosition.BOTTOM,
+                ),
+              );
+            });
+          }
+          return;
+        }
+      }
+
       if (_isNewNotebook) {
         // Create a new notebook
         await _notebookController.createNotebook(
@@ -116,32 +137,27 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
       }
 
       if (mounted) {
-        Get.back(result: true); // Indicate success
+        setState(() {
+          _isLoading = false;
+        });
+        Get.back(result: true); // Indicate success and navigate back
       }
-    } on Exception catch (e) {
+    } catch (e, stackTrace) {
+      Get.log('Save error: $e\n$stackTrace');
       if (mounted) {
-        Get.showSnackbar(
-          GetSnackBar(
-            message: 'Error saving notebook: $e',
-            duration: const Duration(seconds: 2),
-            snackPosition: SnackPosition.BOTTOM,
-          ),
-        );
+        setState(() {
+          _isLoading = false;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Get.showSnackbar(
+            GetSnackBar(
+              message: 'Error saving notebook: $e',
+              duration: const Duration(seconds: 3),
+              snackPosition: SnackPosition.BOTTOM,
+            ),
+          );
+        });
       }
-    } catch (e) {
-      if (mounted) {
-        Get.showSnackbar(
-          GetSnackBar(
-            message: 'Unexpected error saving notebook: $e',
-            duration: const Duration(seconds: 2),
-            snackPosition: SnackPosition.BOTTOM,
-          ),
-        );
-      }
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
@@ -184,24 +200,28 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
         await _notebookController.deleteNotebook(widget.notebookId!);
 
         if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
           Get.back(
             result: true,
           ); // Indicate success and return to previous screen
         }
       } catch (e) {
         if (mounted) {
-          Get.showSnackbar(
-            GetSnackBar(
-              message: 'Error deleting notebook: $e',
-              duration: const Duration(seconds: 2),
-              snackPosition: SnackPosition.BOTTOM,
-            ),
-          );
+          setState(() {
+            _isLoading = false;
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Get.showSnackbar(
+              GetSnackBar(
+                message: 'Error deleting notebook: $e',
+                duration: const Duration(seconds: 2),
+                snackPosition: SnackPosition.BOTTOM,
+              ),
+            );
+          });
         }
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../data/services/combined_note_service.dart';
 import '../features/notes/domain/entities/note.dart';
@@ -46,11 +47,13 @@ class NoteController extends GetxController {
       if (Get.isSnackbarOpen) {
         Get.closeAllSnackbars();
       }
-      Get.rawSnackbar(
-        title: "Error",
-        message: "Error loading notes: $e",
-        duration: const Duration(seconds: 3),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.rawSnackbar(
+          title: "Error",
+          message: "Error loading notes: $e",
+          duration: const Duration(seconds: 3),
+        );
+      });
     } finally {
       _isLoading.value = false;
     }
@@ -78,11 +81,13 @@ class NoteController extends GetxController {
       if (Get.isSnackbarOpen) {
         Get.closeAllSnackbars();
       }
-      Get.rawSnackbar(
-        title: "Error",
-        message: "Error searching notes: $e",
-        duration: const Duration(seconds: 3),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.rawSnackbar(
+          title: "Error",
+          message: "Error searching notes: $e",
+          duration: const Duration(seconds: 3),
+        );
+      });
     } finally {
       _isLoading.value = false;
     }

@@ -64,7 +64,12 @@ class NoteListScreen extends StatelessWidget {
                   final note = controller.notes[index];
                   return GestureDetector(
                     onTap: () {
-                      Get.to(() => NoteDetailScreen(noteId: note.id));
+                      Get.to(() => NoteDetailScreen(noteId: note.id))?.then((value) {
+                        // Refresh list after updating an existing note
+                        if (value == true) {
+                          controller.loadNotes();
+                        }
+                      });
                     },
                     child: Card(
                       margin: AppPadding.small,
@@ -88,7 +93,7 @@ class NoteListScreen extends StatelessWidget {
                                   .bottom, // Reduced bottom padding to reduce gap with content
                             ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surfaceVariant,
+                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(12), // Match the card's top border radius
                               ),
@@ -142,7 +147,12 @@ class NoteListScreen extends StatelessWidget {
                                                   () => NoteDetailScreen(
                                                     noteId: note.id,
                                                   ),
-                                                );
+                                                )?.then((value) {
+                                                  // Refresh list after updating an existing note
+                                                  if (value == true) {
+                                                    controller.loadNotes();
+                                                  }
+                                                });
                                               },
                                               child: FutureBuilder<String?>(
                                                 future: _getImagePath(
@@ -247,21 +257,25 @@ class NoteListScreen extends StatelessWidget {
       // Refresh the notes list to reflect the updated content
       await controller.loadNotes();
     } on Exception catch (e) {
-      Get.showSnackbar(
-        GetSnackBar(
-          message: 'Error updating checklist: $e',
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.BOTTOM,
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.showSnackbar(
+          GetSnackBar(
+            message: 'Error updating checklist: $e',
+            duration: const Duration(seconds: 2),
+            snackPosition: SnackPosition.BOTTOM,
+          ),
+        );
+      });
     } catch (e) {
-      Get.showSnackbar(
-        GetSnackBar(
-          message: 'Unexpected error updating checklist: $e',
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.BOTTOM,
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.showSnackbar(
+          GetSnackBar(
+            message: 'Unexpected error updating checklist: $e',
+            duration: const Duration(seconds: 2),
+            snackPosition: SnackPosition.BOTTOM,
+          ),
+        );
+      });
     }
   }
 }

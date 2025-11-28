@@ -20,7 +20,9 @@ class NotebookListScreen extends StatelessWidget {
                 icon: const Icon(Icons.search),
                 onPressed: () {
                   // Implement search functionality
-                  Get.snackbar('Search', 'Search functionality coming soon');
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Get.snackbar('Search', 'Search functionality coming soon');
+                  });
                 },
               ),
             ],
