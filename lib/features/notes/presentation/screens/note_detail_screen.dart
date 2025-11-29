@@ -89,11 +89,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     } catch (e) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          Get.showSnackbar(
-            GetSnackBar(
-              message: 'Error loading note: $e',
+          // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error loading note: $e'),
               duration: const Duration(seconds: 2),
-              snackPosition: SnackPosition.BOTTOM,
             ),
           );
         }
@@ -144,11 +144,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       } catch (e) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            Get.showSnackbar(
-              GetSnackBar(
-                message: 'Error deleting note: $e',
+            // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error deleting note: $e'),
                 duration: const Duration(seconds: 2),
-                snackPosition: SnackPosition.BOTTOM,
               ),
             );
           }
@@ -165,11 +165,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     if (_contentController.text.trim().isEmpty && _images.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          Get.showSnackbar(
-            const GetSnackBar(
-              message: 'Please enter some content or add an image',
+          // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please enter some content or add an image'),
               duration: Duration(seconds: 2),
-              snackPosition: SnackPosition.BOTTOM,
             ),
           );
         }
@@ -288,11 +288,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     } on Exception catch (e) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          Get.showSnackbar(
-            GetSnackBar(
-              message: 'Error saving note: $e',
+          // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error saving note: $e'),
               duration: const Duration(seconds: 2),
-              snackPosition: SnackPosition.BOTTOM,
             ),
           );
         }
@@ -300,11 +300,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     } catch (e) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          Get.showSnackbar(
-            GetSnackBar(
-              message: 'Unexpected error saving note: $e',
+          // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Unexpected error saving note: $e'),
               duration: const Duration(seconds: 2),
-              snackPosition: SnackPosition.BOTTOM,
             ),
           );
         }
@@ -341,11 +341,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             // Just add the image to the pending list, don't create the note yet
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
-                Get.showSnackbar(
-                  GetSnackBar(
-                    message: 'Image added. Save note to store image.',
-                    duration: const Duration(seconds: 2),
-                    snackPosition: SnackPosition.BOTTOM,
+                // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Image added. Save note to store image.'),
+                    duration: Duration(seconds: 2),
                   ),
                 );
               }
@@ -371,11 +371,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             // Show success message after reloading to ensure UI is updated
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
-                Get.showSnackbar(
-                  const GetSnackBar(
-                    message: 'Image added to note successfully',
+                // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Image added to note successfully'),
                     duration: Duration(seconds: 2),
-                    snackPosition: SnackPosition.BOTTOM,
                   ),
                 );
               }
@@ -384,12 +384,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         } else {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              Get.showSnackbar(
-                GetSnackBar(
-                  message:
-                      'Could not access the selected image. Please try again.',
-                  duration: const Duration(seconds: 2),
-                  snackPosition: SnackPosition.BOTTOM,
+              // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Could not access the selected image. Please try again.'),
+                  duration: Duration(seconds: 2),
                 ),
               );
             }
@@ -398,11 +397,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       } on Exception catch (e) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            Get.showSnackbar(
-              GetSnackBar(
-                message: 'Error adding image: $e',
+            // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error adding image: $e'),
                 duration: const Duration(seconds: 2),
-                snackPosition: SnackPosition.BOTTOM,
               ),
             );
           }

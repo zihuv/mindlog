@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mindlog/ui/notebooks/notebook_list_screen.dart';
 import 'package:mindlog/ui/calendar/calendar_screen.dart';
-import 'package:mindlog/ui/settings/settings_screen.dart';
+import 'package:mindlog/ui/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,9 +14,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    const NotebookListScreen(),
-    const CalendarScreen(),
-    const SettingsScreen(),
+    NotebookListScreen(),
+    CalendarScreen(),
+    SettingsScreen(),
   ];
 
   void _onItemTapped(int index) {

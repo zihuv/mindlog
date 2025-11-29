@@ -113,7 +113,24 @@ class DatabaseProvider {
   // Close the database when the app is done with it
   Future<void> close() async {
     if (_database != null) {
-      await _database!.close();
+      try {
+        await _database!.close();
+      } catch (e) {
+        print('Error closing database: $e');
+      }
+      _database = null;
+    }
+  }
+
+  // Reset the database instance to force reinitialization
+  Future<void> reset() async {
+    // First try to close the existing connection
+    if (_database != null) {
+      try {
+        await _database!.close();
+      } catch (e) {
+        print('Error closing database during reset: $e');
+      }
       _database = null;
     }
   }

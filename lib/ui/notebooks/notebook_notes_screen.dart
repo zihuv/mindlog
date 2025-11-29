@@ -51,22 +51,46 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
         widget.notebookId,
       );
       if (notebook != null) {
-        _notebook = notebook;
+        setState(() {
+          _notebook = notebook;
+        });
+      } else {
+        // Notebook not found, show error
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Notebook not found'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+            // Navigate back after a short delay
+            Future.delayed(const Duration(seconds: 1), () {
+              if (mounted && Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              }
+            });
+          }
+        });
       }
     } catch (e) {
+      print('Error loading notebook: $e');
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.showSnackbar(
-          GetSnackBar(
-            message: 'Error loading notebook info: $e',
-            duration: const Duration(seconds: 2),
-            snackPosition: SnackPosition.BOTTOM,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error loading notebook info: $e'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -76,21 +100,30 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
     });
 
     try {
-      _notes = await _noteController.getNotesByNotebookId(widget.notebookId);
+      final notes = await _noteController.getNotesByNotebookId(widget.notebookId);
+      if (mounted) {
+        setState(() {
+          _notes = notes;
+        });
+      }
     } catch (e) {
+      print('Error loading notes: $e');
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.showSnackbar(
-          GetSnackBar(
-            message: 'Error loading notes: $e',
-            duration: const Duration(seconds: 2),
-            snackPosition: SnackPosition.BOTTOM,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error loading notes: $e'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

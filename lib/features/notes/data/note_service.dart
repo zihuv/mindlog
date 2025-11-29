@@ -50,4 +50,13 @@ class NoteService {
     // Don't close the repository since it uses shared database
     // The shared database will be closed separately
   }
+
+  // Reset the service to force re-initialization (used after database import)
+  Future<void> reset() async {
+    // Close the repository connection
+    await _repository?.close();
+    _repository = null;
+    // Re-initialize on next access
+    await init();
+  }
 }

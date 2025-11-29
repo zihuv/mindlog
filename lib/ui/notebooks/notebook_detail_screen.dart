@@ -62,11 +62,11 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
       }
     } catch (e) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.showSnackbar(
-          GetSnackBar(
-            message: 'Error loading notebook: $e',
+        // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+        ScaffoldMessenger.of(Get.context!).showSnackBar(
+          SnackBar(
+            content: Text('Error loading notebook: $e'),
             duration: const Duration(seconds: 2),
-            snackPosition: SnackPosition.BOTTOM,
           ),
         );
       });
@@ -80,9 +80,10 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
   Future<void> _saveNotebook() async {
     if (_titleController.text.trim().isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.showSnackbar(
-          const GetSnackBar(
-            message: 'Please enter a title for the notebook',
+        // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+        ScaffoldMessenger.of(Get.context!).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter a title for the notebook'),
             duration: Duration(seconds: 2),
           ),
         );
@@ -104,11 +105,11 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
               _isLoading = false;
             });
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              Get.showSnackbar(
-                const GetSnackBar(
-                  message: 'Selected image file not found',
+              // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+              ScaffoldMessenger.of(Get.context!).showSnackBar(
+                const SnackBar(
+                  content: Text('Selected image file not found'),
                   duration: Duration(seconds: 2),
-                  snackPosition: SnackPosition.BOTTOM,
                 ),
               );
             });
@@ -149,11 +150,10 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
           _isLoading = false;
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          Get.showSnackbar(
-            GetSnackBar(
-              message: 'Error saving notebook: $e',
+          ScaffoldMessenger.of(Get.context!).showSnackBar(
+            SnackBar(
+              content: Text('Error saving notebook: $e'),
               duration: const Duration(seconds: 3),
-              snackPosition: SnackPosition.BOTTOM,
             ),
           );
         });
@@ -213,11 +213,10 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
             _isLoading = false;
           });
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            Get.showSnackbar(
-              GetSnackBar(
-                message: 'Error deleting notebook: $e',
+            ScaffoldMessenger.of(Get.context!).showSnackBar(
+              SnackBar(
+                content: Text('Error deleting notebook: $e'),
                 duration: const Duration(seconds: 2),
-                snackPosition: SnackPosition.BOTTOM,
               ),
             );
           });

@@ -258,21 +258,21 @@ class NoteListScreen extends StatelessWidget {
       await controller.loadNotes();
     } on Exception catch (e) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.showSnackbar(
-          GetSnackBar(
-            message: 'Error updating checklist: $e',
+        // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+        ScaffoldMessenger.of(Get.context!).showSnackBar(
+          SnackBar(
+            content: Text('Error updating checklist: $e'),
             duration: const Duration(seconds: 2),
-            snackPosition: SnackPosition.BOTTOM,
           ),
         );
       });
     } catch (e) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.showSnackbar(
-          GetSnackBar(
-            message: 'Unexpected error updating checklist: $e',
+        // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+        ScaffoldMessenger.of(Get.context!).showSnackBar(
+          SnackBar(
+            content: Text('Unexpected error updating checklist: $e'),
             duration: const Duration(seconds: 2),
-            snackPosition: SnackPosition.BOTTOM,
           ),
         );
       });

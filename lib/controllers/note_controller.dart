@@ -232,6 +232,24 @@ class NoteController extends GetxController {
     return content.hashCode + position;
   }
 
+  // Refresh the notes list by reloading from the database
+  Future<void> refreshNotes() async {
+    print('NoteController.refreshNotes: Refreshing note list');
+    _isLoading.value = true;
+    try {
+      final notes = await _service.getAllNotes();
+      print('NoteController.refreshNotes: Retrieved ${notes.length} notes after refresh');
+      // Sort notes by creation createTime in descending order (newest first)
+      notes.sort((a, b) => b.createTime.compareTo(a.createTime));
+      _notes.assignAll(notes);
+    } catch (e) {
+      print('Error refreshing notes: $e');
+      // Don't show snackbar during import to avoid overlay issues
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
   @override
   void onClose() {
     _service.close();

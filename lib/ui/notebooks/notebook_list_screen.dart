@@ -21,7 +21,10 @@ class NotebookListScreen extends StatelessWidget {
                 onPressed: () {
                   // Implement search functionality
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    Get.snackbar('Search', 'Search functionality coming soon');
+                    // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+                    ScaffoldMessenger.of(Get.context!).showSnackBar(
+                      const SnackBar(content: Text('Search functionality coming soon')),
+                    );
                   });
                 },
               ),

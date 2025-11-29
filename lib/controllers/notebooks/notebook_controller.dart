@@ -124,16 +124,16 @@ class NotebookController extends GetxController {
         // Copy image to app documents directory
         final appDir = await getApplicationDocumentsDirectory();
         final notebookImagesDir = Directory('${appDir.path}/notebook_images');
-        
+
         // Create directory if it doesn't exist
         if (!notebookImagesDir.existsSync()) {
           notebookImagesDir.createSync(recursive: true);
         }
-        
+
         // Generate a unique filename
         final filename = '${DateTime.now().millisecondsSinceEpoch}_${path.basename(image.path)}';
         final savedImage = await File(image.path).copy('${notebookImagesDir.path}/$filename');
-        
+
         return savedImage.path;
       } catch (e) {
         Get.log('Error copying image: $e');
@@ -142,6 +142,22 @@ class NotebookController extends GetxController {
       }
     }
     return null;
+  }
+
+  // Refresh the notebooks list by reloading from the database
+  Future<void> refreshNotebooks() async {
+    _isLoading.value = true;
+    try {
+      final notebooks = await _service.getAllNotebooks();
+      // Sort notebooks by creation createTime in descending order (newest first)
+      notebooks.sort((a, b) => b.createTime.compareTo(a.createTime));
+      _notebooks.assignAll(notebooks);
+    } catch (e) {
+      print('Error refreshing notebooks: $e');
+      // Don't show snackbar during import to avoid overlay issues
+    } finally {
+      _isLoading.value = false;
+    }
   }
 
   @override
