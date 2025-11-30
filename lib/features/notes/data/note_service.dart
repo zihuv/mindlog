@@ -41,6 +41,7 @@ class NoteService {
   Future<List<Note>> searchNotes(String query) => repository.searchNotes(query);
   Future<List<Note>> getNotesByNotebookId(String notebookId) =>
       repository.getNotesByNotebookId(notebookId);
+  Future<List<Note>> getNotesByDate(DateTime date) => repository.getNotesByDate(date);
   Future<List<String>> getAllTags() async {
     // Tags functionality has been removed from the app
     return [];

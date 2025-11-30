@@ -9,6 +9,7 @@ abstract class NoteStorageRepository {
   Future<void> deleteNote(String id);
   Future<List<Note>> searchNotes(String query);
   Future<List<Note>> getNotesByNotebookId(String notebookId);
+  Future<List<Note>> getNotesByDate(DateTime date);
   Future<List<String>> getAllTags();
   Future<void> close();
 }

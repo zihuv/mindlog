@@ -66,6 +66,31 @@ class NoteController extends GetxController {
     return notes;
   }
 
+  Future<List<Note>> getNotesByDate(DateTime date) async {
+    _isLoading.value = true;
+    try {
+      final notes = await _service.getNotesByDate(date);
+      // Sort notes by creation createTime in descending order (newest first)
+      notes.sort((a, b) => b.createTime.compareTo(a.createTime));
+      return notes;
+    } catch (e) {
+      Get.log('Error loading notes by date: $e');
+      if (Get.isSnackbarOpen) {
+        Get.closeAllSnackbars();
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.rawSnackbar(
+          title: "Error",
+          message: "Error loading notes by date: $e",
+          duration: const Duration(seconds: 3),
+        );
+      });
+      return [];
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
   Future<void> searchNotes(String query) async {
     _isLoading.value = true;
     try {

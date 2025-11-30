@@ -107,6 +107,14 @@ class NoteDatabaseRepository implements NoteStorageRepository {
   }
 
   @override
+  Future<List<Note>> getNotesByDate(DateTime date) async {
+    final noteDataList = await _noteDao.getNotesByDate(date);
+    return noteDataList
+        .map(_mapNoteDataToNote)
+        .toList();
+  }
+
+  @override
   Future<List<String>> getAllTags() async {
     // Tags functionality has been removed from the app
     return [];

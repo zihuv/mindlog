@@ -246,6 +246,11 @@ class CombinedNoteService {
     return await _noteService.getNotesByNotebookId(notebookId);
   }
 
+  // Get notes by date
+  Future<List<Note>> getNotesByDate(DateTime date) async {
+    return await _noteService.getNotesByDate(date);
+  }
+
   // Get all unique tags
   Future<List<String>> getAllTags() async {
     return await _noteService.getAllTags();

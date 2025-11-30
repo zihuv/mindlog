@@ -92,6 +92,11 @@ class NoteBusinessService {
     return await NoteService.instance.getNotesByNotebookId(notebookId);
   }
 
+  // Get notes by date
+  Future<List<Note>> getNotesByDate(DateTime date) async {
+    return await NoteService.instance.getNotesByDate(date);
+  }
+
   // Get all unique tags
   Future<List<String>> getAllTags() async {
     return await NoteService.instance.getAllTags();

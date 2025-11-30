@@ -36,6 +36,20 @@ class NoteDao extends DatabaseAccessor<AppDatabase> with _$NoteDaoMixin {
     return null;
   }
 
+  // Get notes by creation date
+  Future<List<NoteData>> getNotesByDate(DateTime date) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59, 999, 999);
+
+    return (select(notes)
+          ..where((tbl) =>
+              tbl.isDeleted.equals(false) &
+              tbl.createTime.isBiggerOrEqualValue(startOfDay) &
+              tbl.createTime.isSmallerOrEqualValue(endOfDay)))
+        .get()
+        .then((rows) => rows.map((row) => NoteData.fromTable(row)).toList());
+  }
+
   // Search notes by content with support for search term matching
   Future<List<NoteData>> searchNotes(String query) {
     if (query.isEmpty) {

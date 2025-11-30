@@ -51,6 +51,7 @@ dependencies:
   universal_platform: ^1.1.0
   archive: ^4.0.7
   file_picker: ^10.3.7
+  calendar_date_picker2: ^1.1.9
 
 
 dev_dependencies:
