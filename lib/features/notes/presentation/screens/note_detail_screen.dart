@@ -367,7 +367,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
               // If it's a new note that has been created, load the created note
               await _loadNoteForId(_currentNoteId!);
             }
-
           }
         } else {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -375,7 +374,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
               // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Could not access the selected image. Please try again.'),
+                  content: Text(
+                    'Could not access the selected image. Please try again.',
+                  ),
                   duration: Duration(seconds: 2),
                 ),
               );

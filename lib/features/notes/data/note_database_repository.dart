@@ -28,6 +28,12 @@ class NoteDatabaseRepository implements NoteStorageRepository {
   }
 
   @override
+  Future<List<Note>> getAllNotesForSync() async {
+    final noteDataList = await _noteDao.getAllNotesForSync();
+    return noteDataList.map(_mapNoteDataToNote).toList();
+  }
+
+  @override
   Future<Note?> getNoteById(String id) async {
     final noteData = await _noteDao.getNoteById(id);
     if (noteData == null || noteData.isDeleted) {
@@ -110,9 +116,7 @@ class NoteDatabaseRepository implements NoteStorageRepository {
   @override
   Future<List<Note>> getNotesByDate(DateTime date) async {
     final noteDataList = await _noteDao.getNotesByDate(date);
-    return noteDataList
-        .map(_mapNoteDataToNote)
-        .toList();
+    return noteDataList.map(_mapNoteDataToNote).toList();
   }
 
   @override
@@ -142,6 +146,7 @@ class NoteDatabaseRepository implements NoteStorageRepository {
       images: noteData.imageName,
       videos: noteData.videoName,
       audios: noteData.audioName,
+      isDeleted: noteData.isDeleted,
     );
   }
 }

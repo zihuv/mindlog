@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:webdav_client/webdav_client.dart' as webdav;
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
-
 import 'package:mindlog/data/services/combined_note_service.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/utils/notebook_sync_manager.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import 'package:webdav_client/webdav_client.dart' as webdav;
+
 import 'log_util.dart';
 
 class WebDAVConfig {
@@ -97,7 +97,9 @@ class WebDAVUtil {
       _config.folderName,
     );
 
-    logger.info('WebDAV client initialized with URL: ${_config.url} and folder: ${_config.folderName}');
+    logger.info(
+      'WebDAV client initialized with URL: ${_config.url} and folder: ${_config.folderName}',
+    );
   }
 
   Future<bool> testConnection() async {
@@ -105,7 +107,7 @@ class WebDAVUtil {
       logger.error('WebDAV client not initialized');
       return false;
     }
-    
+
     try {
       logger.info('Testing WebDAV connection');
       await _client!.ping().timeout(
@@ -154,10 +156,10 @@ class WebDAVUtil {
   }
 
   Future<void> _syncNotes(Map<String, dynamic> remoteSyncData) async {
-    // Get all local notes
+    // Get all local notes including deleted ones
     await _noteService.init();
-    List<Note> localNotes = await _noteService.getAllNotes();
-    logger.info('Found ${localNotes.length} local notes');
+    List<Note> localNotes = await _noteService.getAllNotesForSync();
+    logger.info('Found ${localNotes.length} local notes (including deleted)');
 
     // Calculate sync status for each note
     Map<String, SyncStatus> syncStatusMap = await _calculateSyncStatus(
@@ -243,18 +245,6 @@ class WebDAVUtil {
       if (remoteTimestamp == null) {
         // Note doesn't exist on server, needs upload
         needsUpload = true;
-      } else if (remoteTimestamp == 'delete') {
-        // Note was deleted on server, but exists locally
-        // Check if note is marked as deleted locally
-        if (note.isDeleted) {
-          // Both sides are deleted, no action needed
-          needsUpload = false;
-          needsDownload = false;
-        } else {
-          // Note exists locally but was deleted on server
-          // Mark for deletion locally
-          needsDownload = true;
-        }
       } else {
         // Compare timestamps to determine which version is newer
         DateTime localTime =
@@ -268,6 +258,13 @@ class WebDAVUtil {
           needsUpload = true;
         } else if (remoteTime.isAfter(localTime)) {
           needsDownload = true;
+        }
+        // If both times are equal, we check if one side has the note marked as deleted
+        else if (localTime == remoteTime) {
+          // Timestamps are the same, if the local note is deleted, we need to upload the deletion
+          if (note.isDeleted) {
+            needsUpload = true;
+          }
         }
       }
 
@@ -284,23 +281,49 @@ class WebDAVUtil {
       String noteId = entry.key;
       String? remoteStatus = entry.value as String?;
 
-      if (remoteStatus == 'delete') {
-        // If the note was deleted remotely, mark it for local deletion
-        if (!syncStatusMap.containsKey(noteId)) {
+      if (remoteStatus != null && !syncStatusMap.containsKey(noteId)) {
+        // Note exists remotely but not locally, needs download
+        // Check if the note was deleted locally by looking in the database
+        Note? localNote = await _noteService.getNoteById(noteId);
+        String localTimestamp = '0';
+
+        if (localNote != null && localNote.isDeleted) {
+          // The note was deleted locally but exists on remote with a timestamp
+          // Compare timestamps to determine if remote should be deleted too
+          DateTime localDeleteTime =
+              localNote.updateTime ?? localNote.createTime;
+          DateTime remoteTime =
+              DateTime.tryParse(remoteStatus) ??
+              DateTime.fromMillisecondsSinceEpoch(0);
+
+          if (remoteTime.isAfter(localDeleteTime)) {
+            // Remote version is newer, we should download it (undelete it)
+            syncStatusMap[noteId] = SyncStatus(
+              needsUpload: false,
+              needsDownload: true,
+              localTimestamp: localTimestamp,
+              remoteTimestamp: remoteStatus,
+            );
+          } else {
+            // Local deletion is newer, we should upload the deletion status
+            syncStatusMap[noteId] = SyncStatus(
+              needsUpload: true, // Upload the deletion status
+              needsDownload: false,
+              localTimestamp: _formatTimestamp(
+                localNote.updateTime ?? localNote.createTime,
+              ),
+              remoteTimestamp: remoteStatus,
+            );
+          }
+        } else {
+          // Regular case: note exists remotely but not locally, needs download
           syncStatusMap[noteId] = SyncStatus(
             needsUpload: false,
-            needsDownload: true, // Need to download the deletion
-            localTimestamp: '0',
+            needsDownload: true,
+            localTimestamp: localTimestamp,
+            remoteTimestamp: remoteStatus,
           );
         }
-      } else if (remoteStatus != null && !syncStatusMap.containsKey(noteId)) {
-        // Note exists remotely but not locally, needs download
-        syncStatusMap[noteId] = SyncStatus(
-          needsUpload: false,
-          needsDownload: true,
-          localTimestamp: '0',
-          remoteTimestamp: remoteStatus,
-        );
       }
     }
 
@@ -337,16 +360,14 @@ class WebDAVUtil {
         }
 
         if (localNote != null) {
-          // Check if note is marked as deleted locally
-          if (localNote.isDeleted) {
-            // Upload deletion marker to server
-            await _markNoteAsDeletedOnServer(noteId);
-          } else {
-            await _uploadNote(localNote);
+          await _uploadNote(localNote);
+        } else {
+          // Note not found in the localNotes list, check if it exists in database and is deleted
+          Note? noteFromDb = await _noteService.getNoteById(noteId);
+          if (noteFromDb != null && noteFromDb.isDeleted) {
+            // The note exists in database but is marked as deleted, upload note with deletion flag to server
+            await _uploadNote(noteFromDb);
           }
-        } else if (status.remoteTimestamp != 'delete') {
-          // If local note doesn't exist but remote status isn't 'delete',
-          // then we should remove it from sync status (it might have been deleted locally)
         }
       }
     }
@@ -355,18 +376,14 @@ class WebDAVUtil {
   Future<void> _uploadNote(Note note) async {
     try {
       logger.debug('Uploading note: ${note.id}');
-      
-      // Check if note is marked as deleted
-      if (note.isDeleted) {
-        await _markNoteAsDeletedOnServer(note.id);
-        return;
-      }
-      
-      // Upload the note JSON file
+
+      // Use the note's existing updateTime, or createTime if updateTime is null
+      // Don't generate a new DateTime.now() as it would desynchronize with cloud data
+      DateTime effectiveUpdateTime = note.updateTime ?? note.createTime;
+
+      // Upload the note JSON file (whether deleted or not)
       String noteJson = jsonEncode(note.toJson());
-      String noteYear = _getYearFromTimestamp(
-        note.updateTime ?? note.createTime,
-      );
+      String noteYear = _getYearFromTimestamp(effectiveUpdateTime);
       String notePath = '$_rootPath$_notesDir/$noteYear/${note.id}.json';
 
       // Create the year directory if it doesn't exist
@@ -377,24 +394,36 @@ class WebDAVUtil {
         'Content-Type': 'application/json',
       });
 
-      await _client!.write(
-        notePath,
-        Uint8List.fromList(utf8.encode(noteJson))
-      );
+      await _client!.write(notePath, Uint8List.fromList(utf8.encode(noteJson)));
 
-      // Upload associated images if they exist
-      for (String imageName in note.images) {
-        await _uploadImage(note.id, imageName, noteCreateTime: note.createTime);
-      }
+      // Only upload associated media if the note is not deleted
+      if (!note.isDeleted) {
+        // Upload associated images if they exist
+        for (String imageName in note.images) {
+          await _uploadImage(
+            note.id,
+            imageName,
+            noteCreateTime: note.createTime,
+          );
+        }
 
-      // Upload associated videos if they exist
-      for (String videoName in note.videos) {
-        await _uploadVideo(note.id, videoName, noteCreateTime: note.createTime);
-      }
+        // Upload associated videos if they exist
+        for (String videoName in note.videos) {
+          await _uploadVideo(
+            note.id,
+            videoName,
+            noteCreateTime: note.createTime,
+          );
+        }
 
-      // Upload associated audios if they exist
-      for (String audioName in note.audios) {
-        await _uploadAudio(note.id, audioName, noteCreateTime: note.createTime);
+        // Upload associated audios if they exist
+        for (String audioName in note.audios) {
+          await _uploadAudio(
+            note.id,
+            audioName,
+            noteCreateTime: note.createTime,
+          );
+        }
       }
 
       logger.info('Successfully uploaded note: ${note.id}');
@@ -429,7 +458,9 @@ class WebDAVUtil {
         Note? existingNote = await _noteService.getNoteById(noteId);
         if (existingNote != null) {
           await _noteService.deleteNote(noteId);
-          logger.info('Note deleted locally as it was removed from server: $noteId');
+          logger.info(
+            'Note deleted locally as it was removed from server: $noteId',
+          );
         }
         // Also mark in sync status that this note is deleted on server
         return;
@@ -445,7 +476,9 @@ class WebDAVUtil {
         Note? existingNote = await _noteService.getNoteById(noteId);
         if (existingNote != null) {
           await _noteService.deleteNote(noteId);
-          logger.info('Note deleted locally as it was marked as deleted on server: $noteId');
+          logger.info(
+            'Note deleted locally as it was marked as deleted on server: $noteId',
+          );
         }
         return;
       }
@@ -487,7 +520,9 @@ class WebDAVUtil {
           notebookId: note.notebookId,
         );
 
-        logger.debug('Created new note: $noteId with full cloud data preserved');
+        logger.debug(
+          'Created new note: $noteId with full cloud data preserved',
+        );
       }
 
       // Download associated images if they exist
@@ -544,7 +579,11 @@ class WebDAVUtil {
     }
   }
 
-  Future<void> _uploadImage(String noteId, String imageName, {DateTime? noteCreateTime}) async {
+  Future<void> _uploadImage(
+    String noteId,
+    String imageName, {
+    DateTime? noteCreateTime,
+  }) async {
     try {
       logger.debug('Uploading image $imageName for note: $noteId');
       // Get the local image path
@@ -554,7 +593,9 @@ class WebDAVUtil {
       File imageFile = File(imagePath);
       if (await imageFile.exists()) {
         // Calculate the destination path on WebDAV using the note's creation time for consistency
-        String imageYearPath = _getYearFromTimestamp(noteCreateTime ?? DateTime.now());
+        String imageYearPath = _getYearFromTimestamp(
+          noteCreateTime ?? DateTime.now(),
+        );
         String destinationPath =
             '$_rootPath$_assetsDir/$_imageDir/$imageYearPath/$noteId/$imageName';
 
@@ -576,11 +617,19 @@ class WebDAVUtil {
         logger.warning('Local image does not exist: $imagePath');
       }
     } catch (e, s) {
-      logger.error('Error uploading image for note $noteId', error: e, stackTrace: s);
+      logger.error(
+        'Error uploading image for note $noteId',
+        error: e,
+        stackTrace: s,
+      );
     }
   }
 
-  Future<void> _uploadVideo(String noteId, String videoName, {DateTime? noteCreateTime}) async {
+  Future<void> _uploadVideo(
+    String noteId,
+    String videoName, {
+    DateTime? noteCreateTime,
+  }) async {
     try {
       logger.debug('Uploading video $videoName for note: $noteId');
       // Get the local video path
@@ -590,7 +639,9 @@ class WebDAVUtil {
       File videoFile = File(videoPath);
       if (await videoFile.exists()) {
         // Calculate the destination path on WebDAV using the note's creation time for consistency
-        String videoYearPath = _getYearFromTimestamp(noteCreateTime ?? DateTime.now());
+        String videoYearPath = _getYearFromTimestamp(
+          noteCreateTime ?? DateTime.now(),
+        );
         String destinationPath =
             '$_rootPath$_assetsDir/$_videoDir/$videoYearPath/$noteId/$videoName';
 
@@ -612,11 +663,19 @@ class WebDAVUtil {
         logger.warning('Local video does not exist: $videoPath');
       }
     } catch (e, s) {
-      logger.error('Error uploading video for note $noteId', error: e, stackTrace: s);
+      logger.error(
+        'Error uploading video for note $noteId',
+        error: e,
+        stackTrace: s,
+      );
     }
   }
 
-  Future<void> _uploadAudio(String noteId, String audioName, {DateTime? noteCreateTime}) async {
+  Future<void> _uploadAudio(
+    String noteId,
+    String audioName, {
+    DateTime? noteCreateTime,
+  }) async {
     try {
       logger.debug('Uploading audio $audioName for note: $noteId');
       // Get the local audio path
@@ -626,7 +685,9 @@ class WebDAVUtil {
       File audioFile = File(audioPath);
       if (await audioFile.exists()) {
         // Calculate the destination path on WebDAV using the note's creation time for consistency
-        String audioYearPath = _getYearFromTimestamp(noteCreateTime ?? DateTime.now());
+        String audioYearPath = _getYearFromTimestamp(
+          noteCreateTime ?? DateTime.now(),
+        );
         String destinationPath =
             '$_rootPath$_assetsDir/$_audioDir/$audioYearPath/$noteId/$audioName';
 
@@ -648,15 +709,25 @@ class WebDAVUtil {
         logger.warning('Local audio does not exist: $audioPath');
       }
     } catch (e, s) {
-      logger.error('Error uploading audio for note $noteId', error: e, stackTrace: s);
+      logger.error(
+        'Error uploading audio for note $noteId',
+        error: e,
+        stackTrace: s,
+      );
     }
   }
 
-  Future<void> _downloadImage(String noteId, String imageName, DateTime? noteCreateTime) async {
+  Future<void> _downloadImage(
+    String noteId,
+    String imageName,
+    DateTime? noteCreateTime,
+  ) async {
     try {
       logger.debug('Downloading image $imageName for note: $noteId');
       // Calculate the source path on WebDAV using the note's creation time for consistency
-      String imageYearPath = _getYearFromTimestamp(noteCreateTime ?? DateTime.now());
+      String imageYearPath = _getYearFromTimestamp(
+        noteCreateTime ?? DateTime.now(),
+      );
       String sourcePath =
           '$_rootPath$_assetsDir/$_imageDir/$imageYearPath/$noteId/$imageName';
 
@@ -680,17 +751,29 @@ class WebDAVUtil {
       // Write image to local file
       await localImageFile.writeAsBytes(imageBytes);
 
-      logger.debug('Successfully downloaded image: $sourcePath to $localImageFilePath');
+      logger.debug(
+        'Successfully downloaded image: $sourcePath to $localImageFilePath',
+      );
     } catch (e, s) {
-      logger.error('Error downloading image for note $noteId', error: e, stackTrace: s);
+      logger.error(
+        'Error downloading image for note $noteId',
+        error: e,
+        stackTrace: s,
+      );
     }
   }
 
-  Future<void> _downloadVideo(String noteId, String videoName, DateTime? noteCreateTime) async {
+  Future<void> _downloadVideo(
+    String noteId,
+    String videoName,
+    DateTime? noteCreateTime,
+  ) async {
     try {
       logger.debug('Downloading video $videoName for note: $noteId');
       // Calculate the source path on WebDAV using the note's creation time for consistency
-      String videoYearPath = _getYearFromTimestamp(noteCreateTime ?? DateTime.now());
+      String videoYearPath = _getYearFromTimestamp(
+        noteCreateTime ?? DateTime.now(),
+      );
       String sourcePath =
           '$_rootPath$_assetsDir/$_videoDir/$videoYearPath/$noteId/$videoName';
 
@@ -714,17 +797,29 @@ class WebDAVUtil {
       // Write video to local file
       await localVideoFile.writeAsBytes(videoBytes);
 
-      logger.debug('Successfully downloaded video: $sourcePath to $localVideoFilePath');
+      logger.debug(
+        'Successfully downloaded video: $sourcePath to $localVideoFilePath',
+      );
     } catch (e, s) {
-      logger.error('Error downloading video for note $noteId', error: e, stackTrace: s);
+      logger.error(
+        'Error downloading video for note $noteId',
+        error: e,
+        stackTrace: s,
+      );
     }
   }
 
-  Future<void> _downloadAudio(String noteId, String audioName, DateTime? noteCreateTime) async {
+  Future<void> _downloadAudio(
+    String noteId,
+    String audioName,
+    DateTime? noteCreateTime,
+  ) async {
     try {
       logger.debug('Downloading audio $audioName for note: $noteId');
       // Calculate the source path on WebDAV using the note's creation time for consistency
-      String audioYearPath = _getYearFromTimestamp(noteCreateTime ?? DateTime.now());
+      String audioYearPath = _getYearFromTimestamp(
+        noteCreateTime ?? DateTime.now(),
+      );
       String sourcePath =
           '$_rootPath$_assetsDir/$_audioDir/$audioYearPath/$noteId/$audioName';
 
@@ -748,9 +843,15 @@ class WebDAVUtil {
       // Write audio to local file
       await localAudioFile.writeAsBytes(audioBytes);
 
-      logger.debug('Successfully downloaded audio: $sourcePath to $localAudioFilePath');
+      logger.debug(
+        'Successfully downloaded audio: $sourcePath to $localAudioFilePath',
+      );
     } catch (e, s) {
-      logger.error('Error downloading audio for note $noteId', error: e, stackTrace: s);
+      logger.error(
+        'Error downloading audio for note $noteId',
+        error: e,
+        stackTrace: s,
+      );
     }
   }
 
@@ -765,10 +866,18 @@ class WebDAVUtil {
 
         // Check if the note is deleted locally
         Note? localNote = await _noteService.getNoteById(noteId);
-        
+
         if (localNote != null && localNote.isDeleted) {
-          // Mark deleted notes specially in sync file
-          syncData[noteId] = 'delete';
+          // Handle deletion similar to update operation - use the note's updateTime
+          // This ensures the deletion timestamp matches the local modification time
+          syncData[noteId] = _formatTimestamp(
+            localNote.updateTime ?? localNote.createTime,
+          );
+          // Also ensure the WebDAV note file is updated with deletion flag
+          Note? note = await _noteService.getNoteById(noteId);
+          if (note != null) {
+            await _uploadNote(note);
+          }
         } else if (status.needsUpload || status.needsDownload) {
           // Use the newer timestamp (local or remote) if there was a sync operation
           syncData[noteId] = status.localTimestamp;
@@ -779,40 +888,48 @@ class WebDAVUtil {
       }
 
       String syncJson = jsonEncode(syncData);
-      
+
       _client!.setHeaders({
         'accept-charset': 'utf-8',
         'Content-Type': 'application/json',
       });
-      
+
       await _client!.write(
         _rootPath + _syncFileName,
         Uint8List.fromList(utf8.encode(syncJson)),
       );
 
-      logger.info('Sync file updated successfully with ${syncData.length} entries');
+      logger.info(
+        'Sync file updated successfully with ${syncData.length} entries',
+      );
     } catch (e, s) {
       logger.error('Error updating sync file', error: e, stackTrace: s);
       rethrow;
     }
   }
 
-  Future<void> _markNoteAsDeletedOnServer(String noteId) async {
+  // Update sync status for a deleted note to ensure sync.json is updated
+  Future<void> updateDeletedNoteSyncStatus(String noteId) async {
     try {
-      logger.debug('Marking note as deleted on server: $noteId');
-      
-      // Create a simple JSON with just the delete marker
-      Map<String, dynamic> deleteMarker = {
-        'id': noteId,
-        'isDeleted': true,
-      };
-      
-      String deleteJson = jsonEncode(deleteMarker);
-      String noteYear = DateTime.now().year.toString();
-      String notePath = '$_rootPath$_notesDir/$noteYear/$noteId.json';
+      logger.debug('Updating sync status for deleted note: $noteId');
 
-      // Create the year directory if it doesn't exist
-      await _client!.mkdirAll('$_rootPath$_notesDir/$noteYear/');
+      // Get the note to use its updateTime
+      Note? note = await _noteService.getNoteById(noteId);
+
+      // Download the current sync file
+      Map<String, dynamic> currentSyncData = await _downloadSyncFile();
+
+      // Update the sync data with the note's modification time (similar to update operation)
+      if (note != null) {
+        currentSyncData[noteId] = _formatTimestamp(
+          note.updateTime ?? note.createTime,
+        );
+      } else {
+        currentSyncData[noteId] = _formatTimestamp(DateTime.now());
+      }
+
+      // Save the updated sync file back to WebDAV
+      String syncJson = jsonEncode(currentSyncData);
 
       _client!.setHeaders({
         'accept-charset': 'utf-8',
@@ -820,13 +937,17 @@ class WebDAVUtil {
       });
 
       await _client!.write(
-        notePath,
-        Uint8List.fromList(utf8.encode(deleteJson))
+        _rootPath + _syncFileName,
+        Uint8List.fromList(utf8.encode(syncJson)),
       );
 
-      logger.info('Successfully marked note as deleted on server: $noteId');
+      logger.info('Sync file updated for deleted note: $noteId');
     } catch (e, s) {
-      logger.error('Error marking note as deleted on server $noteId', error: e, stackTrace: s);
+      logger.error(
+        'Error updating sync file for deleted note $noteId',
+        error: e,
+        stackTrace: s,
+      );
       rethrow;
     }
   }
@@ -844,12 +965,3 @@ class WebDAVUtil {
     _notebookSyncManager.dispose();
   }
 }
-
-
-
-
-
-
-
-
-

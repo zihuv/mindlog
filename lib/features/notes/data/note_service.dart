@@ -34,6 +34,7 @@ class NoteService {
   // Proxy all NoteStorageRepository methods to current repository
   Future<void> initialize() => repository.initialize();
   Future<List<Note>> getAllNotes() => repository.getAllNotes();
+  Future<List<Note>> getAllNotesForSync() => repository.getAllNotesForSync();
   Future<Note?> getNoteById(String id) => repository.getNoteById(id);
   Future<void> saveNote(Note note) => repository.saveNote(note);
   Future<void> updateNote(Note note) => repository.updateNote(note);
@@ -41,7 +42,8 @@ class NoteService {
   Future<List<Note>> searchNotes(String query) => repository.searchNotes(query);
   Future<List<Note>> getNotesByNotebookId(String notebookId) =>
       repository.getNotesByNotebookId(notebookId);
-  Future<List<Note>> getNotesByDate(DateTime date) => repository.getNotesByDate(date);
+  Future<List<Note>> getNotesByDate(DateTime date) =>
+      repository.getNotesByDate(date);
   Future<List<String>> getAllTags() async {
     // Tags functionality has been removed from the app
     return [];

@@ -11,7 +11,7 @@ class LogUtil {
   static final LogUtil _instance = LogUtil._();
 
   factory LogUtil() => _instance;
-  
+
   late final Logger _logger;
 
   static Future<String> _getLogFilePath() async {
@@ -76,8 +76,6 @@ class LogUtil {
   void warning(dynamic message) {
     _logger.w(message);
   }
-
 }
-
 
 final logger = LogUtil();

@@ -10,7 +10,6 @@ import 'package:get/get.dart';
 import 'package:mindlog/utils/log_util.dart';
 
 class DataExportService {
-
   /// Gets the path to the database file
   Future<String> _getDatabasePath() async {
     final dbFolder = await getApplicationDocumentsDirectory();
@@ -21,7 +20,8 @@ class DataExportService {
   Future<String> exportDataToZip() async {
     // This method creates the archive in a temporary location first
     final String tempPath = (await getTemporaryDirectory()).path;
-    final String exportFileName = 'mindlog_export_${DateTime.now().millisecondsSinceEpoch}.zip';
+    final String exportFileName =
+        'mindlog_export_${DateTime.now().millisecondsSinceEpoch}.zip';
     final String tempExportPath = path.join(tempPath, exportFileName);
 
     // Create archive
@@ -32,7 +32,9 @@ class DataExportService {
     final File dbFile = File(dbPath);
     if (await dbFile.exists()) {
       final dbBytes = await dbFile.readAsBytes();
-      archive.addFile(ArchiveFile('database/mindlog_db.sqlite', dbBytes.length, dbBytes));
+      archive.addFile(
+        ArchiveFile('database/mindlog_db.sqlite', dbBytes.length, dbBytes),
+      );
     }
 
     // Export all media files
@@ -93,7 +95,7 @@ class DataExportService {
           ),
         );
       }
-      
+
       // If file picker is not supported on the platform, throw the error
       rethrow;
     }
@@ -102,7 +104,7 @@ class DataExportService {
   /// Exports all media files to the archive
   Future<void> _exportMediaFiles(Archive archive) async {
     final appDir = await getApplicationDocumentsDirectory();
-    
+
     // Export images directory
     final imagesDir = Directory(path.join(appDir.path, 'images'));
     if (await imagesDir.exists()) {
@@ -110,16 +112,23 @@ class DataExportService {
         if (entity is File) {
           final relativePath = path.relative(entity.path, from: appDir.path);
           final fileBytes = await entity.readAsBytes();
-          archive.addFile(ArchiveFile('media/$relativePath', fileBytes.length, fileBytes));
+          archive.addFile(
+            ArchiveFile('media/$relativePath', fileBytes.length, fileBytes),
+          );
         } else if (entity is Link) {
           // Handle symbolic links by reading the actual file content
           try {
             final target = await entity.resolveSymbolicLinks();
             final targetFile = File(target);
             if (await targetFile.exists()) {
-              final relativePath = path.relative(entity.path, from: appDir.path);
+              final relativePath = path.relative(
+                entity.path,
+                from: appDir.path,
+              );
               final fileBytes = await targetFile.readAsBytes();
-              archive.addFile(ArchiveFile('media/$relativePath', fileBytes.length, fileBytes));
+              archive.addFile(
+                ArchiveFile('media/$relativePath', fileBytes.length, fileBytes),
+              );
             }
           } catch (e) {
             // If we can't resolve the link, skip it
@@ -128,7 +137,7 @@ class DataExportService {
         }
       }
     }
-    
+
     // Export videos directory
     final videosDir = Directory(path.join(appDir.path, 'videos'));
     if (await videosDir.exists()) {
@@ -136,16 +145,23 @@ class DataExportService {
         if (entity is File) {
           final relativePath = path.relative(entity.path, from: appDir.path);
           final fileBytes = await entity.readAsBytes();
-          archive.addFile(ArchiveFile('media/$relativePath', fileBytes.length, fileBytes));
+          archive.addFile(
+            ArchiveFile('media/$relativePath', fileBytes.length, fileBytes),
+          );
         } else if (entity is Link) {
           // Handle symbolic links by reading the actual file content
           try {
             final target = await entity.resolveSymbolicLinks();
             final targetFile = File(target);
             if (await targetFile.exists()) {
-              final relativePath = path.relative(entity.path, from: appDir.path);
+              final relativePath = path.relative(
+                entity.path,
+                from: appDir.path,
+              );
               final fileBytes = await targetFile.readAsBytes();
-              archive.addFile(ArchiveFile('media/$relativePath', fileBytes.length, fileBytes));
+              archive.addFile(
+                ArchiveFile('media/$relativePath', fileBytes.length, fileBytes),
+              );
             }
           } catch (e) {
             // If we can't resolve the link, skip it
@@ -154,7 +170,7 @@ class DataExportService {
         }
       }
     }
-    
+
     // Export audios directory
     final audiosDir = Directory(path.join(appDir.path, 'audios'));
     if (await audiosDir.exists()) {
@@ -162,16 +178,23 @@ class DataExportService {
         if (entity is File) {
           final relativePath = path.relative(entity.path, from: appDir.path);
           final fileBytes = await entity.readAsBytes();
-          archive.addFile(ArchiveFile('media/$relativePath', fileBytes.length, fileBytes));
+          archive.addFile(
+            ArchiveFile('media/$relativePath', fileBytes.length, fileBytes),
+          );
         } else if (entity is Link) {
           // Handle symbolic links by reading the actual file content
           try {
             final target = await entity.resolveSymbolicLinks();
             final targetFile = File(target);
             if (await targetFile.exists()) {
-              final relativePath = path.relative(entity.path, from: appDir.path);
+              final relativePath = path.relative(
+                entity.path,
+                from: appDir.path,
+              );
               final fileBytes = await targetFile.readAsBytes();
-              archive.addFile(ArchiveFile('media/$relativePath', fileBytes.length, fileBytes));
+              archive.addFile(
+                ArchiveFile('media/$relativePath', fileBytes.length, fileBytes),
+              );
             }
           } catch (e) {
             // If we can't resolve the link, skip it
@@ -183,7 +206,10 @@ class DataExportService {
   }
 
   /// Imports data from a ZIP file, restoring notes, notebooks, and media files
-  Future<void> importDataFromZip(String zipFilePath, {Function(double)? onProgress}) async {
+  Future<void> importDataFromZip(
+    String zipFilePath, {
+    Function(double)? onProgress,
+  }) async {
     final zipFile = File(zipFilePath);
     if (!await zipFile.exists()) {
       throw Exception('ZIP file does not exist: $zipFilePath');
@@ -192,38 +218,45 @@ class DataExportService {
     // Read and decode the ZIP file
     final bytes = await zipFile.readAsBytes();
     final archive = ZipDecoder().decodeBytes(bytes);
-    
+
     // Report progress: 10% after reading archive
     if (onProgress != null) onProgress(0.1);
 
     // Import database file
     await _importDatabaseFromArchive(archive);
-    
+
     // Report progress: 30% after importing database
     if (onProgress != null) onProgress(0.3);
 
     // Import media files
-    await _importMediaFilesFromArchive(archive, onProgress: onProgress != null ? (progress) {
-      // Scale progress from 30% to 90%
-      onProgress(0.3 + progress * 0.6);
-    } : null);
-    
+    await _importMediaFilesFromArchive(
+      archive,
+      onProgress: onProgress != null
+          ? (progress) {
+              // Scale progress from 30% to 90%
+              onProgress(0.3 + progress * 0.6);
+            }
+          : null,
+    );
+
     // Report progress: 90% after importing media files
     if (onProgress != null) onProgress(0.9);
-    
+
     // Show success message
     if (Get.isOverlaysOpen) {
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         const SnackBar(
-          content: Text('Backup imported successfully! Restarting database connection...'),
+          content: Text(
+            'Backup imported successfully! Restarting database connection...',
+          ),
           backgroundColor: Colors.green,
         ),
       );
     }
-    
+
     // Report progress: 100% when done
     if (onProgress != null) onProgress(1.0);
-    
+
     // Give a small delay to ensure all files are written
     await Future.delayed(const Duration(milliseconds: 100));
   }
@@ -265,7 +298,7 @@ class DataExportService {
           break;
         }
       }
-      
+
       if (dbFile != null) {
         // Close current database connection
         await DatabaseProvider.instance.close();
@@ -294,13 +327,13 @@ class DataExportService {
     try {
       // Close the existing database connection
       await DatabaseProvider.instance.close();
-      
+
       // Wait a moment to ensure connection is fully closed
       await Future.delayed(const Duration(milliseconds: 100));
-      
+
       // Reset the database provider to force reinitialization
       await DatabaseProvider.instance.reset();
-      
+
       // The database will be reinitialized when accessed again
       logger.debug('Database connection reinitialized successfully');
     } catch (e) {
@@ -309,32 +342,35 @@ class DataExportService {
   }
 
   /// Imports media files from the archive
-  Future<void> _importMediaFilesFromArchive(Archive archive, {Function(double)? onProgress}) async {
+  Future<void> _importMediaFilesFromArchive(
+    Archive archive, {
+    Function(double)? onProgress,
+  }) async {
     final appDir = await getApplicationDocumentsDirectory();
-    
+
     // Collect all media files first
     final List<ArchiveFile> mediaFiles = [];
     for (final file in archive) {
-      if (file.name.startsWith('media/') || 
-          file.name.startsWith('images/') || 
-          file.name.startsWith('videos/') || 
+      if (file.name.startsWith('media/') ||
+          file.name.startsWith('images/') ||
+          file.name.startsWith('videos/') ||
           file.name.startsWith('audios/')) {
         mediaFiles.add(file);
       }
     }
-    
+
     // Check if we're on a Unix-like system where we can use symbolic links
     bool canUseSymlinks = Platform.isMacOS || Platform.isLinux;
-    
+
     // Process each media file
     for (int i = 0; i < mediaFiles.length; i++) {
       final file = mediaFiles[i];
-      
+
       // Report progress
       if (onProgress != null) {
         onProgress(i / mediaFiles.length);
       }
-      
+
       String relativePath;
       if (file.name.startsWith('media/')) {
         // New format: remove 'media/' prefix
@@ -343,7 +379,7 @@ class DataExportService {
         // Old format: use path as-is
         relativePath = file.name;
       }
-      
+
       final filePath = path.join(appDir.path, relativePath);
 
       // Create parent directories if they don't exist
@@ -355,7 +391,7 @@ class DataExportService {
         final tempPath = '$filePath.import.tmp';
         final tempFile = File(tempPath);
         await tempFile.writeAsBytes(file.content as List<int>);
-        
+
         // Then create a symbolic link
         await _createSymbolicLink(tempPath, filePath);
       } else {
@@ -364,7 +400,7 @@ class DataExportService {
         await mediaFile.writeAsBytes(file.content as List<int>);
       }
     }
-    
+
     // Report final progress for media files
     if (onProgress != null) {
       onProgress(1.0);

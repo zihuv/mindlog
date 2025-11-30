@@ -7,7 +7,8 @@ class MockWebDAVSettingsScreen extends StatefulWidget {
   const MockWebDAVSettingsScreen({super.key});
 
   @override
-  State<MockWebDAVSettingsScreen> createState() => _MockWebDAVSettingsScreenState();
+  State<MockWebDAVSettingsScreen> createState() =>
+      _MockWebDAVSettingsScreenState();
 }
 
 class _MockWebDAVSettingsScreenState extends State<MockWebDAVSettingsScreen> {
@@ -36,12 +37,12 @@ class _MockWebDAVSettingsScreenState extends State<MockWebDAVSettingsScreen> {
 }
 
 void main() {
-  testWidgets('Get.snackbar works properly with GetMaterialApp', (WidgetTester tester) async {
+  testWidgets('Get.snackbar works properly with GetMaterialApp', (
+    WidgetTester tester,
+  ) async {
     // Wrap the test widget with GetMaterialApp to ensure Overlay is available
     await tester.pumpWidget(
-      GetMaterialApp(
-        home: const MockWebDAVSettingsScreen(),
-      ),
+      GetMaterialApp(home: const MockWebDAVSettingsScreen()),
     );
 
     // Tap the button to trigger the snackbar

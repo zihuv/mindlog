@@ -65,7 +65,9 @@ class NoteListScreen extends StatelessWidget {
                   final note = controller.notes[index];
                   return GestureDetector(
                     onTap: () {
-                      Get.to(() => NoteDetailScreen(noteId: note.id))?.then((value) {
+                      Get.to(() => NoteDetailScreen(noteId: note.id))?.then((
+                        value,
+                      ) {
                         // Refresh list after updating an existing note
                         if (value == true) {
                           controller.loadNotes();
@@ -82,7 +84,8 @@ class NoteListScreen extends StatelessWidget {
                         children: [
                           // Modification createTime in top-left corner (creation createTime if no modifications)
                           Container(
-                            width: double.infinity, // Make it span the full width of the card
+                            width: double
+                                .infinity, // Make it span the full width of the card
                             padding: EdgeInsets.fromLTRB(
                               AppPadding.large.left,
                               AppPadding
@@ -94,9 +97,13 @@ class NoteListScreen extends StatelessWidget {
                                   .bottom, // Reduced bottom padding to reduce gap with content
                             ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest,
                               borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(12), // Match the card's top border radius
+                                top: Radius.circular(
+                                  12,
+                                ), // Match the card's top border radius
                               ),
                             ),
                             child: Text(

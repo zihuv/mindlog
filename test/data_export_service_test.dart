@@ -19,9 +19,9 @@ void main() {
     test('Export creates a valid ZIP file', () async {
       // This would test that an export operation creates a valid ZIP
       // containing the database and media files
-      
+
       String exportPath = await exportService.exportDataToZip();
-      
+
       // Verify the export file exists
       expect(exportPath, isNotEmpty);
       expect(exportPath.endsWith('.zip'), true);
@@ -31,11 +31,11 @@ void main() {
       // This would test that importing data from a ZIP file
       // correctly restores the database and media files
       // For this test, we'd need to have an existing ZIP file to import
-      
+
       // Example:
       // await exportService.importDataFromZip('path/to/test/export.zip');
       // Verify data was restored by querying the database
-      
+
       // For now, we'll just ensure the method can be called without errors
       try {
         // This is just to verify the method signature exists

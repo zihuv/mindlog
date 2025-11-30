@@ -264,7 +264,9 @@ class NoteController extends GetxController {
     _isLoading.value = true;
     try {
       final notes = await _service.getAllNotes();
-      logger.debug('NoteController.refreshNotes: Retrieved ${notes.length} notes after refresh');
+      logger.debug(
+        'NoteController.refreshNotes: Retrieved ${notes.length} notes after refresh',
+      );
       // Sort notes by creation createTime in descending order (newest first)
       notes.sort((a, b) => b.createTime.compareTo(a.createTime));
       _notes.assignAll(notes);

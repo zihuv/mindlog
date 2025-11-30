@@ -132,8 +132,11 @@ class NotebookController extends GetxController {
         }
 
         // Generate a unique filename
-        final filename = '${DateTime.now().millisecondsSinceEpoch}_${path.basename(image.path)}';
-        final savedImage = await File(image.path).copy('${notebookImagesDir.path}/$filename');
+        final filename =
+            '${DateTime.now().millisecondsSinceEpoch}_${path.basename(image.path)}';
+        final savedImage = await File(
+          image.path,
+        ).copy('${notebookImagesDir.path}/$filename');
 
         return savedImage.path;
       } catch (e) {

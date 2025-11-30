@@ -41,6 +41,11 @@ class NoteBusinessService {
     return await NoteService.instance.getAllNotes();
   }
 
+  // Get all notes including deleted ones for sync purposes
+  Future<List<Note>> getAllNotesForSync() async {
+    return await NoteService.instance.getAllNotesForSync();
+  }
+
   // Get a note by ID
   Future<Note?> getNoteById(String id) async {
     return await NoteService.instance.getNoteById(id);
@@ -54,7 +59,7 @@ class NoteBusinessService {
     List<String>? audioName,
     List<String>? videoName,
     String? notebookId,
-    DateTime? updateTime,  // Allow specifying updateTime from cloud
+    DateTime? updateTime, // Allow specifying updateTime from cloud
   }) async {
     final existingNote = await NoteService.instance.getNoteById(id);
     if (existingNote == null) {
@@ -65,7 +70,8 @@ class NoteBusinessService {
       id: id,
       content: content ?? existingNote.content,
       createTime: existingNote.createTime,
-      updateTime: updateTime ?? DateTime.now(),
+      // Keep existing updateTime unless explicitly provided (to maintain cloud data consistency)
+      updateTime: updateTime ?? existingNote.updateTime,
       notebookId: notebookId ?? existingNote.notebookId,
       images: imageName ?? existingNote.images,
       videos: videoName ?? existingNote.videos,

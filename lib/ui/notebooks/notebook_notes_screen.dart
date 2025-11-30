@@ -101,7 +101,9 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
     });
 
     try {
-      final notes = await _noteController.getNotesByNotebookId(widget.notebookId);
+      final notes = await _noteController.getNotesByNotebookId(
+        widget.notebookId,
+      );
       if (mounted) {
         setState(() {
           _notes = notes;

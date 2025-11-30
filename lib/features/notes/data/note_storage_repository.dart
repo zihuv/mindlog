@@ -3,6 +3,7 @@ import 'package:mindlog/features/notes/domain/entities/note.dart';
 abstract class NoteStorageRepository {
   Future<void> initialize();
   Future<List<Note>> getAllNotes();
+  Future<List<Note>> getAllNotesForSync();
   Future<Note?> getNoteById(String id);
   Future<void> saveNote(Note note);
   Future<void> updateNote(Note note);

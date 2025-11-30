@@ -20,7 +20,12 @@ class NotebookSyncManager {
     _notebookService = notebookService ?? NotebookService.instance;
   }
 
-  Future<void> initClient(String baseUrl, String username, String password, String folderName) async {
+  Future<void> initClient(
+    String baseUrl,
+    String username,
+    String password,
+    String folderName,
+  ) async {
     _rootPath = '/$folderName/';
 
     _client = webdav.newClient(
@@ -35,18 +40,22 @@ class NotebookSyncManager {
       'Content-Type': 'application/json',
     });
 
-    logger.info('Notebook sync client initialized with URL: $baseUrl and folder: $folderName');
+    logger.info(
+      'Notebook sync client initialized with URL: $baseUrl and folder: $folderName',
+    );
   }
 
   Future<void> sync() async {
     if (_client == null) {
       logger.error('WebDAV client not initialized for notebook sync');
-      throw Exception('WebDAV client not initialized. Call initClient() first.');
+      throw Exception(
+        'WebDAV client not initialized. Call initClient() first.',
+      );
     }
 
     try {
       logger.info('Starting notebook WebDAV sync process');
-      
+
       // Ensure the notebooks directory exists
       await _ensureNotebooksDirectory();
 
@@ -59,10 +68,8 @@ class NotebookSyncManager {
       Map<String, dynamic> remoteSyncData = await _downloadSyncFile();
 
       // Calculate sync status for each notebook
-      Map<String, NotebookSyncStatus> syncStatusMap = await _calculateSyncStatus(
-        localNotebooks,
-        remoteSyncData,
-      );
+      Map<String, NotebookSyncStatus> syncStatusMap =
+          await _calculateSyncStatus(localNotebooks, remoteSyncData);
 
       // Process sync operations
       await _processSyncOperations(syncStatusMap, localNotebooks);
@@ -79,12 +86,14 @@ class NotebookSyncManager {
   Future<void> _ensureNotebooksDirectory() async {
     final notebooksPath = '$_rootPath$_notebooksDir/';
     logger.debug('Ensuring notebooks directory exists: $notebooksPath');
-    
+
     try {
       await _client!.mkdirAll(notebooksPath);
       logger.debug('Created/verified notebooks directory: $notebooksPath');
     } catch (e) {
-      logger.warning('Failed to create notebooks directory $notebooksPath (may already exist)');
+      logger.warning(
+        'Failed to create notebooks directory $notebooksPath (may already exist)',
+      );
     }
   }
 
@@ -100,7 +109,9 @@ class NotebookSyncManager {
       logger.debug('Notebook sync file is empty');
       return {};
     } catch (e) {
-      logger.warning('Notebook sync file does not exist on server, starting fresh');
+      logger.warning(
+        'Notebook sync file does not exist on server, starting fresh',
+      );
       return {};
     }
   }
@@ -167,7 +178,8 @@ class NotebookSyncManager {
             localTimestamp: '0',
           );
         }
-      } else if (remoteStatus != null && !syncStatusMap.containsKey(notebookId)) {
+      } else if (remoteStatus != null &&
+          !syncStatusMap.containsKey(notebookId)) {
         // Notebook exists remotely but not locally, needs download
         syncStatusMap[notebookId] = NotebookSyncStatus(
           needsUpload: false,
@@ -204,7 +216,9 @@ class NotebookSyncManager {
         // Find the local notebook
         Notebook? localNotebook;
         try {
-          localNotebook = localNotebooks.firstWhere((notebook) => notebook.id == notebookId);
+          localNotebook = localNotebooks.firstWhere(
+            (notebook) => notebook.id == notebookId,
+          );
         } catch (e) {
           // Notebook not found in localNotebooks list
           localNotebook = null;
@@ -223,7 +237,7 @@ class NotebookSyncManager {
   Future<void> _uploadNotebook(Notebook notebook) async {
     try {
       logger.debug('Uploading notebook: ${notebook.id}');
-      
+
       // Upload the notebook JSON file
       String notebookJson = jsonEncode(notebook.toJson());
       String notebookPath = '$_rootPath$_notebooksDir/${notebook.id}.json';
@@ -235,12 +249,16 @@ class NotebookSyncManager {
 
       await _client!.write(
         notebookPath,
-        Uint8List.fromList(utf8.encode(notebookJson))
+        Uint8List.fromList(utf8.encode(notebookJson)),
       );
 
       logger.info('Successfully uploaded notebook: ${notebook.id}');
     } catch (e, s) {
-      logger.error('Error uploading notebook ${notebook.id}', error: e, stackTrace: s);
+      logger.error(
+        'Error uploading notebook ${notebook.id}',
+        error: e,
+        stackTrace: s,
+      );
       rethrow;
     }
   }
@@ -248,18 +266,22 @@ class NotebookSyncManager {
   Future<void> _downloadNotebook(String notebookId) async {
     try {
       logger.debug('Downloading notebook: $notebookId');
-      
+
       String path = '$_rootPath$_notebooksDir/$notebookId.json';
       List<int> bytes;
-      
+
       try {
         bytes = await _client!.read(path);
       } catch (e) {
         // Notebook doesn't exist on server, might have been deleted
-        Notebook? existingNotebook = await _notebookService.getNotebookById(notebookId);
+        Notebook? existingNotebook = await _notebookService.getNotebookById(
+          notebookId,
+        );
         if (existingNotebook != null) {
           await _notebookService.deleteNotebook(notebookId);
-          logger.info('Notebook deleted locally as it was removed from server: $notebookId');
+          logger.info(
+            'Notebook deleted locally as it was removed from server: $notebookId',
+          );
         }
         return;
       }
@@ -269,7 +291,9 @@ class NotebookSyncManager {
       Notebook notebook = Notebook.fromJson(notebookData);
 
       // Check if notebook exists locally
-      Notebook? existingNotebook = await _notebookService.getNotebookById(notebookId);
+      Notebook? existingNotebook = await _notebookService.getNotebookById(
+        notebookId,
+      );
 
       if (existingNotebook != null) {
         // Update existing notebook - use copyWith to update the notebook
@@ -290,13 +314,21 @@ class NotebookSyncManager {
 
       logger.info('Successfully downloaded notebook: $notebookId');
     } catch (e, s) {
-      logger.error('Error downloading notebook $notebookId', error: e, stackTrace: s);
+      logger.error(
+        'Error downloading notebook $notebookId',
+        error: e,
+        stackTrace: s,
+      );
     }
   }
 
-  Future<void> _updateSyncFile(Map<String, NotebookSyncStatus> syncStatusMap) async {
+  Future<void> _updateSyncFile(
+    Map<String, NotebookSyncStatus> syncStatusMap,
+  ) async {
     try {
-      logger.debug('Updating notebook sync file with ${syncStatusMap.length} entries');
+      logger.debug(
+        'Updating notebook sync file with ${syncStatusMap.length} entries',
+      );
       Map<String, String> syncData = {};
 
       for (final entry in syncStatusMap.entries) {
@@ -308,7 +340,8 @@ class NotebookSyncManager {
           syncData[notebookId] = status.localTimestamp;
         } else {
           // Use the original remote timestamp if no sync occurred
-          syncData[notebookId] = status.remoteTimestamp ?? status.localTimestamp;
+          syncData[notebookId] =
+              status.remoteTimestamp ?? status.localTimestamp;
         }
       }
 
@@ -324,9 +357,15 @@ class NotebookSyncManager {
         Uint8List.fromList(utf8.encode(syncJson)),
       );
 
-      logger.info('Notebook sync file updated successfully with ${syncData.length} entries');
+      logger.info(
+        'Notebook sync file updated successfully with ${syncData.length} entries',
+      );
     } catch (e, s) {
-      logger.error('Error updating notebook sync file', error: e, stackTrace: s);
+      logger.error(
+        'Error updating notebook sync file',
+        error: e,
+        stackTrace: s,
+      );
       rethrow;
     }
   }

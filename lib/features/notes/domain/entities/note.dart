@@ -65,7 +65,7 @@ class Note extends Equatable {
       'id': id,
       'content': content,
       'createTime': createTime.toIso8601String(),
-      'updateTime': updateTime?.toIso8601String(),
+      'updateTime': (updateTime ?? createTime).toIso8601String(),
       'notebookId': notebookId,
       'images': images,
       'videos': videos,

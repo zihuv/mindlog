@@ -19,10 +19,7 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'General',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('General', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
             _buildBackupCard(context),
             const SizedBox(height: 16),

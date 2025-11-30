@@ -27,10 +27,7 @@ class BackupScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Data Backup',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('Data Backup', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
             _buildExportCard(context),
             const SizedBox(height: 16),
@@ -48,16 +45,13 @@ class BackupScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Export Data',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('Export Data', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
               'Create a backup of your notes and media files',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
@@ -82,16 +76,13 @@ class BackupScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Import Data',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('Import Data', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
               'Restore notes and media files from a backup',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
@@ -112,9 +103,9 @@ class BackupScreen extends StatelessWidget {
   void _exportData() async {
     try {
       // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
-      ScaffoldMessenger.of(Get.context!).showSnackBar(
-        const SnackBar(content: Text('Starting data export...')),
-      );
+      ScaffoldMessenger.of(
+        Get.context!,
+      ).showSnackBar(const SnackBar(content: Text('Starting data export...')));
 
       bool exportSuccess = await _exportService.exportDataToZipWithSaveDialog();
 
@@ -175,14 +166,16 @@ class BackupScreen extends StatelessWidget {
       }
 
       String filePath = result.files.single.path!;
-      
+
       // Show progress dialog
       Get.dialog(
         Center(
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Get.theme.dialogTheme.backgroundColor ?? Get.theme.canvasColor,
+              color:
+                  Get.theme.dialogTheme.backgroundColor ??
+                  Get.theme.canvasColor,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
@@ -193,11 +186,15 @@ class BackupScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
-                Obx(() => LinearProgressIndicator(
-                      value: progress.value,
-                      backgroundColor: Colors.grey[300],
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
-                    )),
+                Obx(
+                  () => LinearProgressIndicator(
+                    value: progress.value,
+                    backgroundColor: Colors.grey[300],
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Colors.blue,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 20),
                 Obx(() => Text(progressMessage.value)),
               ],
@@ -208,22 +205,25 @@ class BackupScreen extends StatelessWidget {
       );
 
       // Perform the import with progress callback
-      await _exportService.importDataFromZip(filePath, onProgress: (double p) async {
-        progress.value = p;
-        if (p < 0.1) {
-          progressMessage.value = 'Reading backup file...';
-        } else if (p < 0.3) {
-          progressMessage.value = 'Importing database...';
-        } else if (p < 0.9) {
-          progressMessage.value = 'Importing media files...';
-        } else {
-          progressMessage.value = 'Finalizing import...';
-        }
-        
-        // Small delay to allow UI updates
-        await Future.delayed(const Duration(milliseconds: 10));
-      });
-      
+      await _exportService.importDataFromZip(
+        filePath,
+        onProgress: (double p) async {
+          progress.value = p;
+          if (p < 0.1) {
+            progressMessage.value = 'Reading backup file...';
+          } else if (p < 0.3) {
+            progressMessage.value = 'Importing database...';
+          } else if (p < 0.9) {
+            progressMessage.value = 'Importing media files...';
+          } else {
+            progressMessage.value = 'Finalizing import...';
+          }
+
+          // Small delay to allow UI updates
+          await Future.delayed(const Duration(milliseconds: 10));
+        },
+      );
+
       // Close the progress dialog
       if (Get.isDialogOpen ?? false) {
         Get.back();
@@ -234,14 +234,14 @@ class BackupScreen extends StatelessWidget {
 
       // Force reinitialization of database provider
       await db.DatabaseProvider.instance.reset();
-      
+
       // Reset services to force re-initialization with new database
       await NoteService.instance.reset();
       await NotebookService.instance.reset();
-      
+
       // Add another delay to ensure database is fully reset
       await Future.delayed(const Duration(milliseconds: 200));
-      
+
       // Refresh the controllers to reload data from the database
       // Use try-catch to handle cases where controllers might not be ready yet
       try {
@@ -269,7 +269,9 @@ class BackupScreen extends StatelessWidget {
       // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(
-          content: Text('Data imported successfully from: ${filePath.split('/').last}'),
+          content: Text(
+            'Data imported successfully from: ${filePath.split('/').last}',
+          ),
           backgroundColor: Colors.green,
         ),
       );

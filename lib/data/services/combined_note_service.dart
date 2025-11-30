@@ -77,6 +77,11 @@ class CombinedNoteService {
     return await _noteService.getAllNotes();
   }
 
+  /// Get all notes including deleted ones for sync purposes
+  Future<List<Note>> getAllNotesForSync() async {
+    return await _noteService.getAllNotesForSync();
+  }
+
   // Get a note by ID
   Future<Note?> getNoteById(String id) async {
     return await _noteService.getNoteById(id);
@@ -95,7 +100,7 @@ class CombinedNoteService {
     List<String>? newVideosToCopy, // New videos to add to the note
     List<String>? newAudiosToCopy, // New audios to add to the note
     String? notebookId,
-    DateTime? updateTime,  // Allow specifying updateTime from cloud
+    DateTime? updateTime, // Allow specifying updateTime from cloud
   }) async {
     final existingNote = await _noteService.getNoteById(id);
     if (existingNote == null) {
@@ -231,11 +236,25 @@ class CombinedNoteService {
   }
 
   // Delete a note and its associated media
+  // Note: This is a soft delete - we update the isDeleted flag and updateTime to reflect this modification
   Future<void> deleteNote(String id) async {
+    // Get the existing note before deletion
+    Note? existingNote = await _noteService.getNoteById(id);
+    if (existingNote != null) {
+      // Update the note's updateTime to reflect this deletion as a modification
+      await _noteService.updateNote(
+        id: id,
+        content: existingNote.content,
+        updateTime:
+            DateTime.now(), // Update the modification time when deleting
+        notebookId: existingNote.notebookId,
+      );
+    }
+
     // Delete all associated media files
     await _mediaService.deleteNoteMedia(id);
 
-    // Then delete the note
+    // Then mark the note as deleted (soft delete with is_deleted=true)
     await _noteService.deleteNote(id);
   }
 

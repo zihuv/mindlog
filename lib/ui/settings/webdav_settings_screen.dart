@@ -222,7 +222,9 @@ class _WebDAVSettingsScreenState extends State<WebDAVSettingsScreen> {
                       onPressed: _isLoading ? null : _testConnection,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
                       ),
                       child: _isLoading
                           ? const SizedBox(

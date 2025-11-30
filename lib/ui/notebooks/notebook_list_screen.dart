@@ -28,13 +28,16 @@ class NotebookListScreen extends StatelessWidget {
                     String url = prefs.getString('webdav_url') ?? '';
                     String username = prefs.getString('webdav_username') ?? '';
                     String password = prefs.getString('webdav_password') ?? '';
-                    String folder = prefs.getString('webdav_folder') ?? 'mindlog';
+                    String folder =
+                        prefs.getString('webdav_folder') ?? 'mindlog';
 
                     if (url.isEmpty || username.isEmpty || password.isEmpty) {
                       // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
                       ScaffoldMessenger.of(Get.context!).showSnackBar(
                         const SnackBar(
-                          content: Text('Please configure WebDAV settings first'),
+                          content: Text(
+                            'Please configure WebDAV settings first',
+                          ),
                           backgroundColor: Colors.orange,
                         ),
                       );
@@ -54,7 +57,9 @@ class NotebookListScreen extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Get.theme.dialogTheme.backgroundColor ?? Get.theme.canvasColor,
+                            color:
+                                Get.theme.dialogTheme.backgroundColor ??
+                                Get.theme.canvasColor,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Column(
@@ -114,7 +119,9 @@ class NotebookListScreen extends StatelessWidget {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
                     ScaffoldMessenger.of(Get.context!).showSnackBar(
-                      const SnackBar(content: Text('Search functionality coming soon')),
+                      const SnackBar(
+                        content: Text('Search functionality coming soon'),
+                      ),
                     );
                   });
                 },
