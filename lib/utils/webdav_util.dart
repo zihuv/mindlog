@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../data/services/combined_note_service.dart';
 import '../features/notes/domain/entities/note.dart';
+import '../utils/notebook_sync_manager.dart';
 import 'log_util.dart';
 
 class WebDAVConfig {
@@ -63,9 +64,11 @@ class WebDAVUtil {
   late WebDAVConfig _config;
   late String _rootPath;
   late CombinedNoteService _noteService;
+  late NotebookSyncManager _notebookSyncManager;
 
   WebDAVUtil({CombinedNoteService? noteService}) {
     _noteService = noteService ?? CombinedNoteService();
+    _notebookSyncManager = NotebookSyncManager();
   }
 
   Future<void> init(WebDAVConfig config) async {
@@ -83,7 +86,15 @@ class WebDAVUtil {
       'accept-charset': 'utf-8',
       'Content-Type': 'application/json',
     });
-    
+
+    // Initialize notebook sync manager with the same credentials
+    await _notebookSyncManager.initClient(
+      _config.url,
+      _config.username,
+      _config.password,
+      _config.folderName,
+    );
+
     logger.info('WebDAV client initialized with URL: ${_config.url} and folder: ${_config.folderName}');
   }
 
@@ -127,25 +138,45 @@ class WebDAVUtil {
       // Download sync.json from WebDAV
       Map<String, dynamic> remoteSyncData = await _downloadSyncFile();
 
-      // Get all local notes
-      await _noteService.init();
-      List<Note> localNotes = await _noteService.getAllNotes();
-      logger.info('Found ${localNotes.length} local notes');
+      // Sync notes
+      await _syncNotes(remoteSyncData);
 
-      // Calculate sync status for each note
-      Map<String, SyncStatus> syncStatusMap = await _calculateSyncStatus(
-        localNotes,
-        remoteSyncData,
-      );
+      // Sync notebooks
+      await _syncNotebooks();
 
-      // Process sync operations
-      await _processSyncOperations(syncStatusMap, localNotes);
-
-      // Update sync.json after sync
-      await _updateSyncFile(syncStatusMap);
       logger.info('WebDAV sync process completed successfully');
     } catch (e, s) {
       logger.error('Error during sync', error: e, stackTrace: s);
+      rethrow;
+    }
+  }
+
+  Future<void> _syncNotes(Map<String, dynamic> remoteSyncData) async {
+    // Get all local notes
+    await _noteService.init();
+    List<Note> localNotes = await _noteService.getAllNotes();
+    logger.info('Found ${localNotes.length} local notes');
+
+    // Calculate sync status for each note
+    Map<String, SyncStatus> syncStatusMap = await _calculateSyncStatus(
+      localNotes,
+      remoteSyncData,
+    );
+
+    // Process sync operations
+    await _processSyncOperations(syncStatusMap, localNotes);
+
+    // Update sync.json after sync
+    await _updateSyncFile(syncStatusMap);
+  }
+
+  Future<void> _syncNotebooks() async {
+    logger.info('Starting notebook sync process');
+    try {
+      await _notebookSyncManager.sync();
+      logger.info('Notebook sync process completed successfully');
+    } catch (e, s) {
+      logger.error('Error during notebook sync', error: e, stackTrace: s);
       rethrow;
     }
   }
@@ -156,6 +187,7 @@ class WebDAVUtil {
       '$_rootPath$_notesDir/',
       '$_rootPath$_assetsDir/',
       '$_rootPath$_assetsDir/$_imageDir/',
+      '$_rootPath/Notebook/', // For notebook files
     ];
 
     logger.debug('Ensuring WebDAV directory structure exists');
@@ -550,6 +582,7 @@ class WebDAVUtil {
   }
 
   void dispose() {
-    // Client doesn't need explicit closing
+    _client = null;
+    _notebookSyncManager.dispose();
   }
 }
