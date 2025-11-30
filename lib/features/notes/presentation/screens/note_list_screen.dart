@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'note_detail_screen.dart';
-import '../../../../controllers/note_controller.dart';
-import '../../../../ui/design_system/design_system.dart';
-import '../components/components/markdown_checklist.dart';
+import 'package:mindlog/controllers/note_controller.dart';
+import 'package:mindlog/ui/design_system/design_system.dart';
+import 'package:mindlog/features/notes/presentation/components/components/markdown_checklist.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import '../../../../utils/log_util.dart';
+import 'package:mindlog/utils/log_util.dart';
 
 class NoteListScreen extends StatelessWidget {
   const NoteListScreen({super.key});

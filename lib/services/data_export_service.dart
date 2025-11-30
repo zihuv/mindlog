@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:file_picker/file_picker.dart';
-import '../database/app_database.dart';
+import 'package:mindlog/database/app_database.dart';
 import 'package:get/get.dart';
-import '../utils/log_util.dart';
+import 'package:mindlog/utils/log_util.dart';
 
 class DataExportService {
 

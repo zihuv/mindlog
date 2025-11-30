@@ -7,9 +7,9 @@ import 'package:webdav_client/webdav_client.dart' as webdav;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
-import '../data/services/combined_note_service.dart';
-import '../features/notes/domain/entities/note.dart';
-import '../utils/notebook_sync_manager.dart';
+import 'package:mindlog/data/services/combined_note_service.dart';
+import 'package:mindlog/features/notes/domain/entities/note.dart';
+import 'package:mindlog/utils/notebook_sync_manager.dart';
 import 'log_util.dart';
 
 class WebDAVConfig {

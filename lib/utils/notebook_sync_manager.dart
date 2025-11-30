@@ -4,8 +4,8 @@ import 'dart:typed_data';
 
 import 'package:webdav_client/webdav_client.dart' as webdav;
 
-import '../features/notebooks/domain/entities/notebook.dart';
-import '../features/notebooks/notebook_service.dart';
+import 'package:mindlog/features/notebooks/domain/entities/notebook.dart';
+import 'package:mindlog/features/notebooks/notebook_service.dart';
 import 'log_util.dart';
 
 class NotebookSyncManager {

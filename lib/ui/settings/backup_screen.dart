@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
-import '../../services/data_export_service.dart';
-import '../../controllers/note_controller.dart';
-import '../../controllers/notebooks/notebook_controller.dart';
-import '../../database/app_database.dart' as db;
-import '../../features/notes/data/note_service.dart';
-import '../../features/notebooks/notebook_service.dart';
-import '../../utils/log_util.dart';
+import 'package:mindlog/services/data_export_service.dart';
+import 'package:mindlog/controllers/note_controller.dart';
+import 'package:mindlog/controllers/notebooks/notebook_controller.dart';
+import 'package:mindlog/database/app_database.dart' as db;
+import 'package:mindlog/features/notes/data/note_service.dart';
+import 'package:mindlog/features/notebooks/notebook_service.dart';
+import 'package:mindlog/utils/log_util.dart';
 
 class BackupScreen extends StatelessWidget {
   final DataExportService _exportService = DataExportService();

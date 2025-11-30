@@ -5,7 +5,7 @@ import 'package:mindlog/ui/notebooks/notebook_notes_screen.dart';
 import 'package:mindlog/controllers/notebooks/notebook_controller.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../utils/webdav_util.dart';
+import 'package:mindlog/utils/webdav_util.dart';
 
 class NotebookListScreen extends StatelessWidget {
   const NotebookListScreen({super.key});

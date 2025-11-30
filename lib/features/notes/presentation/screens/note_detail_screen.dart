@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../controllers/note_controller.dart';
+import 'package:mindlog/controllers/note_controller.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../../ui/design_system/design_system.dart';
+import 'package:mindlog/ui/design_system/design_system.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 

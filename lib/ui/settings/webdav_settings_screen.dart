@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../utils/webdav_util.dart';
+import 'package:mindlog/utils/webdav_util.dart';
 
 class WebDAVSettingsScreen extends StatefulWidget {
   const WebDAVSettingsScreen({super.key});

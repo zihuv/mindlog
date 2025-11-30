@@ -8,7 +8,7 @@ import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/presentation/screens/note_detail_screen.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
 import 'package:mindlog/features/notes/presentation/components/components/markdown_checklist.dart';
-import '../../utils/log_util.dart';
+import 'package:mindlog/utils/log_util.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 

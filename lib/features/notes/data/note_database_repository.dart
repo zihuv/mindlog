@@ -5,7 +5,7 @@ import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:uuid/uuid.dart';
 
 import 'note_storage_repository.dart';
-import '../../../utils/log_util.dart';
+import 'package:mindlog/utils/log_util.dart';
 
 class NoteDatabaseRepository implements NoteStorageRepository {
   late db.AppDatabase _database;

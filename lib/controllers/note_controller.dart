@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import '../data/services/combined_note_service.dart';
-import '../features/notes/domain/entities/note.dart';
-import '../utils/log_util.dart';
+import 'package:mindlog/data/services/combined_note_service.dart';
+import 'package:mindlog/features/notes/domain/entities/note.dart';
+import 'package:mindlog/utils/log_util.dart';
 
 class NoteController extends GetxController {
   final CombinedNoteService _service = CombinedNoteService();

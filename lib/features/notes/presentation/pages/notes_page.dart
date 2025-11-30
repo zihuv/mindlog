@@ -5,7 +5,7 @@ import 'package:mindlog/features/notes/presentation/widgets/note_card.dart';
 import 'package:mindlog/features/notes/presentation/widgets/note_editor_screen.dart';
 
 import 'package:mindlog/features/settings/presentation/pages/settings_page.dart';
-import '../../../../utils/log_util.dart';
+import 'package:mindlog/utils/log_util.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});

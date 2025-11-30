@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:drift/drift.dart' as drift show Value;
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
-import '../database/app_database.dart';
-import '../database/note_dao.dart';
-import '../media/media_manager.dart';
+import 'package:mindlog/database/app_database.dart';
+import 'package:mindlog/database/note_dao.dart';
+import 'package:mindlog/media/media_manager.dart';
 
 class NoteService extends GetxService {
   late AppDatabase _database;

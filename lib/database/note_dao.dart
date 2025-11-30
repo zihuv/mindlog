@@ -2,7 +2,7 @@ import 'package:drift/drift.dart'
     as drift
     show Value; // Import Value from drift with alias
 import 'package:drift/drift.dart';
-import '../database/app_database.dart';
+import 'package:mindlog/database/app_database.dart';
 
 part 'note_dao.g.dart';
 

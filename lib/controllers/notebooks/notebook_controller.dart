@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import '../../utils/log_util.dart';
+import 'package:mindlog/utils/log_util.dart';
 
 class NotebookController extends GetxController {
   final NotebookService _service = NotebookService();
