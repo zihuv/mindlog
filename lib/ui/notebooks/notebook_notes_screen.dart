@@ -263,8 +263,7 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                                                 ), // Reduced spacing
                                                 Text(
                                                   _formatDateTime(
-                                                    note.updateTime ??
-                                                        note.createTime,
+                                                    note.createTime,
                                                   ),
                                                   style: TextStyle(
                                                     fontSize: AppFontSize

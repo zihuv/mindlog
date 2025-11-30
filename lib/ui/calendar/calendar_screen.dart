@@ -20,12 +20,18 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   DateTime? _currentDate;
   List<Note> _notesForSelectedDate = [];
-  late final NoteController _noteController;
+  NoteController? _noteController;
 
   @override
   void initState() {
     super.initState();
-    _noteController = Get.find<NoteController>();
+    // Try to find the controller, and if not found, initialize it
+    try {
+      _noteController = Get.find<NoteController>();
+    } catch (e) {
+      // If the controller is not found, create and register it
+      _noteController = Get.put(NoteController());
+    }
     _currentDate = DateTime.now();
     // Load notes for the current date
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -34,10 +40,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _loadNotesForDate(DateTime date) async {
-    if (_noteController.isLoading) return;
+    if (_noteController?.isLoading ?? true) return;
 
     // Get notes specifically for the selected date using the controller's method
-    final notesForDate = await _noteController.getNotesByDate(date);
+    final notesForDate = await _noteController!.getNotesByDate(date);
 
     setState(() {
       _notesForSelectedDate = notesForDate;
@@ -112,7 +118,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
           // Notes list for selected date
           Expanded(
-            child: _noteController.isLoading
+            child: (_noteController?.isLoading ?? true)
                 ? const Center(child: CircularProgressIndicator())
                 : _notesForSelectedDate.isEmpty
                     ? Center(

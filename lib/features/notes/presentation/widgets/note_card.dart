@@ -36,7 +36,7 @@ class NoteCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _formatDateTime(note.updateTime ?? note.createTime),
+                    _formatDateTime(note.createTime),
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   Row(
