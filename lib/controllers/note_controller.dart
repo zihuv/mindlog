@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../data/services/combined_note_service.dart';
 import '../features/notes/domain/entities/note.dart';
+import '../utils/log_util.dart';
 
 class NoteController extends GetxController {
   final CombinedNoteService _service = CombinedNoteService();
@@ -30,12 +31,12 @@ class NoteController extends GetxController {
   Future<void> loadNotes() async {
     _isLoading.value = true;
     try {
-      print('NoteController.loadNotes: Loading all notes');
+      logger.debug('NoteController.loadNotes: Loading all notes');
       final notes = await _service.getAllNotes();
-      print('NoteController.loadNotes: Retrieved ${notes.length} notes');
+      logger.debug('NoteController.loadNotes: Retrieved ${notes.length} notes');
       for (int i = 0; i < notes.length; i++) {
         final note = notes[i];
-        print(
+        logger.debug(
           'Note ${i + 1}: id=${note.id}, images=${note.images}, content length=${note.content.length}',
         );
       }
@@ -119,14 +120,14 @@ class NoteController extends GetxController {
   }
 
   Future<Note?> getNoteById(String id) async {
-    print('NoteController.getNoteById: $id');
+    logger.debug('NoteController.getNoteById: $id');
     final note = await _service.getNoteById(id);
     if (note != null) {
-      print(
+      logger.debug(
         'NoteController.getNoteById result: id=${note.id}, images=${note.images}, content length=${note.content.length}',
       );
     } else {
-      print('NoteController.getNoteById: note not found');
+      logger.debug('NoteController.getNoteById: note not found');
     }
     return note;
   }
@@ -259,16 +260,16 @@ class NoteController extends GetxController {
 
   // Refresh the notes list by reloading from the database
   Future<void> refreshNotes() async {
-    print('NoteController.refreshNotes: Refreshing note list');
+    logger.debug('NoteController.refreshNotes: Refreshing note list');
     _isLoading.value = true;
     try {
       final notes = await _service.getAllNotes();
-      print('NoteController.refreshNotes: Retrieved ${notes.length} notes after refresh');
+      logger.debug('NoteController.refreshNotes: Retrieved ${notes.length} notes after refresh');
       // Sort notes by creation createTime in descending order (newest first)
       notes.sort((a, b) => b.createTime.compareTo(a.createTime));
       _notes.assignAll(notes);
     } catch (e) {
-      print('Error refreshing notes: $e');
+      logger.error('Error refreshing notes: $e');
       // Don't show snackbar during import to avoid overlay issues
     } finally {
       _isLoading.value = false;

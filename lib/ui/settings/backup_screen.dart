@@ -7,6 +7,7 @@ import '../../controllers/notebooks/notebook_controller.dart';
 import '../../database/app_database.dart' as db;
 import '../../features/notes/data/note_service.dart';
 import '../../features/notebooks/notebook_service.dart';
+import '../../utils/log_util.dart';
 
 class BackupScreen extends StatelessWidget {
   final DataExportService _exportService = DataExportService();
@@ -251,7 +252,7 @@ class BackupScreen extends StatelessWidget {
         await noteController.initialize();
         await noteController.loadNotes();
       } catch (e) {
-        print('NoteController refresh error: $e');
+        logger.error('NoteController refresh error: $e');
       }
 
       try {
@@ -262,7 +263,7 @@ class BackupScreen extends StatelessWidget {
         await notebookController.initialize();
         await notebookController.loadNotebooks();
       } catch (e) {
-        print('NotebookController refresh error: $e');
+        logger.error('NotebookController refresh error: $e');
       }
 
       // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues

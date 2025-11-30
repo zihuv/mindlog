@@ -83,7 +83,7 @@ class NotebookSyncManager {
     try {
       await _client!.mkdirAll(notebooksPath);
       logger.debug('Created/verified notebooks directory: $notebooksPath');
-    } catch (e, s) {
+    } catch (e) {
       logger.warning('Failed to create notebooks directory $notebooksPath (may already exist)');
     }
   }
@@ -99,7 +99,7 @@ class NotebookSyncManager {
       }
       logger.debug('Notebook sync file is empty');
       return {};
-    } catch (e, s) {
+    } catch (e) {
       logger.warning('Notebook sync file does not exist on server, starting fresh');
       return {};
     }

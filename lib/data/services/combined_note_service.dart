@@ -1,6 +1,7 @@
 import 'note_business_service.dart';
 import 'media_service.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
+import 'package:mindlog/features/notes/data/note_service.dart';
 
 class CombinedNoteService {
   final NoteBusinessService _noteService = NoteBusinessService();
@@ -94,6 +95,7 @@ class CombinedNoteService {
     List<String>? newVideosToCopy, // New videos to add to the note
     List<String>? newAudiosToCopy, // New audios to add to the note
     String? notebookId,
+    DateTime? updateTime,  // Allow specifying updateTime from cloud
   }) async {
     final existingNote = await _noteService.getNoteById(id);
     if (existingNote == null) {
@@ -140,6 +142,7 @@ class CombinedNoteService {
       audioName: updatedAudioNames,
       videoName: updatedVideoNames,
       notebookId: notebookId,
+      updateTime: updateTime,
     );
 
     // Clean up cache files after they have been saved to the note directory
@@ -254,6 +257,33 @@ class CombinedNoteService {
   // Get all unique tags
   Future<List<String>> getAllTags() async {
     return await _noteService.getAllTags();
+  }
+
+  /// Save a note with all cloud data preserved (ID, createTime, updateTime)
+  /// This method is specifically for sync operations where we need to maintain cloud data integrity
+  Future<void> saveNoteWithCloudData({
+    required String id,
+    required String content,
+    required DateTime createTime,
+    DateTime? updateTime,
+    List<String>? images,
+    List<String>? videos,
+    List<String>? audios,
+    String? notebookId,
+  }) async {
+    // Create or update the note in the database with all cloud data preserved
+    final note = Note(
+      id: id,
+      content: content,
+      createTime: createTime,
+      updateTime: updateTime,
+      notebookId: notebookId,
+      images: images ?? [],
+      videos: videos ?? [],
+      audios: audios ?? [],
+    );
+
+    await NoteService.instance.saveNote(note);
   }
 
   // Close the services

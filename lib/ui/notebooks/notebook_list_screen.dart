@@ -49,7 +49,7 @@ class NotebookListScreen extends StatelessWidget {
                     );
 
                     // Show progress indicator
-                    final progress = Get.dialog(
+                    Get.dialog(
                       Center(
                         child: Container(
                           padding: const EdgeInsets.all(20),

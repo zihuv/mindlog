@@ -7,6 +7,7 @@ import 'package:path/path.dart' as path;
 import 'package:file_picker/file_picker.dart';
 import '../database/app_database.dart';
 import 'package:get/get.dart';
+import '../utils/log_util.dart';
 
 class DataExportService {
 
@@ -122,7 +123,7 @@ class DataExportService {
             }
           } catch (e) {
             // If we can't resolve the link, skip it
-            print('Could not resolve symbolic link: ${entity.path}');
+            logger.warning('Could not resolve symbolic link: ${entity.path}');
           }
         }
       }
@@ -148,7 +149,7 @@ class DataExportService {
             }
           } catch (e) {
             // If we can't resolve the link, skip it
-            print('Could not resolve symbolic link: ${entity.path}');
+            logger.warning('Could not resolve symbolic link: ${entity.path}');
           }
         }
       }
@@ -174,7 +175,7 @@ class DataExportService {
             }
           } catch (e) {
             // If we can't resolve the link, skip it
-            print('Could not resolve symbolic link: ${entity.path}');
+            logger.warning('Could not resolve symbolic link: ${entity.path}');
           }
         }
       }
@@ -301,9 +302,9 @@ class DataExportService {
       await DatabaseProvider.instance.reset();
       
       // The database will be reinitialized when accessed again
-      print('Database connection reinitialized successfully');
+      logger.debug('Database connection reinitialized successfully');
     } catch (e) {
-      print('Error reinitializing database connection: $e');
+      logger.error('Error reinitializing database connection: $e');
     }
   }
 

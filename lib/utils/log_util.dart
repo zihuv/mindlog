@@ -28,7 +28,7 @@ class LogUtil {
           lineLength: 120,
           colors: true,
           printEmojis: true,
-          printTime: true,
+          dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
         ),
         output: ConsoleOutput(),
         filter: DevelopmentFilter(),
@@ -42,7 +42,7 @@ class LogUtil {
           lineLength: 120,
           colors: false,
           printEmojis: false,
-          printTime: true,
+          dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
         ),
         output: MultiOutput([
           ConsoleOutput(),

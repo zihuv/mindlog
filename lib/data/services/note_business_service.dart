@@ -54,6 +54,7 @@ class NoteBusinessService {
     List<String>? audioName,
     List<String>? videoName,
     String? notebookId,
+    DateTime? updateTime,  // Allow specifying updateTime from cloud
   }) async {
     final existingNote = await NoteService.instance.getNoteById(id);
     if (existingNote == null) {
@@ -64,7 +65,7 @@ class NoteBusinessService {
       id: id,
       content: content ?? existingNote.content,
       createTime: existingNote.createTime,
-      updateTime: DateTime.now(),
+      updateTime: updateTime ?? DateTime.now(),
       notebookId: notebookId ?? existingNote.notebookId,
       images: imageName ?? existingNote.images,
       videos: videoName ?? existingNote.videos,

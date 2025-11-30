@@ -5,6 +5,7 @@ import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:uuid/uuid.dart';
 
 import 'note_storage_repository.dart';
+import '../../../utils/log_util.dart';
 
 class NoteDatabaseRepository implements NoteStorageRepository {
   late db.AppDatabase _database;
@@ -40,8 +41,8 @@ class NoteDatabaseRepository implements NoteStorageRepository {
     // Generate a UUID if the note doesn't have an ID yet
     final id = note.id.isEmpty ? _uuid.v7() : note.id;
 
-    print(
-      'Saving note to database: id=$id, images=${note.images}, content length=${note.content.length}',
+    logger.debug(
+      'Saving note to database: id=$id, images=${note.images}, content length=${note.content.length}, createTime=${note.createTime}, updateTime=${note.updateTime}',
     );
 
     await _noteDao.insertNote(
@@ -61,8 +62,8 @@ class NoteDatabaseRepository implements NoteStorageRepository {
 
   @override
   Future<void> updateNote(Note note) async {
-    print(
-      'Updating note in database: id=${note.id}, images=${note.images}, content length=${note.content.length}',
+    logger.debug(
+      'Updating note in database: id=${note.id}, images=${note.images}, content length=${note.content.length}, createTime=${note.createTime}, updateTime=${note.updateTime}',
     );
 
     await _noteDao.updateNote(
@@ -70,7 +71,7 @@ class NoteDatabaseRepository implements NoteStorageRepository {
         content: drift.Value(note.content),
         createTime: drift.Value(
           note.createTime,
-        ), // Keep original creation createTime
+        ), // Keep original creation createTime from cloud
         updateTime: drift.Value(note.updateTime ?? DateTime.now()),
         imageName: drift.Value(note.images),
         audioName: drift.Value(note.audios),
@@ -127,7 +128,7 @@ class NoteDatabaseRepository implements NoteStorageRepository {
   }
 
   Note _mapNoteDataToNote(NoteData noteData) {
-    print(
+    logger.debug(
       'Mapping note from database: id=${noteData.id}, images=${noteData.imageName}, content length=${noteData.content.length}',
     );
     return Note(

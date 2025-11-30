@@ -368,18 +368,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
               await _loadNoteForId(_currentNoteId!);
             }
 
-            // Show success message after reloading to ensure UI is updated
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Image added to note successfully'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
-            });
           }
         } else {
           WidgetsBinding.instance.addPostFrameCallback((_) {

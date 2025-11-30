@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import '../utils/log_util.dart';
 
 part 'app_database.g.dart';
 
@@ -116,7 +117,7 @@ class DatabaseProvider {
       try {
         await _database!.close();
       } catch (e) {
-        print('Error closing database: $e');
+        logger.error('Error closing database: $e');
       }
       _database = null;
     }
@@ -129,7 +130,7 @@ class DatabaseProvider {
       try {
         await _database!.close();
       } catch (e) {
-        print('Error closing database during reset: $e');
+        logger.error('Error closing database during reset: $e');
       }
       _database = null;
     }

@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import '../../utils/log_util.dart';
 
 class NotebookController extends GetxController {
   final NotebookService _service = NotebookService();
@@ -153,7 +154,7 @@ class NotebookController extends GetxController {
       notebooks.sort((a, b) => b.createTime.compareTo(a.createTime));
       _notebooks.assignAll(notebooks);
     } catch (e) {
-      print('Error refreshing notebooks: $e');
+      logger.error('Error refreshing notebooks: $e');
       // Don't show snackbar during import to avoid overlay issues
     } finally {
       _isLoading.value = false;

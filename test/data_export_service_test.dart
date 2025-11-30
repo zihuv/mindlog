@@ -3,16 +3,13 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mindlog/services/data_export_service.dart';
-import 'package:mindlog/database/app_database.dart';
 
 void main() {
   group('DataExportService Tests', () {
     late DataExportService exportService;
-    late AppDatabase database;
 
     setUp(() {
       exportService = DataExportService();
-      database = DatabaseProvider.instance.database;
     });
 
     tearDown(() async {

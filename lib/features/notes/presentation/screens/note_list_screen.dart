@@ -7,6 +7,7 @@ import '../components/components/markdown_checklist.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import '../../../../utils/log_util.dart';
 
 class NoteListScreen extends StatelessWidget {
   const NoteListScreen({super.key});
@@ -160,7 +161,7 @@ class NoteListScreen extends StatelessWidget {
                                                   note.images[index],
                                                 ),
                                                 builder: (context, snapshot) {
-                                                  print(
+                                                  logger.debug(
                                                     'Image FutureBuilder - Note: ${note.id}, Index: $index, HasData: ${snapshot.hasData}, Data: ${snapshot.data}',
                                                   );
                                                   if (snapshot.hasData &&
@@ -172,7 +173,7 @@ class NoteListScreen extends StatelessWidget {
                                                       fit: BoxFit.cover,
                                                     );
                                                   } else {
-                                                    print(
+                                                    logger.debug(
                                                       'Image FutureBuilder - No data for note: ${note.id}, image: ${note.images[index]}',
                                                     );
                                                     return Container(
@@ -365,13 +366,13 @@ Future<String?> _getImagePath(String noteId, String imageName) async {
     String imagePath = path.join(appDir.path, 'images', noteId, imageName);
 
     // Debugging: Print the path being checked
-    print('Checking for image at path: $imagePath');
+    logger.debug('Checking for image at path: $imagePath');
     bool exists = File(imagePath).existsSync();
-    print('Image exists: $exists');
+    logger.debug('Image exists: $exists');
 
     return exists ? imagePath : null;
   } on Exception catch (e) {
-    print('Error getting image path: $e');
+    logger.error('Error getting image path: $e');
     return null;
   }
 }

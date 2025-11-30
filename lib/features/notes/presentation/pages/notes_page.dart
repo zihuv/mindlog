@@ -5,6 +5,7 @@ import 'package:mindlog/features/notes/presentation/widgets/note_card.dart';
 import 'package:mindlog/features/notes/presentation/widgets/note_editor_screen.dart';
 
 import 'package:mindlog/features/settings/presentation/pages/settings_page.dart';
+import '../../../../utils/log_util.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
@@ -31,7 +32,7 @@ class _NotesPageState extends State<NotesPage> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading notes: $e');
+      logger.error('Error loading notes: $e');
       setState(() {
         _isLoading = false;
       });
@@ -117,7 +118,7 @@ class _NotesPageState extends State<NotesPage> {
           _allNotes.removeWhere((m) => m.id == note.id);
         });
       } catch (e) {
-        print('Error deleting note: $e');
+        logger.error('Error deleting note: $e');
         // Show error snackbar only if context is still valid
         if (contextLocal.mounted) {
           ScaffoldMessenger.of(contextLocal).showSnackBar(

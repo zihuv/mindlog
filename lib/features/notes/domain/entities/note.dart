@@ -9,6 +9,7 @@ class Note extends Equatable {
   final List<String> images;
   final List<String> videos;
   final List<String> audios;
+  final bool isDeleted; // Flag to indicate if the note is deleted
 
   const Note({
     required this.id,
@@ -19,6 +20,7 @@ class Note extends Equatable {
     this.images = const [],
     this.videos = const [],
     this.audios = const [],
+    this.isDeleted = false, // By default, notes are not deleted
   });
 
   @override
@@ -31,6 +33,7 @@ class Note extends Equatable {
     images,
     videos,
     audios,
+    isDeleted,
   ];
 
   Note copyWith({
@@ -42,6 +45,7 @@ class Note extends Equatable {
     List<String>? images,
     List<String>? videos,
     List<String>? audios,
+    bool? isDeleted,
   }) {
     return Note(
       id: id ?? this.id,
@@ -52,6 +56,7 @@ class Note extends Equatable {
       images: images ?? this.images,
       videos: videos ?? this.videos,
       audios: audios ?? this.audios,
+      isDeleted: isDeleted ?? this.isDeleted,
     );
   }
 
@@ -65,6 +70,7 @@ class Note extends Equatable {
       'images': images,
       'videos': videos,
       'audios': audios,
+      'isDeleted': isDeleted,
     };
   }
 
@@ -82,6 +88,7 @@ class Note extends Equatable {
       images: List<String>.from(json['images'] ?? []),
       videos: List<String>.from(json['videos'] ?? []),
       audios: List<String>.from(json['audios'] ?? []),
+      isDeleted: json['isDeleted'] as bool? ?? false,
     );
   }
 }

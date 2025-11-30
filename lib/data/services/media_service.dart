@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import '../../utils/log_util.dart';
 
 class MediaService {
   static const String _imagesDirName = 'images';
@@ -47,7 +48,7 @@ class MediaService {
 
     // Check if the source file is in the cache directory
     bool isCachePath = await _isCachePath(sourcePath);
-    print(
+    logger.debug(
       'Saving image: sourcePath=$sourcePath, isCachePath=$isCachePath, destinationPath=$destinationPath',
     );
 
@@ -55,7 +56,7 @@ class MediaService {
       // If the source file is in cache, copy it from the cache to the note directory
       final sourceFile = File(sourcePath);
       final destinationFile = await sourceFile.copy(destinationPath);
-      print(
+      logger.debug(
         'Copied from cache to storage: ${sourceFile.path} -> ${destinationFile.path}',
       );
       return destinationFile.path;
@@ -64,7 +65,7 @@ class MediaService {
       // We should still copy it to the correct location for this note
       final sourceFile = File(sourcePath);
       final destinationFile = await sourceFile.copy(destinationPath);
-      print(
+      logger.debug(
         'Copied from source to storage: ${sourceFile.path} -> ${destinationFile.path}',
       );
       return destinationFile.path;
@@ -82,7 +83,7 @@ class MediaService {
 
     // Check if the source file is in the cache directory
     bool isCachePath = await _isCachePath(sourcePath);
-    print(
+    logger.debug(
       'Saving video: sourcePath=$sourcePath, isCachePath=$isCachePath, destinationPath=$destinationPath',
     );
 
@@ -90,7 +91,7 @@ class MediaService {
       // If the source file is in cache, copy it from the cache to the note directory
       final sourceFile = File(sourcePath);
       final destinationFile = await sourceFile.copy(destinationPath);
-      print(
+      logger.debug(
         'Copied from cache to storage: ${sourceFile.path} -> ${destinationFile.path}',
       );
       return destinationFile.path;
@@ -99,7 +100,7 @@ class MediaService {
       // We should still copy it to the correct location for this note
       final sourceFile = File(sourcePath);
       final destinationFile = await sourceFile.copy(destinationPath);
-      print(
+      logger.debug(
         'Copied from source to storage: ${sourceFile.path} -> ${destinationFile.path}',
       );
       return destinationFile.path;
@@ -117,7 +118,7 @@ class MediaService {
 
     // Check if the source file is in the cache directory
     bool isCachePath = await _isCachePath(sourcePath);
-    print(
+    logger.debug(
       'Saving audio: sourcePath=$sourcePath, isCachePath=$isCachePath, destinationPath=$destinationPath',
     );
 
@@ -125,7 +126,7 @@ class MediaService {
       // If the source file is in cache, copy it from the cache to the note directory
       final sourceFile = File(sourcePath);
       final destinationFile = await sourceFile.copy(destinationPath);
-      print(
+      logger.debug(
         'Copied from cache to storage: ${sourceFile.path} -> ${destinationFile.path}',
       );
       return destinationFile.path;
@@ -134,7 +135,7 @@ class MediaService {
       // We should still copy it to the correct location for this note
       final sourceFile = File(sourcePath);
       final destinationFile = await sourceFile.copy(destinationPath);
-      print(
+      logger.debug(
         'Copied from source to storage: ${sourceFile.path} -> ${destinationFile.path}',
       );
       return destinationFile.path;
@@ -284,7 +285,7 @@ class MediaService {
             await file.delete();
           } catch (e) {
             // If we can't delete the file, log the error but continue
-            print('Could not delete cache file $cachePath: $e');
+            logger.warning('Could not delete cache file $cachePath: $e');
           }
         }
       }
