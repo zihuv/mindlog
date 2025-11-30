@@ -4,6 +4,8 @@ import 'package:mindlog/ui/notebooks/notebook_detail_screen.dart';
 import 'package:mindlog/ui/notebooks/notebook_notes_screen.dart';
 import 'package:mindlog/controllers/notebooks/notebook_controller.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../utils/webdav_util.dart';
 
 class NotebookListScreen extends StatelessWidget {
   const NotebookListScreen({super.key});
@@ -16,6 +18,95 @@ class NotebookListScreen extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             actions: [
+              IconButton(
+                icon: const Icon(Icons.cloud_sync),
+                onPressed: () async {
+                  // Import webdav util and perform sync
+                  try {
+                    // Load settings from shared preferences
+                    final prefs = await SharedPreferences.getInstance();
+                    String url = prefs.getString('webdav_url') ?? '';
+                    String username = prefs.getString('webdav_username') ?? '';
+                    String password = prefs.getString('webdav_password') ?? '';
+                    String folder = prefs.getString('webdav_folder') ?? 'mindlog';
+
+                    if (url.isEmpty || username.isEmpty || password.isEmpty) {
+                      // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
+                      ScaffoldMessenger.of(Get.context!).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please configure WebDAV settings first'),
+                          backgroundColor: Colors.orange,
+                        ),
+                      );
+                      return;
+                    }
+
+                    WebDAVConfig config = WebDAVConfig(
+                      url: url,
+                      username: username,
+                      password: password,
+                      folderName: folder,
+                    );
+
+                    // Show progress indicator
+                    final progress = Get.dialog(
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Get.theme.dialogTheme.backgroundColor ?? Get.theme.canvasColor,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const CircularProgressIndicator(),
+                              const SizedBox(height: 20),
+                              const Text(
+                                'Syncing with WebDAV...',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      barrierDismissible: false,
+                    );
+
+                    WebDAVUtil webdavUtil = WebDAVUtil();
+                    await webdavUtil.init(config);
+                    await webdavUtil.sync();
+
+                    // Close progress dialog
+                    if (Get.isDialogOpen ?? false) {
+                      Get.back();
+                    }
+
+                    // Show success message
+                    ScaffoldMessenger.of(Get.context!).showSnackBar(
+                      const SnackBar(
+                        content: Text('Sync completed successfully!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+
+                    webdavUtil.dispose();
+                  } catch (e) {
+                    // Close progress dialog if still open
+                    if (Get.isDialogOpen ?? false) {
+                      Get.back();
+                    }
+
+                    // Show error message
+                    ScaffoldMessenger.of(Get.context!).showSnackBar(
+                      SnackBar(
+                        content: Text('Sync failed: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+              ),
               IconButton(
                 icon: const Icon(Icons.search),
                 onPressed: () {

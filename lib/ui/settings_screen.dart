@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'settings/backup_screen.dart';
+import 'settings/webdav_settings_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -24,6 +25,8 @@ class SettingsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildBackupCard(context),
+            const SizedBox(height: 16),
+            _buildWebDAVCard(context),
           ],
         ),
       ),
@@ -39,6 +42,20 @@ class SettingsScreen extends StatelessWidget {
         trailing: const Icon(Icons.arrow_forward_ios),
         onTap: () {
           Get.to(() => BackupScreen());
+        },
+      ),
+    );
+  }
+
+  Widget _buildWebDAVCard(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.cloud_sync),
+        title: const Text('WebDAV Sync'),
+        subtitle: const Text('Sync your notes with WebDAV'),
+        trailing: const Icon(Icons.arrow_forward_ios),
+        onTap: () {
+          Get.to(() => const WebDAVSettingsScreen());
         },
       ),
     );

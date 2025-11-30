@@ -118,121 +118,127 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         child: Text(
                           'No notes for this date',
                           style: TextStyle(
-                            fontSize: AppFontSize.medium,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontSize: AppFontSize.large,
+                            fontWeight: AppFontWeight.normal,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       )
-                    : ListView.builder(
-                        padding: AppPadding.small,
-                        itemCount: _notesForSelectedDate.length,
-                        itemBuilder: (context, index) {
-                          final note = _notesForSelectedDate[index];
-                          return Card(
-                            margin: AppPadding.small,
-                            child: Stack(
-                              children: [
-                                // Full card tap gesture
-                                Positioned.fill(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Get.to(
-                                        () => NoteDetailScreen(
-                                          noteId: note.id,
-                                        ),
-                                      );
-                                    },
-                                    // This allows the gesture detector to be behind other widgets
-                                    behavior: HitTestBehavior.translucent,
-                                  ),
-                                ),
-                                // Content and images
-                                Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    // Content area (always shown)
-                                    Container(
-                                      padding: AppPadding
-                                          .small, // Reduced padding
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            constraints: const BoxConstraints(
-                                              maxHeight:
-                                                  60, // Limit height to 2 lines
-                                            ),
-                                            child: MarkdownChecklist(
-                                              text:
-                                                  note.content.length > 50
-                                                  ? '${note.content.substring(0, 50)}...'
-                                                  : note.content,
-                                              style: TextStyle(
-                                                fontSize:
-                                                    AppFontSize.body,
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.onSurface,
-                                              ),
-                                              onTextChange: (updatedText) {
-                                                // Don't allow changes from this view
-                                              },
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 2,
-                                          ), // Reduced spacing
-                                          Text(
-                                            _formatDateTime(
-                                              note.updateTime ??
-                                                  note.createTime,
-                                            ),
-                                            style: TextStyle(
-                                              fontSize: AppFontSize
-                                                  .small, // Smaller font size
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurfaceVariant,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    // Image thumbnails grid if available (up to 9 images in 3x3 grid)
-                                    if (note.images.isNotEmpty)
-                                      FutureBuilder<List<String>>(
-                                        future: _getImagePaths(
-                                          note.id,
-                                          note.images.take(9).toList(),
-                                        ), // Limit to first 9 images
-                                        builder: (context, snapshot) {
-                                          if (snapshot.hasData &&
-                                              snapshot.data!.isNotEmpty) {
-                                            final imagePaths =
-                                                snapshot.data!;
-                                            return Container(
-                                              padding:
-                                                  const EdgeInsets.all(
-                                                    8.0,
-                                                  ),
-                                              child: _buildImagesGrid(
-                                                imagePaths,
-                                              ),
-                                            );
-                                          } else {
-                                            // If image paths couldn't be retrieved, don't show any images
-                                            return const SizedBox.shrink();
-                                          }
-                                        },
-                                      ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
+                    : RefreshIndicator(
+                        onRefresh: () async {
+                          await _loadNotesForDate(_currentDate!);
+                          return; // Required for the refresh indicator
                         },
+                        child: ListView.builder(
+                          padding: AppPadding.small,
+                          itemCount: _notesForSelectedDate.length,
+                          itemBuilder: (context, index) {
+                            final note = _notesForSelectedDate[index];
+                            return Card(
+                              margin: AppPadding.small,
+                              child: Stack(
+                                children: [
+                                  // Full card tap gesture
+                                  Positioned.fill(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Get.to(
+                                          () => NoteDetailScreen(
+                                            noteId: note.id,
+                                          ),
+                                        );
+                                      },
+                                      // This allows the gesture detector to be behind other widgets
+                                      behavior: HitTestBehavior.translucent,
+                                    ),
+                                  ),
+                                  // Content and images
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Content area (always shown)
+                                      Container(
+                                        padding: AppPadding
+                                            .small, // Reduced padding
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              constraints: const BoxConstraints(
+                                                maxHeight:
+                                                    60, // Limit height to 2 lines
+                                              ),
+                                              child: MarkdownChecklist(
+                                                text:
+                                                    note.content.length > 50
+                                                    ? '${note.content.substring(0, 50)}...'
+                                                    : note.content,
+                                                style: TextStyle(
+                                                  fontSize:
+                                                      AppFontSize.body,
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.onSurface,
+                                                ),
+                                                onTextChange: (updatedText) {
+                                                  // Don't allow changes from this view
+                                                },
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              height: 2,
+                                            ), // Reduced spacing
+                                            Text(
+                                              _formatDateTime(
+                                                note.createTime,
+                                              ),
+                                              style: TextStyle(
+                                                fontSize: AppFontSize
+                                                    .small, // Smaller font size
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      // Image thumbnails grid if available (up to 9 images in 3x3 grid)
+                                      if (note.images.isNotEmpty)
+                                        FutureBuilder<List<String>>(
+                                          future: _getImagePaths(
+                                            note.id,
+                                            note.images.take(9).toList(),
+                                          ), // Limit to first 9 images
+                                          builder: (context, snapshot) {
+                                            if (snapshot.hasData &&
+                                                snapshot.data!.isNotEmpty) {
+                                              final imagePaths =
+                                                  snapshot.data!;
+                                              return Container(
+                                                padding:
+                                                    const EdgeInsets.all(
+                                                      8.0,
+                                                    ),
+                                                child: _buildImagesGrid(
+                                                  imagePaths,
+                                                ),
+                                              );
+                                            } else {
+                                              // If image paths couldn't be retrieved, don't show any images
+                                              return const SizedBox.shrink();
+                                            }
+                                          },
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
           ),
         ],

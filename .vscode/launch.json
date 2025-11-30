@@ -11,6 +11,15 @@
       "deviceId": "emulator-5554"
     },
     {
+      "name": "Flutter (macos)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "${workspaceFolder}",
+      "flutterMode": "debug",
+      "deviceId": "macos"
+    },
+    {
       "name": "Flutter",
       "request": "launch",
       "type": "dart",
