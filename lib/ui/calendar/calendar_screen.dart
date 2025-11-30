@@ -20,11 +20,12 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   DateTime? _currentDate;
   List<Note> _notesForSelectedDate = [];
-  final NoteController _noteController = Get.find<NoteController>();
+  late final NoteController _noteController;
 
   @override
   void initState() {
     super.initState();
+    _noteController = Get.find<NoteController>();
     _currentDate = DateTime.now();
     // Load notes for the current date
     WidgetsBinding.instance.addPostFrameCallback((_) {
