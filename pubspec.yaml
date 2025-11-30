@@ -53,6 +53,7 @@ dependencies:
   calendar_date_picker2: ^1.1.9
   webdav_client: ^1.2.2
   shared_preferences: ^2.2.2
+  logger: ^2.6.1
 
 
 dev_dependencies:

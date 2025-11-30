@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../data/services/combined_note_service.dart';
 import '../features/notes/domain/entities/note.dart';
+import 'log_util.dart';
 
 class WebDAVConfig {
   final String url;
@@ -82,36 +83,44 @@ class WebDAVUtil {
       'accept-charset': 'utf-8',
       'Content-Type': 'application/json',
     });
+    
+    logger.info('WebDAV client initialized with URL: ${_config.url} and folder: ${_config.folderName}');
   }
 
   Future<bool> testConnection() async {
     if (_client == null) {
+      logger.error('WebDAV client not initialized');
       return false;
     }
     
     try {
+      logger.info('Testing WebDAV connection');
       await _client!.ping().timeout(
         const Duration(seconds: 5),
         onTimeout: () {
+          logger.error('WebDAV ping operation timed out');
           throw TimeoutException(
             'Ping operation timed out',
             const Duration(seconds: 5),
           );
         },
       );
+      logger.info('WebDAV connection test successful');
       return true;
-    } catch (e) {
-      print('WebDAV connectivity check failed: $e');
+    } catch (e, s) {
+      logger.error('WebDAV connectivity check failed', error: e, stackTrace: s);
       return false;
     }
   }
 
   Future<void> sync() async {
     if (_client == null) {
+      logger.error('WebDAV not initialized. Call init() first.');
       throw Exception('WebDAV not initialized. Call init() first.');
     }
 
     try {
+      logger.info('Starting WebDAV sync process');
       // Ensure the directory structure exists
       await _ensureDirectoryStructure();
 
@@ -121,6 +130,7 @@ class WebDAVUtil {
       // Get all local notes
       await _noteService.init();
       List<Note> localNotes = await _noteService.getAllNotes();
+      logger.info('Found ${localNotes.length} local notes');
 
       // Calculate sync status for each note
       Map<String, SyncStatus> syncStatusMap = await _calculateSyncStatus(
@@ -133,8 +143,9 @@ class WebDAVUtil {
 
       // Update sync.json after sync
       await _updateSyncFile(syncStatusMap);
-    } catch (e) {
-      // print('Error during sync: $e');
+      logger.info('WebDAV sync process completed successfully');
+    } catch (e, s) {
+      logger.error('Error during sync', error: e, stackTrace: s);
       rethrow;
     }
   }
@@ -147,27 +158,30 @@ class WebDAVUtil {
       '$_rootPath$_assetsDir/$_imageDir/',
     ];
 
+    logger.debug('Ensuring WebDAV directory structure exists');
     for (final dir in directories) {
       try {
         await _client!.mkdirAll(dir);
-      } catch (e) {
-        // Directory might already exist, continue
-        // print('Directory creation failed for $dir: $e');
+        logger.debug('Created/verified directory: $dir');
+      } catch (e, s) {
+        logger.warning('Failed to create directory $dir (may already exist)');
       }
     }
   }
 
   Future<Map<String, dynamic>> _downloadSyncFile() async {
     try {
+      logger.debug('Downloading sync file from WebDAV');
       final response = await _client!.read(_rootPath + _syncFileName);
       if (response.isNotEmpty) {
         String remoteSyncContent = utf8.decode(response);
+        logger.debug('Sync file downloaded successfully');
         return jsonDecode(remoteSyncContent);
       }
+      logger.debug('Sync file is empty');
       return {};
-    } catch (e) {
-      // If sync file doesn't exist, return empty map
-      // print('Sync file does not exist on server, starting fresh: $e');
+    } catch (e, s) {
+      logger.warning('Sync file does not exist on server, starting fresh');
       return {};
     }
   }
@@ -289,6 +303,7 @@ class WebDAVUtil {
 
   Future<void> _uploadNote(Note note) async {
     try {
+      logger.debug('Uploading note: ${note.id}');
       // Upload the note JSON file
       String noteJson = jsonEncode(note.toJson());
       String noteYear = _getYearFromTimestamp(
@@ -314,15 +329,16 @@ class WebDAVUtil {
         await _uploadImage(note.id, imageName);
       }
 
-      // print('Successfully uploaded note: ${note.id}');
-    } catch (e) {
-      // print('Error uploading note ${note.id}: $e');
+      logger.info('Successfully uploaded note: ${note.id}');
+    } catch (e, s) {
+      logger.error('Error uploading note ${note.id}', error: e, stackTrace: s);
       rethrow;
     }
   }
 
   Future<void> _downloadNote(String noteId) async {
     try {
+      logger.debug('Downloading note: $noteId');
       // Try different years to find the note file since we don't know the creation year
       List<int> possibleYears = await _getPossibleYears();
       Uint8List? noteBytes;
@@ -332,6 +348,7 @@ class WebDAVUtil {
         try {
           List<int> bytes = await _client!.read(path);
           noteBytes = Uint8List.fromList(bytes);
+          logger.debug('Found note $noteId in year $year');
           break;
         } catch (e) {
           // Continue to next year
@@ -344,7 +361,7 @@ class WebDAVUtil {
         Note? existingNote = await _noteService.getNoteById(noteId);
         if (existingNote != null) {
           await _noteService.deleteNote(noteId);
-          // print('Note deleted locally: $noteId');
+          logger.info('Note deleted locally as it was removed from server: $noteId');
         }
         return;
       }
@@ -363,12 +380,14 @@ class WebDAVUtil {
           content: note.content,
           notebookId: note.notebookId,
         );
+        logger.debug('Updated existing note: $noteId');
       } else {
         // Create new note
         await _noteService.createNote(
           content: note.content,
           notebookId: note.notebookId,
         );
+        logger.debug('Created new note: $noteId');
       }
 
       // Download associated images if they exist
@@ -376,9 +395,9 @@ class WebDAVUtil {
         await _downloadImage(note.id, imageName);
       }
 
-      // print('Successfully downloaded note: $noteId');
-    } catch (e) {
-      // print('Error downloading note $noteId: $e');
+      logger.info('Successfully downloaded note: $noteId');
+    } catch (e, s) {
+      logger.error('Error downloading note $noteId', error: e, stackTrace: s);
     }
   }
 
@@ -408,7 +427,7 @@ class WebDAVUtil {
 
       return years;
     } catch (e) {
-      // print('Error getting possible years: $e');
+      logger.error('Error getting possible years', error: e);
       // Default to a few recent years
       int currentYear = DateTime.now().year;
       return [currentYear, currentYear - 1, currentYear - 2];
@@ -417,6 +436,7 @@ class WebDAVUtil {
 
   Future<void> _uploadImage(String noteId, String imageName) async {
     try {
+      logger.debug('Uploading image $imageName for note: $noteId');
       // Get the local image path
       final appDir = await getApplicationDocumentsDirectory();
       String imagePath = path.join(appDir.path, 'images', noteId, imageName);
@@ -441,17 +461,18 @@ class WebDAVUtil {
         
         await _client!.write(destinationPath, Uint8List.fromList(imageBytes));
 
-        // print('Successfully uploaded image: $destinationPath');
+        logger.debug('Successfully uploaded image: $destinationPath');
       } else {
-        // print('Local image does not exist: $imagePath');
+        logger.warning('Local image does not exist: $imagePath');
       }
-    } catch (e) {
-      // print('Error uploading image for note $noteId: $e');
+    } catch (e, s) {
+      logger.error('Error uploading image for note $noteId', error: e, stackTrace: s);
     }
   }
 
   Future<void> _downloadImage(String noteId, String imageName) async {
     try {
+      logger.debug('Downloading image $imageName for note: $noteId');
       // Calculate the source path on WebDAV
       String imageYearPath = _getYearFromTimestamp(DateTime.now());
       String sourcePath =
@@ -477,14 +498,15 @@ class WebDAVUtil {
       // Write image to local file
       await localImageFile.writeAsBytes(imageBytes);
 
-      // print('Successfully downloaded image: $sourcePath to $localImageFilePath');
-    } catch (e) {
-      // print('Error downloading image for note $noteId: $e');
+      logger.debug('Successfully downloaded image: $sourcePath to $localImageFilePath');
+    } catch (e, s) {
+      logger.error('Error downloading image for note $noteId', error: e, stackTrace: s);
     }
   }
 
   Future<void> _updateSyncFile(Map<String, SyncStatus> syncStatusMap) async {
     try {
+      logger.debug('Updating sync file with ${syncStatusMap.length} entries');
       Map<String, String> syncData = {};
 
       for (final entry in syncStatusMap.entries) {
@@ -512,9 +534,9 @@ class WebDAVUtil {
         Uint8List.fromList(utf8.encode(syncJson)),
       );
 
-      // print('Sync file updated successfully');
-    } catch (e) {
-      // print('Error updating sync file: $e');
+      logger.info('Sync file updated successfully with ${syncData.length} entries');
+    } catch (e, s) {
+      logger.error('Error updating sync file', error: e, stackTrace: s);
       rethrow;
     }
   }

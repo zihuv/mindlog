@@ -4,9 +4,11 @@ import 'ui/home/home_screen.dart';
 import 'controllers/note_controller.dart';
 import 'controllers/notebooks/notebook_controller.dart';
 import 'ui/design_system/app_theme.dart';
+import 'utils/log_util.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await LogUtil().init();
   runApp(const MyApp());
 }
 
