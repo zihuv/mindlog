@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mindlog/data/services/combined_note_service.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
-import 'package:uuid/uuid.dart';
 
 void main() {
   late CombinedNoteService service;

@@ -19,7 +19,17 @@ class DataExportService {
   /// Exports all notes, notebooks, and associated media files to a ZIP file at a specified location
   Future<String> exportDataToZip() async {
     // This method creates the archive in a temporary location first
-    final String tempPath = (await getTemporaryDirectory()).path;
+    // Use app's cache directory instead of system temp directory for better Android compatibility
+    String tempPath;
+    try {
+      final cacheDir = await getTemporaryDirectory();
+      tempPath = cacheDir.path;
+    } catch (e) {
+      // Fallback to app documents directory if temp directory fails
+      final appDir = await getApplicationDocumentsDirectory();
+      tempPath = appDir.path;
+    }
+
     final String exportFileName =
         'mindlog_export_${DateTime.now().millisecondsSinceEpoch}.zip';
     final String tempExportPath = path.join(tempPath, exportFileName);
@@ -52,52 +62,111 @@ class DataExportService {
   Future<bool> exportDataToZipWithSaveDialog() async {
     try {
       // First create the archive in temporary location
+      logger.debug('Starting export process...');
       final String tempExportPath = await exportDataToZip();
+      logger.debug('Archive created at: $tempExportPath');
 
-      // Use file_picker to let user choose where to save the file
-      String? selectedPath = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save backup file',
-        fileName: path.basename(tempExportPath),
-        type: FileType.custom,
-        allowedExtensions: ['zip'],
-      );
+      final String exportFileName =
+          'mindlog_export_${DateTime.now().millisecondsSinceEpoch}.zip';
+      logger.debug('Opening file picker with filename: $exportFileName');
 
-      if (selectedPath != null) {
-        // Move the temporary file to the selected location
-        final tempFile = File(tempExportPath);
-        await tempFile.copy(selectedPath);
-
-        // Delete the temporary file
-        await tempFile.delete();
-
-        // Show success message
-        if (Get.isOverlaysOpen) {
-          ScaffoldMessenger.of(Get.context!).showSnackBar(
-            const SnackBar(
-              content: Text('Backup exported successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
+      // Get the base path for saving (Downloads folder preferred)
+      String basePath;
+      try {
+        final downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir != null) {
+          basePath = downloadsDir.path;
+          logger.debug('Using Downloads directory: $basePath');
+        } else {
+          throw Exception('Downloads directory not available');
         }
-
-        return true;
+      } catch (e) {
+        logger.warning('Downloads directory not available, using Documents: $e');
+        final docsDir = await getApplicationDocumentsDirectory();
+        basePath = docsDir.path;
       }
 
-      // User cancelled the save dialog
-      return false;
+      // Try to use file_picker's saveFile method for user to choose exact location
+      String? selectedPath;
+      try {
+        selectedPath = await FilePicker.platform.saveFile(
+          dialogTitle: 'Save backup file',
+          fileName: exportFileName,
+          allowedExtensions: ['zip'],
+        );
+        logger.debug('File picker saveFile result: $selectedPath');
+      } catch (e) {
+        logger.warning(
+          'File picker saveFile method not available, using default path: $e',
+        );
+        // Don't rethrow - just use default path
+        selectedPath = null;
+      }
+
+      // If user didn't select a path or file picker failed, use default location
+      if (selectedPath == null) {
+        logger.debug(
+          'No path selected by user, using default Downloads path',
+        );
+        selectedPath = path.join(basePath, exportFileName);
+      }
+
+      // Ensure the selected path has the correct extension
+      String finalPath = selectedPath;
+      if (!finalPath.endsWith('.zip')) {
+        finalPath = '$selectedPath.zip';
+      }
+
+      logger.debug('Final export path: $finalPath');
+
+      // Create parent directories if they don't exist
+      final parentDir = Directory(path.dirname(finalPath));
+      if (!await parentDir.exists()) {
+        await parentDir.create(recursive: true);
+        logger.debug('Created directory: ${path.dirname(finalPath)}');
+      }
+
+      // Move the temporary file to the selected location
+      final tempFile = File(tempExportPath);
+      logger.debug('Copying file from $tempExportPath to $finalPath');
+      await tempFile.copy(finalPath);
+      logger.debug('File copied successfully to $finalPath');
+
+      // Delete the temporary file
+      try {
+        await tempFile.delete();
+      } catch (e) {
+        logger.warning('Failed to delete temporary file: $e');
+      }
+
+      // Show success message
+      if (Get.isOverlaysOpen) {
+        ScaffoldMessenger.of(Get.context!).showSnackBar(
+          SnackBar(
+            content: Text('Backup exported successfully!\nLocation: $finalPath'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+
+      logger.info('Export completed successfully at: $finalPath');
+      return true;
     } catch (e) {
+      logger.error('Export failed: $e', stackTrace: StackTrace.current);
       // Show error message
       if (Get.isOverlaysOpen) {
         ScaffoldMessenger.of(Get.context!).showSnackBar(
           SnackBar(
             content: Text('Export failed: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
 
-      // If file picker is not supported on the platform, throw the error
-      rethrow;
+      // Don't rethrow - just return false to indicate failure
+      return false;
     }
   }
 
