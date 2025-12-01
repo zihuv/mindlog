@@ -383,11 +383,11 @@ class WebDAVUtil {
 
       // Upload the note JSON file (whether deleted or not)
       String noteJson = jsonEncode(note.toJson());
-      String noteYear = _getYearFromTimestamp(effectiveUpdateTime);
-      String notePath = '$_rootPath$_notesDir/$noteYear/${note.id}.json';
+      String noteYearMonth = _getYearMonthFromTimestamp(effectiveUpdateTime);
+      String notePath = '$_rootPath$_notesDir/$noteYearMonth/${note.id}.json';
 
-      // Create the year directory if it doesn't exist
-      await _client!.mkdirAll('$_rootPath$_notesDir/$noteYear/');
+      // Create the year-month directory if it doesn't exist
+      await _client!.mkdirAll('$_rootPath$_notesDir/$noteYearMonth/');
 
       _client!.setHeaders({
         'accept-charset': 'utf-8',
@@ -436,19 +436,19 @@ class WebDAVUtil {
   Future<void> _downloadNote(String noteId) async {
     try {
       logger.debug('Downloading note: $noteId');
-      // Try different years to find the note file since we don't know the creation year
-      List<int> possibleYears = await _getPossibleYears();
+      // Try different year-month directories to find the note file since we don't know the creation date
+      List<String> possibleYearMonths = await _getPossibleYearMonths();
       Uint8List? noteBytes;
 
-      for (int year in possibleYears) {
-        String path = '$_rootPath$_notesDir/$year/$noteId.json';
+      for (String yearMonth in possibleYearMonths) {
+        String path = '$_rootPath$_notesDir/$yearMonth/$noteId.json';
         try {
           List<int> bytes = await _client!.read(path);
           noteBytes = Uint8List.fromList(bytes);
-          logger.debug('Found note $noteId in year $year');
+          logger.debug('Found note $noteId in year-month $yearMonth');
           break;
         } catch (e) {
-          // Continue to next year
+          // Continue to next year-month
           continue;
         }
       }
@@ -546,38 +546,48 @@ class WebDAVUtil {
     }
   }
 
-  Future<List<int>> _getPossibleYears() async {
+  Future<List<String>> _getPossibleYearMonths() async {
     try {
-      // List all directories under the Note directory to get possible years
+      // List all directories under the Note directory to get possible year-month directories
       var items = await _client!.readDir('$_rootPath$_notesDir/');
-      List<int> years = [];
+      List<String> yearMonths = [];
 
       for (var item in items) {
         String? itemName = item.name;
-        // Check if it's a directory
+        // Check if it's a directory and matches year-month format (YYYY-MM)
         if (item.isDir == true && itemName != null && itemName.isNotEmpty) {
-          // Try to parse the directory name as a year
-          try {
-            int year = int.parse(itemName);
-            if (year > 2000 && year < 2100) {
-              // Reasonable year range
-              years.add(year);
+          // Try to parse the directory name as a year-month format (e.g., "2025-11")
+          if (itemName.contains('-')) {
+            List<String> parts = itemName.split('-');
+            if (parts.length == 2) {
+              try {
+                int year = int.parse(parts[0]);
+                int month = int.parse(parts[1]);
+                if (year > 2000 && year < 2100 && month >= 1 && month <= 12) {
+                  // Valid year-month format
+                  yearMonths.add(itemName);
+                }
+              } catch (e) {
+                // Not a valid year-month, skip
+                continue;
+              }
             }
-          } catch (e) {
-            // Not a valid year, skip
-            continue;
           }
         }
       }
 
-      return years;
+      return yearMonths;
     } catch (e) {
-      logger.error('Error getting possible years', error: e);
-      // Default to a few recent years
-      int currentYear = DateTime.now().year;
-      return [currentYear, currentYear - 1, currentYear - 2];
+      logger.error('Error getting possible year-months', error: e);
+      // Default to a few recent months
+      DateTime now = DateTime.now();
+      String currentYearMonth = _getYearMonthFromTimestamp(now);
+      String prevMonthYearMonth = _getYearMonthFromTimestamp(DateTime(now.year, now.month - 1));
+      String prev2MonthYearMonth = _getYearMonthFromTimestamp(DateTime(now.year, now.month - 2));
+      return [currentYearMonth, prevMonthYearMonth, prev2MonthYearMonth];
     }
   }
+
 
   Future<void> _uploadImage(
     String noteId,
@@ -593,11 +603,11 @@ class WebDAVUtil {
       File imageFile = File(imagePath);
       if (await imageFile.exists()) {
         // Calculate the destination path on WebDAV using the note's creation time for consistency
-        String imageYearPath = _getYearFromTimestamp(
+        String imageYearMonthPath = _getYearMonthFromTimestamp(
           noteCreateTime ?? DateTime.now(),
         );
         String destinationPath =
-            '$_rootPath$_assetsDir/$_imageDir/$imageYearPath/$noteId/$imageName';
+            '$_rootPath$_assetsDir/$_imageDir/$imageYearMonthPath/$noteId/$imageName';
 
         // Create the directory if it doesn't exist
         await _client!.mkdirAll('${path.dirname(destinationPath)}/');
@@ -639,11 +649,11 @@ class WebDAVUtil {
       File videoFile = File(videoPath);
       if (await videoFile.exists()) {
         // Calculate the destination path on WebDAV using the note's creation time for consistency
-        String videoYearPath = _getYearFromTimestamp(
+        String videoYearMonthPath = _getYearMonthFromTimestamp(
           noteCreateTime ?? DateTime.now(),
         );
         String destinationPath =
-            '$_rootPath$_assetsDir/$_videoDir/$videoYearPath/$noteId/$videoName';
+            '$_rootPath$_assetsDir/$_videoDir/$videoYearMonthPath/$noteId/$videoName';
 
         // Create the directory if it doesn't exist
         await _client!.mkdirAll('${path.dirname(destinationPath)}/');
@@ -685,11 +695,11 @@ class WebDAVUtil {
       File audioFile = File(audioPath);
       if (await audioFile.exists()) {
         // Calculate the destination path on WebDAV using the note's creation time for consistency
-        String audioYearPath = _getYearFromTimestamp(
+        String audioYearMonthPath = _getYearMonthFromTimestamp(
           noteCreateTime ?? DateTime.now(),
         );
         String destinationPath =
-            '$_rootPath$_assetsDir/$_audioDir/$audioYearPath/$noteId/$audioName';
+            '$_rootPath$_assetsDir/$_audioDir/$audioYearMonthPath/$noteId/$audioName';
 
         // Create the directory if it doesn't exist
         await _client!.mkdirAll('${path.dirname(destinationPath)}/');
@@ -725,11 +735,11 @@ class WebDAVUtil {
     try {
       logger.debug('Downloading image $imageName for note: $noteId');
       // Calculate the source path on WebDAV using the note's creation time for consistency
-      String imageYearPath = _getYearFromTimestamp(
+      String imageYearMonthPath = _getYearMonthFromTimestamp(
         noteCreateTime ?? DateTime.now(),
       );
       String sourcePath =
-          '$_rootPath$_assetsDir/$_imageDir/$imageYearPath/$noteId/$imageName';
+          '$_rootPath$_assetsDir/$_imageDir/$imageYearMonthPath/$noteId/$imageName';
 
       // Download the image file
       List<int> imageBytesList = await _client!.read(sourcePath);
@@ -771,11 +781,11 @@ class WebDAVUtil {
     try {
       logger.debug('Downloading video $videoName for note: $noteId');
       // Calculate the source path on WebDAV using the note's creation time for consistency
-      String videoYearPath = _getYearFromTimestamp(
+      String videoYearMonthPath = _getYearMonthFromTimestamp(
         noteCreateTime ?? DateTime.now(),
       );
       String sourcePath =
-          '$_rootPath$_assetsDir/$_videoDir/$videoYearPath/$noteId/$videoName';
+          '$_rootPath$_assetsDir/$_videoDir/$videoYearMonthPath/$noteId/$videoName';
 
       // Download the video file
       List<int> videoBytesList = await _client!.read(sourcePath);
@@ -817,11 +827,11 @@ class WebDAVUtil {
     try {
       logger.debug('Downloading audio $audioName for note: $noteId');
       // Calculate the source path on WebDAV using the note's creation time for consistency
-      String audioYearPath = _getYearFromTimestamp(
+      String audioYearMonthPath = _getYearMonthFromTimestamp(
         noteCreateTime ?? DateTime.now(),
       );
       String sourcePath =
-          '$_rootPath$_assetsDir/$_audioDir/$audioYearPath/$noteId/$audioName';
+          '$_rootPath$_assetsDir/$_audioDir/$audioYearMonthPath/$noteId/$audioName';
 
       // Download the audio file
       List<int> audioBytesList = await _client!.read(sourcePath);
@@ -956,8 +966,10 @@ class WebDAVUtil {
     return dateTime.toIso8601String();
   }
 
-  String _getYearFromTimestamp(DateTime dateTime) {
-    return dateTime.year.toString();
+  String _getYearMonthFromTimestamp(DateTime dateTime) {
+    int year = dateTime.year;
+    int month = dateTime.month;
+    return '${year.toString()}-${month.toString().padLeft(2, '0')}';
   }
 
   void dispose() {

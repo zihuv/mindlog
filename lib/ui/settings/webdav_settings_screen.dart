@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mindlog/utils/webdav_util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WebDAVSettingsScreen extends StatefulWidget {
   const WebDAVSettingsScreen({super.key});
@@ -273,18 +273,7 @@ class _WebDAVSettingsScreenState extends State<WebDAVSettingsScreen> {
                       const Text(
                         '1. Enter your WebDAV server details above\n'
                         '2. Click "Test Connection" to verify your settings\n'
-                        '3. Click "Sync Now" to start the synchronization\n\n'
-                        'Your notes will be stored in the specified folder under the following structure:\n'
-                        '/[folder_name]/\n'
-                        '├── Note/\n'
-                        '│   └── [year]/\n'
-                        '│       └── [note_id].json\n'
-                        '├── Asset/\n'
-                        '│   └── Image/\n'
-                        '│       └── [year]/\n'
-                        '│           └── [note_id]/\n'
-                        '│               └── [image_name]\n'
-                        '└── sync.json',
+                        '3. Click "Sync Now" to start the synchronization\n\n',
                         style: TextStyle(fontSize: 14),
                       ),
                     ],
