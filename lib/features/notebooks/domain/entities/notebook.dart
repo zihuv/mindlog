@@ -8,6 +8,7 @@ class Notebook extends Equatable {
   final String? description;
   final String? coverImage;
   final NotebookType type;
+  final int sortIndex;
   final DateTime createTime;
   final DateTime? updateTime;
 
@@ -17,6 +18,7 @@ class Notebook extends Equatable {
     this.description,
     this.coverImage,
     this.type = NotebookType.standard,
+    this.sortIndex = 0,
     required this.createTime,
     this.updateTime,
   });
@@ -28,6 +30,7 @@ class Notebook extends Equatable {
     description,
     coverImage,
     type,
+    sortIndex,
     createTime,
     updateTime,
   ];
@@ -38,6 +41,7 @@ class Notebook extends Equatable {
     String? description,
     String? coverImage,
     NotebookType? type,
+    int? sortIndex,
     DateTime? createTime,
     DateTime? updateTime,
   }) {
@@ -47,6 +51,7 @@ class Notebook extends Equatable {
       description: description ?? this.description,
       coverImage: coverImage ?? this.coverImage,
       type: type ?? this.type,
+      sortIndex: sortIndex ?? this.sortIndex,
       createTime: createTime ?? this.createTime,
       updateTime: updateTime ?? this.updateTime,
     );
@@ -59,6 +64,7 @@ class Notebook extends Equatable {
       'description': description,
       'coverImage': coverImage,
       'type': type.toString().split('.').last, // Get just the enum value
+      'sortIndex': sortIndex,
       'createTime': createTime.toIso8601String(),
       'updateTime': updateTime?.toIso8601String(),
     };
@@ -71,6 +77,7 @@ class Notebook extends Equatable {
       description: json['description'],
       coverImage: json['coverImage'],
       type: _getNotebookTypeFromString(json['type'] ?? 'standard'),
+      sortIndex: json['sortIndex'] ?? 0,
       createTime: DateTime.parse(
         json['createTime'] ?? DateTime.now().toIso8601String(),
       ),

@@ -151,12 +151,16 @@ class NotebookListScreen extends StatelessWidget {
                 await controller.loadNotebooks();
                 return; // Required for the refresh indicator
               },
-              child: ListView.builder(
+              child: ReorderableListView.builder(
                 padding: AppPadding.small,
                 itemCount: controller.notebooks.length,
+                onReorder: (int oldIndex, int newIndex) {
+                  controller.reorderNotebooks(oldIndex, newIndex);
+                },
                 itemBuilder: (context, index) {
                   final notebook = controller.notebooks[index];
                   return Card(
+                    key: ValueKey(notebook.id), // Key required for ReorderableListView
                     margin: const EdgeInsets.symmetric(
                       horizontal: 12.0,
                       vertical: 6.0,

@@ -19,6 +19,7 @@ class NotebookService {
 
   Future<void> init() async {
     await _initializeRepository();
+    await _migrateSortIndex();
   }
 
   Future<void> _initializeRepository() async {
@@ -28,6 +29,38 @@ class NotebookService {
       _repository = NotebookDatabaseRepository();
       await _repository!
           .initialize(); // The repository is not null at this point, so using ! is safe
+    }
+  }
+
+  /// Migrate existing notebooks to have proper sort_index values after schema update
+  Future<void> _migrateSortIndex() async {
+    try {
+      final allNotebooks = await getAllNotebooks();
+
+      // Check if there are notebooks with sortIndex=0 that may be old notebooks
+      // If there are notebooks with the same sortIndex, it indicates a need for migration
+      final hasDuplicateSortIndex = allNotebooks
+          .map((nb) => nb.sortIndex)
+          .toSet()
+          .length != allNotebooks.length;
+
+      if (hasDuplicateSortIndex || allNotebooks.any((nb) => nb.sortIndex == 0)) {
+        // Sort notebooks by creation time and assign sortIndex accordingly
+        final sortedNotebooks = List<Notebook>.from(allNotebooks)
+          ..sort((a, b) => a.createTime.compareTo(b.createTime));
+
+        // Update each notebook with the correct sortIndex
+        for (int i = 0; i < sortedNotebooks.length; i++) {
+          final notebook = sortedNotebooks[i];
+          if (notebook.sortIndex != i) {
+            final updatedNotebook = notebook.copyWith(sortIndex: i);
+            await updateNotebook(updatedNotebook);
+          }
+        }
+      }
+    } catch (e) {
+      // If migration fails, just continue - it's not critical
+      print('Notebook sort index migration failed: $e');
     }
   }
 

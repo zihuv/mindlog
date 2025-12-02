@@ -627,6 +627,18 @@ class $NotebooksTable extends Notebooks
     requiredDuringInsert: false,
     defaultValue: const Constant('standard'),
   );
+  static const VerificationMeta _sortIndexMeta = const VerificationMeta(
+    'sortIndex',
+  );
+  @override
+  late final GeneratedColumn<int> sortIndex = GeneratedColumn<int>(
+    'sort_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _createTimeMeta = const VerificationMeta(
     'createTime',
   );
@@ -656,6 +668,7 @@ class $NotebooksTable extends Notebooks
     description,
     coverImage,
     type,
+    sortIndex,
     createTime,
     updateTime,
   ];
@@ -705,6 +718,12 @@ class $NotebooksTable extends Notebooks
         type.isAcceptableOrUnknown(data['type']!, _typeMeta),
       );
     }
+    if (data.containsKey('sort_index')) {
+      context.handle(
+        _sortIndexMeta,
+        sortIndex.isAcceptableOrUnknown(data['sort_index']!, _sortIndexMeta),
+      );
+    }
     if (data.containsKey('create_time')) {
       context.handle(
         _createTimeMeta,
@@ -748,6 +767,10 @@ class $NotebooksTable extends Notebooks
         DriftSqlType.string,
         data['${effectivePrefix}type'],
       )!,
+      sortIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_index'],
+      )!,
       createTime: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}create_time'],
@@ -771,6 +794,7 @@ class Notebook extends DataClass implements Insertable<Notebook> {
   final String? description;
   final String? coverImage;
   final String type;
+  final int sortIndex;
   final DateTime createTime;
   final DateTime? updateTime;
   const Notebook({
@@ -779,6 +803,7 @@ class Notebook extends DataClass implements Insertable<Notebook> {
     this.description,
     this.coverImage,
     required this.type,
+    required this.sortIndex,
     required this.createTime,
     this.updateTime,
   });
@@ -794,6 +819,7 @@ class Notebook extends DataClass implements Insertable<Notebook> {
       map['cover_image'] = Variable<String>(coverImage);
     }
     map['type'] = Variable<String>(type);
+    map['sort_index'] = Variable<int>(sortIndex);
     map['create_time'] = Variable<DateTime>(createTime);
     if (!nullToAbsent || updateTime != null) {
       map['update_time'] = Variable<DateTime>(updateTime);
@@ -812,6 +838,7 @@ class Notebook extends DataClass implements Insertable<Notebook> {
           ? const Value.absent()
           : Value(coverImage),
       type: Value(type),
+      sortIndex: Value(sortIndex),
       createTime: Value(createTime),
       updateTime: updateTime == null && nullToAbsent
           ? const Value.absent()
@@ -830,6 +857,7 @@ class Notebook extends DataClass implements Insertable<Notebook> {
       description: serializer.fromJson<String?>(json['description']),
       coverImage: serializer.fromJson<String?>(json['coverImage']),
       type: serializer.fromJson<String>(json['type']),
+      sortIndex: serializer.fromJson<int>(json['sortIndex']),
       createTime: serializer.fromJson<DateTime>(json['createTime']),
       updateTime: serializer.fromJson<DateTime?>(json['updateTime']),
     );
@@ -843,6 +871,7 @@ class Notebook extends DataClass implements Insertable<Notebook> {
       'description': serializer.toJson<String?>(description),
       'coverImage': serializer.toJson<String?>(coverImage),
       'type': serializer.toJson<String>(type),
+      'sortIndex': serializer.toJson<int>(sortIndex),
       'createTime': serializer.toJson<DateTime>(createTime),
       'updateTime': serializer.toJson<DateTime?>(updateTime),
     };
@@ -854,6 +883,7 @@ class Notebook extends DataClass implements Insertable<Notebook> {
     Value<String?> description = const Value.absent(),
     Value<String?> coverImage = const Value.absent(),
     String? type,
+    int? sortIndex,
     DateTime? createTime,
     Value<DateTime?> updateTime = const Value.absent(),
   }) => Notebook(
@@ -862,6 +892,7 @@ class Notebook extends DataClass implements Insertable<Notebook> {
     description: description.present ? description.value : this.description,
     coverImage: coverImage.present ? coverImage.value : this.coverImage,
     type: type ?? this.type,
+    sortIndex: sortIndex ?? this.sortIndex,
     createTime: createTime ?? this.createTime,
     updateTime: updateTime.present ? updateTime.value : this.updateTime,
   );
@@ -876,6 +907,7 @@ class Notebook extends DataClass implements Insertable<Notebook> {
           ? data.coverImage.value
           : this.coverImage,
       type: data.type.present ? data.type.value : this.type,
+      sortIndex: data.sortIndex.present ? data.sortIndex.value : this.sortIndex,
       createTime: data.createTime.present
           ? data.createTime.value
           : this.createTime,
@@ -893,6 +925,7 @@ class Notebook extends DataClass implements Insertable<Notebook> {
           ..write('description: $description, ')
           ..write('coverImage: $coverImage, ')
           ..write('type: $type, ')
+          ..write('sortIndex: $sortIndex, ')
           ..write('createTime: $createTime, ')
           ..write('updateTime: $updateTime')
           ..write(')'))
@@ -906,6 +939,7 @@ class Notebook extends DataClass implements Insertable<Notebook> {
     description,
     coverImage,
     type,
+    sortIndex,
     createTime,
     updateTime,
   );
@@ -918,6 +952,7 @@ class Notebook extends DataClass implements Insertable<Notebook> {
           other.description == this.description &&
           other.coverImage == this.coverImage &&
           other.type == this.type &&
+          other.sortIndex == this.sortIndex &&
           other.createTime == this.createTime &&
           other.updateTime == this.updateTime);
 }
@@ -928,6 +963,7 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
   final Value<String?> description;
   final Value<String?> coverImage;
   final Value<String> type;
+  final Value<int> sortIndex;
   final Value<DateTime> createTime;
   final Value<DateTime?> updateTime;
   final Value<int> rowid;
@@ -937,6 +973,7 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
     this.description = const Value.absent(),
     this.coverImage = const Value.absent(),
     this.type = const Value.absent(),
+    this.sortIndex = const Value.absent(),
     this.createTime = const Value.absent(),
     this.updateTime = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -947,6 +984,7 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
     this.description = const Value.absent(),
     this.coverImage = const Value.absent(),
     this.type = const Value.absent(),
+    this.sortIndex = const Value.absent(),
     required DateTime createTime,
     this.updateTime = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -959,6 +997,7 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
     Expression<String>? description,
     Expression<String>? coverImage,
     Expression<String>? type,
+    Expression<int>? sortIndex,
     Expression<DateTime>? createTime,
     Expression<DateTime>? updateTime,
     Expression<int>? rowid,
@@ -969,6 +1008,7 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
       if (description != null) 'description': description,
       if (coverImage != null) 'cover_image': coverImage,
       if (type != null) 'type': type,
+      if (sortIndex != null) 'sort_index': sortIndex,
       if (createTime != null) 'create_time': createTime,
       if (updateTime != null) 'update_time': updateTime,
       if (rowid != null) 'rowid': rowid,
@@ -981,6 +1021,7 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
     Value<String?>? description,
     Value<String?>? coverImage,
     Value<String>? type,
+    Value<int>? sortIndex,
     Value<DateTime>? createTime,
     Value<DateTime?>? updateTime,
     Value<int>? rowid,
@@ -991,6 +1032,7 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
       description: description ?? this.description,
       coverImage: coverImage ?? this.coverImage,
       type: type ?? this.type,
+      sortIndex: sortIndex ?? this.sortIndex,
       createTime: createTime ?? this.createTime,
       updateTime: updateTime ?? this.updateTime,
       rowid: rowid ?? this.rowid,
@@ -1015,6 +1057,9 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
     if (type.present) {
       map['type'] = Variable<String>(type.value);
     }
+    if (sortIndex.present) {
+      map['sort_index'] = Variable<int>(sortIndex.value);
+    }
     if (createTime.present) {
       map['create_time'] = Variable<DateTime>(createTime.value);
     }
@@ -1035,6 +1080,7 @@ class NotebooksCompanion extends UpdateCompanion<Notebook> {
           ..write('description: $description, ')
           ..write('coverImage: $coverImage, ')
           ..write('type: $type, ')
+          ..write('sortIndex: $sortIndex, ')
           ..write('createTime: $createTime, ')
           ..write('updateTime: $updateTime, ')
           ..write('rowid: $rowid')
@@ -1340,6 +1386,7 @@ typedef $$NotebooksTableCreateCompanionBuilder =
       Value<String?> description,
       Value<String?> coverImage,
       Value<String> type,
+      Value<int> sortIndex,
       required DateTime createTime,
       Value<DateTime?> updateTime,
       Value<int> rowid,
@@ -1351,6 +1398,7 @@ typedef $$NotebooksTableUpdateCompanionBuilder =
       Value<String?> description,
       Value<String?> coverImage,
       Value<String> type,
+      Value<int> sortIndex,
       Value<DateTime> createTime,
       Value<DateTime?> updateTime,
       Value<int> rowid,
@@ -1387,6 +1435,11 @@ class $$NotebooksTableFilterComposer
 
   ColumnFilters<String> get type => $composableBuilder(
     column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortIndex => $composableBuilder(
+    column: $table.sortIndex,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1435,6 +1488,11 @@ class $$NotebooksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get sortIndex => $composableBuilder(
+    column: $table.sortIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createTime => $composableBuilder(
     column: $table.createTime,
     builder: (column) => ColumnOrderings(column),
@@ -1473,6 +1531,9 @@ class $$NotebooksTableAnnotationComposer
 
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<int> get sortIndex =>
+      $composableBuilder(column: $table.sortIndex, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createTime => $composableBuilder(
     column: $table.createTime,
@@ -1518,6 +1579,7 @@ class $$NotebooksTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<String?> coverImage = const Value.absent(),
                 Value<String> type = const Value.absent(),
+                Value<int> sortIndex = const Value.absent(),
                 Value<DateTime> createTime = const Value.absent(),
                 Value<DateTime?> updateTime = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -1527,6 +1589,7 @@ class $$NotebooksTableTableManager
                 description: description,
                 coverImage: coverImage,
                 type: type,
+                sortIndex: sortIndex,
                 createTime: createTime,
                 updateTime: updateTime,
                 rowid: rowid,
@@ -1538,6 +1601,7 @@ class $$NotebooksTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<String?> coverImage = const Value.absent(),
                 Value<String> type = const Value.absent(),
+                Value<int> sortIndex = const Value.absent(),
                 required DateTime createTime,
                 Value<DateTime?> updateTime = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -1547,6 +1611,7 @@ class $$NotebooksTableTableManager
                 description: description,
                 coverImage: coverImage,
                 type: type,
+                sortIndex: sortIndex,
                 createTime: createTime,
                 updateTime: updateTime,
                 rowid: rowid,

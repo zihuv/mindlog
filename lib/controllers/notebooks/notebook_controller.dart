@@ -49,8 +49,8 @@ class NotebookController extends GetxController {
     _isLoading.value = true;
     try {
       final notebooks = await _service.getAllNotebooks();
-      // Sort notebooks by creation createTime in descending order (newest first)
-      notebooks.sort((a, b) => b.createTime.compareTo(a.createTime));
+      // Sort notebooks by sortIndex (for user-defined order)
+      notebooks.sort((a, b) => a.sortIndex.compareTo(b.sortIndex));
       _notebooks.assignAll(notebooks);
     } catch (e) {
       Get.log('Error loading notebooks: $e');
@@ -79,12 +79,18 @@ class NotebookController extends GetxController {
     String? coverImage,
     NotebookType type = NotebookType.standard,
   }) async {
+    final notebooks = await _service.getAllNotebooks();
+    final maxSortIndex = notebooks.isNotEmpty
+        ? notebooks.map((n) => n.sortIndex).reduce((a, b) => a > b ? a : b)
+        : -1;
+
     final notebook = Notebook(
       id: '',
       title: title,
       description: description,
       coverImage: coverImage,
       type: type,
+      sortIndex: maxSortIndex + 1, // Place at the end
       createTime: DateTime.now(),
     );
     return await _service.saveNotebook(notebook);
@@ -153,14 +159,44 @@ class NotebookController extends GetxController {
     _isLoading.value = true;
     try {
       final notebooks = await _service.getAllNotebooks();
-      // Sort notebooks by creation createTime in descending order (newest first)
-      notebooks.sort((a, b) => b.createTime.compareTo(a.createTime));
+      // Sort notebooks by sortIndex (for user-defined order)
+      notebooks.sort((a, b) => a.sortIndex.compareTo(b.sortIndex));
       _notebooks.assignAll(notebooks);
     } catch (e) {
       logger.error('Error refreshing notebooks: $e');
       // Don't show snackbar during import to avoid overlay issues
     } finally {
       _isLoading.value = false;
+    }
+  }
+
+  Future<void> reorderNotebooks(int oldIndex, int newIndex) async {
+    if (oldIndex == newIndex) return;
+
+    try {
+      // Adjust indices if dragging down (since the item shifts during drag)
+      if (oldIndex < newIndex) {
+        newIndex -= 1;
+      }
+
+      // Get the notebook being moved
+      final notebookToMove = _notebooks.removeAt(oldIndex);
+
+      // Insert it at the new position
+      _notebooks.insert(newIndex, notebookToMove);
+
+      // Update sort indices for all notebooks
+      for (int i = 0; i < _notebooks.length; i++) {
+        final updatedNotebook = _notebooks[i].copyWith(sortIndex: i);
+        await _service.updateNotebook(updatedNotebook);
+      }
+
+      // Refresh the list to make sure it's in the correct order
+      await loadNotebooks();
+    } catch (e) {
+      Get.log('Error reordering notebooks: $e');
+      // Reload notebooks to restore original order if something went wrong
+      await loadNotebooks();
     }
   }
 

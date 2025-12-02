@@ -207,6 +207,7 @@ class NotebookData {
   final String? description;
   final String? coverImage;
   final String type;
+  final int sortIndex;
   final DateTime createTime;
   final DateTime? updateTime;
 
@@ -216,6 +217,7 @@ class NotebookData {
     this.description,
     this.coverImage,
     required this.type,
+    this.sortIndex = 0,
     required this.createTime,
     this.updateTime,
   });
@@ -227,6 +229,7 @@ class NotebookData {
       description: row.description,
       coverImage: row.coverImage,
       type: row.type,
+      sortIndex: row.sortIndex,
       createTime: row.createTime,
       updateTime: row.updateTime,
     );
@@ -240,6 +243,7 @@ class NotebookData {
       description: drift.Value(description),
       coverImage: drift.Value(coverImage),
       type: drift.Value(type),
+      sortIndex: drift.Value(sortIndex),
       createTime: drift.Value(createTime),
       updateTime: drift.Value(updateTime),
     );

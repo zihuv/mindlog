@@ -30,6 +30,7 @@ class Notebooks extends Table {
   TextColumn get description => text().nullable()();
   TextColumn get coverImage => text().nullable()();
   TextColumn get type => text().withDefault(const Constant('standard'))();
+  IntColumn get sortIndex => integer().withDefault(const Constant(0))();
   DateTimeColumn get createTime => dateTime()();
   DateTimeColumn get updateTime => dateTime().nullable()();
 }
@@ -74,7 +75,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -82,8 +83,13 @@ class AppDatabase extends _$AppDatabase {
       await m.createAll();
     },
     onUpgrade: (Migrator m, int from, int to) async {
-      // For beta testing, we're starting fresh with schema version 1
-      // All tables will be created during onCreate
+      if (from < 2 && to >= 2) {
+        // Add sort_index column to existing Notebooks table
+        await m.addColumn(notebooks, notebooks.sortIndex);
+
+        // For existing databases (from < 2), populate sort_index with 0 initially
+        // Then the service will handle the proper migration later
+      }
     },
   );
 
