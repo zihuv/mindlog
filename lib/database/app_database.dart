@@ -84,8 +84,13 @@ class AppDatabase extends _$AppDatabase {
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from < 2 && to >= 2) {
-        // Add sort_index column to existing Notebooks table
-        await m.addColumn(notebooks, notebooks.sortIndex);
+        try {
+          // Add sort_index column to existing Notebooks table
+          await m.addColumn(notebooks, notebooks.sortIndex);
+        } catch (e) {
+          // Column might already exist in some cases (e.g., macOS), so we catch and continue
+          logger.info('Column sort_index may already exist: $e');
+        }
 
         // For existing databases (from < 2), populate sort_index with 0 initially
         // Then the service will handle the proper migration later
