@@ -297,11 +297,13 @@ class NotebookSyncManager {
 
       if (existingNotebook != null) {
         // Update existing notebook - use copyWith to update the notebook
+        // Important: preserve the sortIndex from the server version to maintain ordering
         Notebook updatedNotebook = existingNotebook.copyWith(
           title: notebook.title,
           description: notebook.description,
           coverImage: notebook.coverImage,
           type: notebook.type,
+          sortIndex: notebook.sortIndex, // Preserve the sortIndex from server
           updateTime: notebook.updateTime,
         );
         await _notebookService.updateNotebook(updatedNotebook);

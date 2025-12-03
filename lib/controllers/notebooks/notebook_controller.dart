@@ -186,8 +186,12 @@ class NotebookController extends GetxController {
       _notebooks.insert(newIndex, notebookToMove);
 
       // Update sort indices for all notebooks
+      // Also update updateTime to ensure sync recognizes the change
       for (int i = 0; i < _notebooks.length; i++) {
-        final updatedNotebook = _notebooks[i].copyWith(sortIndex: i);
+        final updatedNotebook = _notebooks[i].copyWith(
+          sortIndex: i,
+          updateTime: DateTime.now(),
+        );
         await _service.updateNotebook(updatedNotebook);
       }
 
