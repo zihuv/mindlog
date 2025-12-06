@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
-import 'package:mindlog/features/notes/presentation/components/components/markdown_checklist.dart';
 import 'package:mindlog/features/notes/presentation/widgets/image_display.dart';
 
 class NoteCard extends StatelessWidget {
@@ -8,7 +7,6 @@ class NoteCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
-  final Function(Note)? onChecklistChanged;
 
   const NoteCard({
     super.key,
@@ -16,7 +14,6 @@ class NoteCard extends StatelessWidget {
     this.onTap,
     this.onEdit,
     this.onDelete,
-    this.onChecklistChanged,
   });
 
   @override
@@ -68,17 +65,10 @@ class NoteCard extends StatelessWidget {
               const SizedBox(
                 height: 2,
               ), // Minimal spacing between createTime and content
-              // Note content with markdown support for checkboxes (interactive)
-              MarkdownChecklist(
-                text: note.content,
+              // Note content as plain text
+              Text(
+                note.content,
                 style: const TextStyle(fontSize: 14.0),
-                onTextChange: (updatedText) async {
-                  // Create an updated note with the new content
-                  final updatedNote = note.copyWith(content: updatedText);
-
-                  // Call the parent callback to update the note
-                  onChecklistChanged?.call(updatedNote);
-                },
               ),
               // Display attached images as thumbnails if any
               if (note.images.isNotEmpty)

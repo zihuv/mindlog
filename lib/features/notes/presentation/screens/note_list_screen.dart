@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'note_detail_screen.dart';
 import 'package:mindlog/controllers/note_controller.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
-import 'package:mindlog/features/notes/presentation/components/components/markdown_checklist.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -63,22 +62,30 @@ class NoteListScreen extends StatelessWidget {
                 itemCount: controller.notes.length,
                 itemBuilder: (context, index) {
                   final note = controller.notes[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Get.to(() => NoteDetailScreen(noteId: note.id))?.then((
-                        value,
-                      ) {
-                        // Refresh list after updating an existing note
-                        if (value == true) {
-                          controller.loadNotes();
-                        }
-                      });
-                    },
-                    child: Card(
-                      margin: AppPadding.small,
-                      shape: RoundedRectangleBorder(
+                  return Card(
+                    margin: AppPadding.small,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppBorderRadius.card,
+                    ),
+                    child: InkWell(
+                      // Using InkWell to make the entire card tappable
+                      onTap: () {
+                        Get.to(() => NoteDetailScreen(noteId: note.id))?.then((
+                          value,
+                        ) {
+                          // Refresh list after updating an existing note
+                          if (value == true) {
+                            controller.loadNotes();
+                          }
+                        });
+                      },
+                      borderRadius: AppBorderRadius.card, // Match the card's border radius for proper InkWell effect
+                      // Make the InkWell more responsive to touches
+                      splashColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                      customBorder: RoundedRectangleBorder(
                         borderRadius: AppBorderRadius.card,
                       ),
+                      // Ensure the InkWell properly detects taps across the entire area
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -150,6 +157,7 @@ class NoteListScreen extends StatelessWidget {
                                             ),
                                             child: GestureDetector(
                                               onTap: () {
+                                                // Stop propagation to parent InkWell to avoid double navigation
                                                 // Navigate to detail view to see the image
                                                 Get.to(
                                                   () => NoteDetailScreen(
@@ -208,20 +216,22 @@ class NoteListScreen extends StatelessWidget {
                                       },
                                     ),
                                   ),
-                                // Main content with markdown checklist support
-                                MarkdownChecklist(
-                                  text: note.content.length > 200
-                                      ? '${note.content.substring(0, 200)}...'
-                                      : note.content,
-                                  style: TextStyle(
-                                    fontSize: AppFontSize.body,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurface,
+                                // Main content as plain text with expanded touch area
+                                Container(
+                                  width: double.infinity, // Ensure text takes full width
+                                  padding: const EdgeInsets.only(top: 8.0, bottom: 8.0), // Add vertical padding to expand touch area
+                                  margin: const EdgeInsets.only(top: 4.0), // Add margin for better spacing
+                                  child: Text(
+                                    note.content.length > 200
+                                        ? '${note.content.substring(0, 200)}...'
+                                        : note.content,
+                                    style: TextStyle(
+                                      fontSize: AppFontSize.body,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
+                                    ),
                                   ),
-                                  onTextChange: (updatedText) {
-                                    _updateNoteContent(note.id, updatedText);
-                                  },
                                 ),
                               ],
                             ),
@@ -257,35 +267,6 @@ class NoteListScreen extends StatelessWidget {
     return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
-  // Update the note content when checklist items are toggled
-  Future<void> _updateNoteContent(String noteId, String newContent) async {
-    try {
-      final controller = Get.find<NoteController>();
-      await controller.updateNote(id: noteId, content: newContent);
-      // Refresh the notes list to reflect the updated content
-      await controller.loadNotes();
-    } on Exception catch (e) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
-        ScaffoldMessenger.of(Get.context!).showSnackBar(
-          SnackBar(
-            content: Text('Error updating checklist: $e'),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      });
-    } catch (e) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
-        ScaffoldMessenger.of(Get.context!).showSnackBar(
-          SnackBar(
-            content: Text('Unexpected error updating checklist: $e'),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      });
-    }
-  }
 }
 
 class _NoteSearchDelegate extends SearchDelegate<String> {

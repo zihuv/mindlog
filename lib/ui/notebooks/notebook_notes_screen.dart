@@ -7,7 +7,6 @@ import 'package:mindlog/controllers/note_controller.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/presentation/screens/note_detail_screen.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
-import 'package:mindlog/features/notes/presentation/components/components/markdown_checklist.dart';
 import 'package:mindlog/utils/log_util.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -206,82 +205,73 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                                 final note = _notes[index];
                                 return Card(
                                   margin: AppPadding.small,
-                                  child: Stack(
-                                    children: [
-                                      // Full card tap gesture
-                                      Positioned.fill(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            Get.to(
-                                              () => NoteDetailScreen(
-                                                noteId: note.id,
-                                              ),
-                                            )?.then((value) {
-                                              if (value == true) {
-                                                _loadNotes(); // Refresh the notes list after editing
-                                              }
-                                            });
-                                          },
-                                          // This allows the gesture detector to be behind other widgets
-                                          behavior: HitTestBehavior.translucent,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Get.to(
+                                        () => NoteDetailScreen(
+                                          noteId: note.id,
                                         ),
-                                      ),
-                                      // Content and images
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          // Content area (always shown)
-                                          Container(
-                                            padding: AppPadding
-                                                .small, // Reduced padding
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Container(
-                                                  constraints: const BoxConstraints(
-                                                    maxHeight:
-                                                        60, // Limit height to 2 lines
-                                                  ),
-                                                  child: MarkdownChecklist(
-                                                    text:
-                                                        note.content.length > 50
-                                                        ? '${note.content.substring(0, 50)}...'
-                                                        : note.content,
-                                                    style: TextStyle(
-                                                      fontSize:
-                                                          AppFontSize.body,
-                                                      color: Theme.of(
-                                                        context,
-                                                      ).colorScheme.onSurface,
-                                                    ),
-                                                    onTextChange: (updatedText) {
-                                                      // Don't allow changes from this view
-                                                    },
-                                                  ),
+                                      )?.then((value) {
+                                        if (value == true) {
+                                          _loadNotes(); // Refresh the notes list after editing
+                                        }
+                                      });
+                                    },
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // Content area (always shown)
+                                        Container(
+                                          padding: AppPadding
+                                              .small, // Reduced padding
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                constraints: const BoxConstraints(
+                                                  maxHeight:
+                                                      60, // Limit height to 2 lines
                                                 ),
-                                                const SizedBox(
-                                                  height: 2,
-                                                ), // Reduced spacing
-                                                Text(
-                                                  _formatDateTime(
-                                                    note.createTime,
-                                                  ),
+                                                child: Text(
+                                                  note.content.length > 50
+                                                      ? '${note.content.substring(0, 50)}...'
+                                                      : note.content,
                                                   style: TextStyle(
-                                                    fontSize: AppFontSize
-                                                        .small, // Smaller font size
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .onSurfaceVariant,
+                                                    fontSize:
+                                                        AppFontSize.body,
+                                                    color: Theme.of(
+                                                      context,
+                                                    ).colorScheme.onSurface,
                                                   ),
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                              const SizedBox(
+                                                height: 2,
+                                              ), // Reduced spacing
+                                              Text(
+                                                _formatDateTime(
+                                                  note.createTime,
+                                                ),
+                                                style: TextStyle(
+                                                  fontSize: AppFontSize
+                                                      .small, // Smaller font size
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          // Image thumbnails grid if available (up to 9 images in 3x3 grid)
-                                          if (note.images.isNotEmpty)
-                                            FutureBuilder<List<String>>(
+                                        ),
+                                        // Image thumbnails grid if available (up to 9 images in 3x3 grid)
+                                        if (note.images.isNotEmpty)
+                                          GestureDetector(
+                                            onTap: () {
+                                              // Prevent propagation to card's onTap
+                                            },
+                                            child: FutureBuilder<List<String>>(
                                               future: _getImagePaths(
                                                 note.id,
                                                 note.images.take(9).toList(),
@@ -306,9 +296,9 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                                                 }
                                               },
                                             ),
-                                        ],
-                                      ),
-                                    ],
+                                          ),
+                                      ],
+                                    ),
                                   ),
                                 );
                               },

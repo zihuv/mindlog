@@ -234,21 +234,6 @@ class _NotesPageState extends State<NotesPage> {
                           },
                           onEdit: () => _editNote(note),
                           onDelete: () => _deleteNote(note),
-                          onChecklistChanged: (updatedNote) async {
-                            // Save the updated note with new checklist states
-                            await NoteService.instance.updateNote(updatedNote);
-
-                            // Update the local list
-                            setState(() {
-                              int index = _allNotes.indexWhere(
-                                (m) => m.id == updatedNote.id,
-                              );
-                              if (index != -1) {
-                                _allNotes[index] = updatedNote;
-                                _sortNotes();
-                              }
-                            });
-                          },
                         );
                       },
                     ),

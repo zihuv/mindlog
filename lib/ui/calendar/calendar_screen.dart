@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mindlog/controllers/note_controller.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
-import 'package:mindlog/features/notes/presentation/components/components/markdown_checklist.dart';
 import 'package:mindlog/features/notes/presentation/screens/note_detail_screen.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
 import 'package:path/path.dart' as path;
@@ -176,8 +175,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                             maxHeight:
                                                 60, // Limit height to 2 lines
                                           ),
-                                          child: MarkdownChecklist(
-                                            text: note.content.length > 50
+                                          child: Text(
+                                            note.content.length > 50
                                                 ? '${note.content.substring(0, 50)}...'
                                                 : note.content,
                                             style: TextStyle(
@@ -186,9 +185,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 context,
                                               ).colorScheme.onSurface,
                                             ),
-                                            onTextChange: (updatedText) {
-                                              // Don't allow changes from this view
-                                            },
                                           ),
                                         ),
                                         const SizedBox(
