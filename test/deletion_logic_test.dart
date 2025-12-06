@@ -19,7 +19,6 @@ void main() {
     Note? createdNote = await service.getNoteById(noteId);
     expect(createdNote, isNotNull);
     expect(createdNote!.isDeleted, false);
-    DateTime? initialUpdateTime = createdNote.updateTime;
 
     // Sleep briefly to ensure different timestamps if needed
     await Future.delayed(const Duration(milliseconds: 1));
@@ -50,8 +49,6 @@ void main() {
     expect(originalIsDeleted, false);
 
     // Store the original updateTime for comparison
-    DateTime updateTimeBeforeDeletion =
-        originalUpdateTime ?? createdNote.createTime;
 
     // Wait briefly to ensure potential time difference
     await Future.delayed(const Duration(milliseconds: 2));

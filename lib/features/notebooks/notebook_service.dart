@@ -1,3 +1,4 @@
+import 'package:mindlog/utils/log_util.dart';
 import 'package:mindlog/features/notebooks/data/notebook_database_repository.dart';
 import 'package:mindlog/features/notebooks/domain/entities/notebook.dart';
 
@@ -60,7 +61,7 @@ class NotebookService {
       }
     } catch (e) {
       // If migration fails, just continue - it's not critical
-      print('Notebook sort index migration failed: $e');
+      logger.error('Notebook sort index migration failed: $e');
     }
   }
 

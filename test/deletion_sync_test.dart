@@ -14,7 +14,6 @@ void main() {
     // Create a test note
     String noteId = const Uuid().v4();
     String initialContent = 'Test content for deletion';
-    DateTime initialTime = DateTime.now().subtract(const Duration(hours: 1));
 
     // Create a note with initial data
     await service.createNote(content: initialContent);
@@ -25,7 +24,7 @@ void main() {
     expect(createdNote!.isDeleted, false);
 
     // Get the initial updateTime
-    DateTime? initialUpdateTime = createdNote.updateTime;
+    // DateTime? initialUpdateTime = createdNote.updateTime; // Unused variable, commented out
 
     // Delete the note (this should update the updateTime and set isDeleted to true before deletion)
     await service.deleteNote(noteId);
