@@ -4,9 +4,9 @@ on:
   workflow_dispatch: # Allows manual triggering of the workflow
     inputs:
       release_tag:
-        description: 'Release tag (e.g: 1.0.0)'
+        description: 'Release tag (e.g: v1.0.0)'
         required: false
-        default: '1.0.0'
+        default: 'v1.0.0'
       release_title:
         description: 'Release title'
         required: false
