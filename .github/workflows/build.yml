@@ -33,7 +33,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.33.0'
+        flutter-version-file: 'pubspec.yaml'
         cache: true
 
     - name: Get dependencies
@@ -68,7 +68,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.33.0'
+        flutter-version-file: 'pubspec.yaml'
         cache: true
 
     - name: Get dependencies
@@ -102,7 +102,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.33.0'
+        flutter-version-file: 'pubspec.yaml'
         cache: true
 
     - name: Check if Windows build is enabled
