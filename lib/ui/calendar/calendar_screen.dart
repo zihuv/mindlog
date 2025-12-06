@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:mindlog/controllers/note_controller.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
@@ -187,9 +188,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                             ),
                                           ),
                                         ),
-                                        const SizedBox(
-                                          height: 2,
-                                        ), // Reduced spacing
+                                        const Gap(2), // Reduced spacing
                                         Text(
                                           _formatDateTime(note.createTime),
                                           style: TextStyle(

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gap/gap.dart';
 import 'package:mindlog/features/notebooks/domain/entities/notebook.dart';
 import 'package:mindlog/controllers/notebooks/notebook_controller.dart';
 import 'package:mindlog/controllers/note_controller.dart';
@@ -164,7 +165,7 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 4.0),
+                        const Gap(4.0),
                         Expanded(
                           child: Text(
                             _notebook?.title ?? 'Notes',
@@ -179,7 +180,7 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                             maxLines: 1,
                           ),
                         ),
-                        const SizedBox(width: 8.0),
+                        const Gap(8.0),
                       ],
                     ),
                   ),
@@ -247,9 +248,7 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                                                   ),
                                                 ),
                                               ),
-                                              const SizedBox(
-                                                height: 2,
-                                              ), // Reduced spacing
+                                              const Gap(2), // Reduced spacing
                                               Text(
                                                 _formatDateTime(
                                                   note.createTime,

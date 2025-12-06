@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:mindlog/features/notes/data/note_service.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/presentation/widgets/note_card.dart';
@@ -204,12 +205,12 @@ class _NotesPageState extends State<NotesPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.note_add, size: 64, color: Colors.grey),
-                        SizedBox(height: 16),
+                        const Gap(16),
                         Text(
                           'No notes yet',
                           style: TextStyle(fontSize: 18, color: Colors.grey),
                         ),
-                        SizedBox(height: 8),
+                        const Gap(8),
                         Text(
                           'Tap the + button to create your first note',
                           style: TextStyle(fontSize: 14, color: Colors.grey),

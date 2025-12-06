@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:mindlog/utils/webdav_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -177,21 +178,21 @@ class _WebDAVSettingsScreenState extends State<WebDAVSettingsScreen> {
                 'WebDAV Configuration',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              const SizedBox(height: 16),
+              const Gap(16),
               _buildTextField(
                 controller: _urlController,
                 label: 'WebDAV URL',
                 hint: 'https://example.com/remote.php/webdav/',
                 prefixIcon: Icons.link,
               ),
-              const SizedBox(height: 16),
+              const Gap(16),
               _buildTextField(
                 controller: _usernameController,
                 label: 'Username',
                 hint: 'Your WebDAV username',
                 prefixIcon: Icons.person,
               ),
-              const SizedBox(height: 16),
+              const Gap(16),
               _buildTextField(
                 controller: _passwordController,
                 label: 'Password',
@@ -199,14 +200,14 @@ class _WebDAVSettingsScreenState extends State<WebDAVSettingsScreen> {
                 prefixIcon: Icons.lock,
                 obscureText: true,
               ),
-              const SizedBox(height: 16),
+              const Gap(16),
               _buildTextField(
                 controller: _folderController,
                 label: 'Folder Name',
                 hint: 'Folder name on WebDAV server (default: mindlog)',
                 prefixIcon: Icons.folder,
               ),
-              const SizedBox(height: 24),
+              const Gap(24),
               Text(
                 'Connection Status: $_connectionStatus',
                 style: TextStyle(
@@ -214,7 +215,7 @@ class _WebDAVSettingsScreenState extends State<WebDAVSettingsScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 24),
+              const Gap(24),
               Row(
                 children: [
                   Expanded(
@@ -235,7 +236,7 @@ class _WebDAVSettingsScreenState extends State<WebDAVSettingsScreen> {
                           : const Text('Test Connection'),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  Gap(12),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _performSync,
@@ -258,7 +259,7 @@ class _WebDAVSettingsScreenState extends State<WebDAVSettingsScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
+              const Gap(32),
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -269,7 +270,7 @@ class _WebDAVSettingsScreenState extends State<WebDAVSettingsScreen> {
                         'Instructions',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
-                      const SizedBox(height: 8),
+                      const Gap(8),
                       const Text(
                         '1. Enter your WebDAV server details above\n'
                         '2. Click "Test Connection" to verify your settings\n'
@@ -298,7 +299,7 @@ class _WebDAVSettingsScreenState extends State<WebDAVSettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 8),
+        const Gap(8),
         TextField(
           controller: controller,
           obscureText: obscureText,

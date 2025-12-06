@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/data/note_service.dart';
 import 'package:uuid/uuid.dart';
@@ -119,7 +120,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                 textCapitalization: TextCapitalization.sentences,
               ),
             ),
-            const SizedBox(height: 16),
+            const Gap(16),
             // Bottom toolbar with formatting options
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),

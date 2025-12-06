@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:mindlog/services/data_export_service.dart';
@@ -28,9 +29,9 @@ class BackupScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Data Backup', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 16),
+            const Gap(16),
             _buildExportCard(context),
-            const SizedBox(height: 16),
+            const Gap(16),
             _buildImportCard(context),
           ],
         ),
@@ -46,14 +47,14 @@ class BackupScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Export Data', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
+            const Gap(8),
             Text(
               'Create a backup of your notes and media files',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 16),
+            const Gap(16),
             ElevatedButton.icon(
               onPressed: _exportData,
               icon: const Icon(Icons.download),
@@ -77,14 +78,14 @@ class BackupScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Import Data', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
+            const Gap(8),
             Text(
               'Restore notes and media files from a backup',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 16),
+            const Gap(16),
             ElevatedButton.icon(
               onPressed: _importData,
               icon: const Icon(Icons.upload),
@@ -185,7 +186,7 @@ class BackupScreen extends StatelessWidget {
                   'Importing Data',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 20),
+                const Gap(20),
                 Obx(
                   () => LinearProgressIndicator(
                     value: progress.value,
@@ -195,7 +196,7 @@ class BackupScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const Gap(20),
                 Obx(() => Text(progressMessage.value)),
               ],
             ),

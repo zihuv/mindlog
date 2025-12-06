@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:mindlog/features/notebooks/domain/entities/notebook.dart';
 import 'package:mindlog/controllers/notebooks/notebook_controller.dart';
@@ -289,7 +290,7 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
                             ),
                     ),
                   ),
-                  const SizedBox(height: 16.0),
+                  const Gap(16.0),
                   // Title input
                   TextField(
                     controller: _titleController,
@@ -301,7 +302,7 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
                       hintText: 'Enter notebook title...',
                     ),
                   ),
-                  const SizedBox(height: 16.0),
+                  const Gap(16.0),
                   // Type selection
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -335,7 +336,7 @@ class _NotebookDetailScreenState extends State<NotebookDetailScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16.0),
+                  const Gap(16.0),
                   // Description input
                   Expanded(
                     child: TextField(

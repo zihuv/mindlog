@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'settings/backup_screen.dart';
 import 'settings/webdav_settings_screen.dart';
@@ -20,9 +21,9 @@ class SettingsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('General', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 16),
+            const Gap(16),
             _buildBackupCard(context),
-            const SizedBox(height: 16),
+            const Gap(16),
             _buildWebDAVCard(context),
           ],
         ),

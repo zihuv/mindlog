@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart' as md;
 
@@ -60,7 +61,7 @@ class _TaskCheckboxBuilder extends MarkdownElementBuilder {
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
-            const SizedBox(width: 4), // Better spacing to text
+            const Gap(4), // Better spacing to text
             Expanded(
               child: Text(
                 content,
@@ -148,7 +149,7 @@ class SimpleMarkdownCheckboxRenderer extends StatelessWidget {
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
-                const SizedBox(width: 4), // Better spacing to text
+                const Gap(4), // Better spacing to text
                 Expanded(
                   child: Text(
                     taskInfo.content,

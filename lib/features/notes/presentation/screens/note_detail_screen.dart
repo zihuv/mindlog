@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:mindlog/controllers/note_controller.dart';
 import 'package:image_picker/image_picker.dart';
@@ -903,7 +904,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                           8, // Set a reasonable maximum to allow scrolling
                       keyboardType: TextInputType.multiline,
                     ),
-                    const SizedBox(height: 16.0),
+                    const Gap(16.0),
                     // Display attached images in a grid (up to 9 images)
                     if (_images.isNotEmpty)
                       Container(

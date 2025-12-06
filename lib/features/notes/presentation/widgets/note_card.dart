@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/presentation/widgets/image_display.dart';
 
@@ -62,9 +63,7 @@ class NoteCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 2,
-              ), // Minimal spacing between createTime and content
+              const Gap(2), // Minimal spacing between createTime and content
               // Note content as plain text
               Text(
                 note.content,

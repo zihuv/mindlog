@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gap/gap.dart';
 import 'package:mindlog/ui/notebooks/notebook_detail_screen.dart';
 import 'package:mindlog/ui/notebooks/notebook_notes_screen.dart';
 import 'package:mindlog/controllers/notebooks/notebook_controller.dart';
@@ -71,7 +72,7 @@ class NotebookListScreen extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const CircularProgressIndicator(),
-                              const SizedBox(height: 20),
+                              const Gap(20),
                               const Text(
                                 'Syncing with WebDAV...',
                                 style: TextStyle(fontSize: 16),
@@ -228,9 +229,7 @@ class NotebookListScreen extends StatelessWidget {
                                           ).colorScheme.primary,
                                         ),
                                 ),
-                                const SizedBox(
-                                  width: 8,
-                                ), // Small gap between image and text
+                                const Gap(8), // Small gap between image and text
                                 // Notebook title and type
                                 Expanded(
                                   child: Column(
@@ -249,7 +248,7 @@ class NotebookListScreen extends StatelessWidget {
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
-                                      const SizedBox(height: 2), // Minimal spacing
+                                      const Gap(2), // Minimal spacing
                                       Text(
                                         notebook.type.toString().split('.').last,
                                         style: TextStyle(
