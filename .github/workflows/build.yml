@@ -33,7 +33,8 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version-file: 'pubspec.yaml'
+        channel: stable
+        flutter-version-file: pubspec.yaml
         cache: true
 
     - name: Get dependencies
@@ -68,7 +69,8 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version-file: 'pubspec.yaml'
+        channel: stable
+        flutter-version-file: pubspec.yaml
         cache: true
 
     - name: Get dependencies
@@ -102,7 +104,8 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version-file: 'pubspec.yaml'
+        channel: stable
+        flutter-version-file: pubspec.yaml
         cache: true
 
     - name: Check if Windows build is enabled
