@@ -14,7 +14,7 @@ on:
       create_release:
         description: 'Create GitHub release'
         required: false
-        default: false
+        default: true
         type: boolean
 
 jobs:
