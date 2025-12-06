@@ -4,13 +4,13 @@ on:
   workflow_dispatch: # Allows manual triggering of the workflow
     inputs:
       release_tag:
-        description: 'Release tag (e.g., v1.0.0)'
+        description: 'Release tag (e.g: 1.0.0)'
         required: false
-        default: 'v1.0.0'
+        default: '1.0.0'
       release_title:
         description: 'Release title'
         required: false
-        default: 'Release'
+        default: ''
       create_release:
         description: 'Create GitHub release'
         required: false
@@ -54,7 +54,9 @@ jobs:
       run: |
         flutter build apk --release --target-platform android-arm64
         mkdir -p build-artifacts/android
-        cp build/app/outputs/flutter-apk/app-release.apk build-artifacts/android/mindlog-android-arm64.apk
+        # Extract version from tag (removing 'v' prefix if present)
+        VERSION=$(echo "${{ inputs.release_tag }}" | sed 's/^v//')
+        cp build/app/outputs/flutter-apk/app-release.apk build-artifacts/android/mindlog_android_${VERSION}.apk
 
     - name: Upload Android APK
       uses: actions/upload-artifact@v4
@@ -82,8 +84,10 @@ jobs:
       run: |
         flutter build macos --release
         mkdir -p build-artifacts/macos
+        # Extract version from tag (removing 'v' prefix if present)
+        VERSION=$(echo "${{ inputs.release_tag }}" | sed 's/^v//')
         cd build/macos/Build/Products/Release
-        zip -r ../../../../../build-artifacts/macos/mindlog-macos.zip mindlog.app
+        zip -r ../../../../../build-artifacts/macos/mindlog_macos_${VERSION}.zip mindlog.app
 
     - name: Upload macOS App
       uses: actions/upload-artifact@v4
@@ -110,9 +114,11 @@ jobs:
     - name: Build Windows App
       run: |
         flutter build windows --release
+        # Extract version from tag (removing 'v' prefix if present)
+        $VERSION = "${{ inputs.release_tag }}".TrimStart("v")
         New-Item -ItemType Directory -Force -Path build-artifacts
         New-Item -ItemType Directory -Force -Path build-artifacts\windows
-        Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath build-artifacts\windows\mindlog-windows.zip
+        Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath build-artifacts\windows\mindlog_windows_${VERSION}.zip
 
     - name: Upload Windows App
       uses: actions/upload-artifact@v4
@@ -144,6 +150,6 @@ jobs:
         draft: false
         prerelease: false
         files: |
-          build-artifacts/android-apk-*/mindlog-*.apk
-          build-artifacts/macos-app-*/mindlog-macos.zip
-          build-artifacts/windows-app-*/mindlog-windows.zip
+          build-artifacts/android-apk-*/mindlog_android_*.apk
+          build-artifacts/macos-app-*/mindlog_macos_*.zip
+          build-artifacts/windows-app-*/mindlog_windows_*.zip
