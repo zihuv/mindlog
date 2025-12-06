@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gap/gap.dart';
@@ -7,10 +6,9 @@ import 'package:mindlog/controllers/notebooks/notebook_controller.dart';
 import 'package:mindlog/controllers/note_controller.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/presentation/screens/note_detail_screen.dart';
+import 'package:mindlog/features/notes/presentation/widgets/note_card.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
 import 'package:mindlog/utils/log_util.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 
 class NotebookNotesScreen extends StatefulWidget {
   final String notebookId;
@@ -204,101 +202,20 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                               itemCount: _notes.length,
                               itemBuilder: (context, index) {
                                 final note = _notes[index];
-                                return Card(
-                                  margin: AppPadding.small,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Get.to(
-                                        () => NoteDetailScreen(
-                                          noteId: note.id,
-                                        ),
-                                      )?.then((value) {
-                                        if (value == true) {
-                                          _loadNotes(); // Refresh the notes list after editing
-                                        }
-                                      });
-                                    },
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // Content area (always shown)
-                                        Container(
-                                          padding: AppPadding
-                                              .small, // Reduced padding
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Container(
-                                                constraints: const BoxConstraints(
-                                                  maxHeight:
-                                                      60, // Limit height to 2 lines
-                                                ),
-                                                child: Text(
-                                                  note.content.length > 50
-                                                      ? '${note.content.substring(0, 50)}...'
-                                                      : note.content,
-                                                  style: TextStyle(
-                                                    fontSize:
-                                                        AppFontSize.body,
-                                                    color: Theme.of(
-                                                      context,
-                                                    ).colorScheme.onSurface,
-                                                  ),
-                                                ),
-                                              ),
-                                              const Gap(2), // Reduced spacing
-                                              Text(
-                                                _formatDateTime(
-                                                  note.createTime,
-                                                ),
-                                                style: TextStyle(
-                                                  fontSize: AppFontSize
-                                                      .small, // Smaller font size
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurfaceVariant,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        // Image thumbnails grid if available (up to 9 images in 3x3 grid)
-                                        if (note.images.isNotEmpty)
-                                          GestureDetector(
-                                            onTap: () {
-                                              // Prevent propagation to card's onTap
-                                            },
-                                            child: FutureBuilder<List<String>>(
-                                              future: _getImagePaths(
-                                                note.id,
-                                                note.images.take(9).toList(),
-                                              ), // Limit to first 9 images
-                                              builder: (context, snapshot) {
-                                                if (snapshot.hasData &&
-                                                    snapshot.data!.isNotEmpty) {
-                                                  final imagePaths =
-                                                      snapshot.data!;
-                                                  return Container(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                          8.0,
-                                                        ),
-                                                    child: _buildImagesGrid(
-                                                      imagePaths,
-                                                    ),
-                                                  );
-                                                } else {
-                                                  // If image paths couldn't be retrieved, don't show any images
-                                                  return const SizedBox.shrink();
-                                                }
-                                              },
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
+                                return NoteCard(
+                                  note: note,
+                                  onEdit: () {
+                                    Get.to(
+                                      () => NoteDetailScreen(
+                                        noteId: note.id,
+                                      ),
+                                    )?.then((value) {
+                                      if (value == true) {
+                                        _loadNotes(); // Refresh the notes list after editing
+                                      }
+                                    });
+                                  },
+                                  onDelete: null, // No delete option in notebook view for now
                                 );
                               },
                             ),
@@ -323,131 +240,4 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
     );
   }
 
-  String _formatDateTime(DateTime? dateTime) {
-    if (dateTime == null) {
-      return 'No date';
-    }
-    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
-
-  // Convert image names to full file paths
-  Future<List<String>> _getImagePaths(
-    String noteId,
-    List<String> imageNames,
-  ) async {
-    final paths = <String>[];
-    for (final imageName in imageNames) {
-      try {
-        // According to MediaService implementation, images are stored in {appDir}/images/{noteId}/{imageName}
-        final appDir = await getApplicationDocumentsDirectory();
-        String imagePath = path.join(appDir.path, 'images', noteId, imageName);
-        paths.add(imagePath);
-      } catch (e) {
-        // If we can't get the path, return the original path as fallback
-        paths.add(imageName);
-      }
-    }
-    return paths;
-  }
-
-  Future<bool> _isFileAccessible(String imagePath) async {
-    try {
-      final file = File(imagePath);
-      return await file.exists();
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Widget _buildImagesGrid(List<String> imagePaths) {
-    // Show up to 9 images in a grid with consistent 3x3 layout
-    final imagesToShow = imagePaths.length > 9
-        ? imagePaths.take(9).toList()
-        : imagePaths;
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics:
-          const NeverScrollableScrollPhysics(), // Disable scrolling in the grid
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3, // Always use 3 columns for consistent layout
-        crossAxisSpacing: 4.0,
-        mainAxisSpacing: 4.0,
-        childAspectRatio: 1.0, // Square aspect ratio
-      ),
-      itemCount: imagesToShow.length,
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () {
-            // Show image in fullscreen when tapped (not navigating to note detail)
-            _showFullscreenImage(context, imagesToShow[index]);
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4.0),
-              border: Border.all(
-                color: Theme.of(context).dividerColor,
-                width: 0.5,
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(4.0),
-              child: FutureBuilder<bool>(
-                future: _isFileAccessible(imagesToShow[index]),
-                builder: (context, snapshot) {
-                  if (snapshot.data == true) {
-                    return Image.file(
-                      File(imagesToShow[index]),
-                      fit: BoxFit.cover,
-                    );
-                  } else {
-                    return Container(
-                      color: Theme.of(context).dividerColor,
-                      child: const Icon(Icons.broken_image, color: Colors.grey),
-                    );
-                  }
-                },
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showFullscreenImage(BuildContext context, String imagePath) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Image View'),
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
-          ),
-          backgroundColor: Colors.black,
-          body: InteractiveViewer(
-            minScale: 0.1,
-            maxScale: 5.0,
-            child: Container(
-              constraints: const BoxConstraints.expand(),
-              child: FutureBuilder<bool>(
-                future: _isFileAccessible(imagePath),
-                builder: (context, snapshot) {
-                  if (snapshot.data == true) {
-                    return Image.file(File(imagePath), fit: BoxFit.contain);
-                  } else {
-                    return const Icon(
-                      Icons.broken_image,
-                      color: Colors.grey,
-                      size: 50,
-                    );
-                  }
-                },
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
