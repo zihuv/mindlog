@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-MindLog is a Flutter-based personal journal and reflection application that allows users to create, manage, and organize their notes with features like tagging, checklists, and media attachments. The application uses GetX for state management and dependency injection, with a clean architecture that separates data, domain, and presentation layers.
+MindLog is a Flutter-based personal journal and reflection application that allows users to create, manage, and organize their notes with features like tagging, checklists, and media attachments. The application uses GetX for state management and dependency injection, with a clean architecture that separates data, domain (business logic), and presentation layers.
 
 ### Key Features
 - Create and edit notes with rich text content
@@ -14,15 +14,16 @@ MindLog is a Flutter-based personal journal and reflection application that allo
 - Notebook organization system
 - Calendar view for notes
 - Settings screen for app configuration
+- WebDAV sync for cloud storage
 
 ### Architecture
-- **Presentation Layer**: UI screens and widgets located in the `ui` directory
-- **Domain Layer**: Business logic entities in `features/*/domain`
-- **Data Layer**: Services and repositories in `features/*/data` and `data` directories
-- **Database Layer**: SQLite implementation using Drift in `database` directory
+- **Presentation Layer**: UI screens and widgets located in the `presentation` directory
+- **Business Layer**: Business logic services in `data/services` (NoteBusinessService, etc.)
+- **Data Layer**: Models, repositories and services in `data` directory
+- **Database Layer**: SQLite implementation using Drift in `data/database` directory
 - **State Management**: GetX framework with dedicated controllers
 - **Core Utilities**: Shared utilities in `core` directory
-- **Services**: Shared services in `services` directory
+- **Design System**: Theme and design components in `core/design_system`
 
 ## Building and Running
 
@@ -78,37 +79,42 @@ flutter format .
 
 ### File Structure
 - `lib/`: Main application source code
-  - `lib/controllers/`: GetX controllers for business logic, organized by feature
-    - `lib/controllers/note_controller.dart`: Note management controller
-    - `lib/controllers/notebooks/`: Notebook-specific controllers
+  - `lib/presentation/`: Presentation layer containing screens, widgets and controllers
+    - `lib/presentation/controllers/`: GetX controllers for business logic
+      - `lib/presentation/controllers/note_controller.dart`: Note management controller
+      - `lib/presentation/controllers/notebook_controller.dart`: Notebook management controller
+    - `lib/presentation/routes/`: GetX routing configuration
+      - `lib/presentation/routes/app_pages.dart`: App pages configuration
+      - `lib/presentation/routes/app_routes.dart`: App routes definition
+    - `lib/presentation/views/`: UI screens organized by feature
+      - `lib/presentation/views/home/`: Home screen components
+      - `lib/presentation/views/note/`: Note-related screens
+      - `lib/presentation/views/notebooks/`: Notebook screens
+      - `lib/presentation/views/calendar/`: Calendar view components
+      - `lib/presentation/views/settings/`: Settings screens
+    - `lib/presentation/widgets/`: Reusable UI components
+      - `lib/presentation/widgets/common/`: Common reusable widgets
+      - `lib/presentation/widgets/note/`: Note-specific widgets
+      - `lib/presentation/widgets/notebooks/`: Notebook-specific widgets
   - `lib/core/`: Core utilities and constants
-    - `lib/core/constants/`: App constants
-    - `lib/core/errors/`: Error definitions
-    - `lib/core/utils/`: Core utility functions
-  - `lib/data/`: Data layer with database services
+    - `lib/core/design_system/`: Design system components and theme
+  - `lib/data/`: Data layer with models, repositories and services
     - `lib/data/database/`: Database-specific code
-    - `lib/data/services/`: Data services
-  - `lib/database/`: Drift database implementation files
-    - `lib/database/app_database.dart`: Main database class
-    - `lib/database/note_dao.dart`: Data access objects
-  - `lib/features/`: Feature-based modules
-    - `lib/features/notes/`: Note feature module
-      - `lib/features/notes/data/`: Note data layer
-      - `lib/features/notes/domain/`: Note domain layer
-      - `lib/features/notes/presentation/`: Note UI layer
-    - `lib/features/notebooks/`: Notebook feature module
-      - `lib/features/notebooks/data/`: Notebook data layer
-      - `lib/features/notebooks/domain/`: Notebook domain layer
-    - `lib/features/settings/`: Settings feature module
-      - `lib/features/settings/presentation/`: Settings UI layer
-  - `lib/media/`: Media-related utilities
-  - `lib/services/`: Shared services and utilities
-  - `lib/ui/`: Presentation layer containing screens and widgets
-    - `lib/ui/calendar/`: Calendar view components
-    - `lib/ui/design_system/`: Design system components and theme
-    - `lib/ui/home/`: Home screen components
-    - `lib/ui/notebooks/`: Notebook UI components
-    - `lib/ui/settings/`: Settings UI components
+      - `lib/data/database/app_database.dart`: Main database class
+      - `lib/data/database/note_dao.dart`: Data access objects
+    - `lib/data/models/`: Data models
+      - `lib/data/models/note.dart`: Note model
+      - `lib/data/models/notebook.dart`: Notebook model
+    - `lib/data/repositories/`: Data repositories
+      - `lib/data/repositories/note_database_repository.dart`: Note database operations
+      - `lib/data/repositories/note_storage_repository.dart`: Note file storage operations
+      - `lib/data/repositories/notebook_database_repository.dart`: Notebook database operations
+      - `lib/data/repositories/notebook_storage_repository.dart`: Notebook file storage operations
+    - `lib/data/services/`: Business services
+      - `lib/data/services/note_service.dart`: Note CRUD operations
+      - `lib/data/services/notebook_service.dart`: Notebook CRUD operations
+      - `lib/data/services/note_business_service.dart`: Business logic layer
+      - `lib/data/services/combined_note_service.dart`: High-level note service combining business logic and media operations
   - `lib/utils/`: General utility functions
 - `lib/main.dart`: Entry point with GetMaterialApp and GetX bindings
 - `test/`: Unit and integration tests
@@ -136,13 +142,14 @@ flutter format .
 - WebDAV Client: Cloud sync functionality
 - Shared Preferences: Local app preferences
 - Logger: Application logging
+- Archive: Archive handling for import/export
 
 ## Project Status
 
 The application uses a feature-based modular architecture with clean separation of concerns:
 - Uses GetX for state management throughout the application
 - Created NoteController and NotebookController for managing related states
-- Organized code in feature-based modules (notes, notebooks, settings)
+- Organized code in a layered architecture (presentation, business, data)
 - Implemented proper error handling and loading states
 - Updated main.dart to use GetMaterialApp with dependency bindings
 - Uses Drift for type-safe database access
@@ -153,35 +160,44 @@ The application includes an interactive checklist feature:
 - Users can create checklist items in notes using markdown syntax: `- [ ] task` or `- [x] task`
 - Checklist items render as interactive checkboxes in the note list view
 - Clicking checkboxes updates both the visual state and the underlying text content
-- Changes to checklists also update the modification createTime of notes
+- Changes to checklists also update the modification updateTime of notes
 - The checklist state is properly preserved in the database
 
-## Key Files and Directories
+## Notebook Types
 
-- `lib/main.dart`: Entry point with GetMaterialApp and GetX bindings
-- `lib/controllers/note_controller.dart`: Centralized state management for notes
-- `lib/controllers/notebooks/notebook_controller.dart`: State management for notebooks
-- `lib/ui/home/home_screen.dart`: Main screen for the application
-- `lib/ui/settings_screen.dart`: Settings screen for the application
-- `lib/features/notes/presentation/`: Note-related UI components
-- `lib/features/notebooks/`: Notebook feature implementation
-- `lib/database/app_database.dart`: Main database implementation
-- `pubspec.yaml`: Project dependencies and configuration
+The application supports different types of notebooks:
+- Standard notebooks: Traditional note-taking
+- Checklist notebooks: For task management
+- Timer notebooks: For time tracking (planned feature)
+
+## Media Management
+
+The application handles media attachments through:
+- MediaUtil class for generating unique filenames
+- Separate storage for images, videos, and audio files
+- Proper cleanup of orphaned media files
+- UUID-based naming to prevent conflicts
+
+## Cloud Sync (WebDAV)
+
+- WebDAV client for cloud synchronization
+- Save note with cloud data preserved (ID, createTime, updateTime)
+- Sync operations maintain data integrity across devices
 
 ## Design System
 
 The application uses a unified design system with the following components:
 
 ### Design System Files
-- `lib/ui/design_system/app_colors.dart`: Theme colors for the application
-- `lib/ui/design_system/border_radius.dart`: Consistent border radius values
-- `lib/ui/design_system/box_shadow.dart`: Standard box shadow styles
-- `lib/ui/design_system/flex.dart`: Consistent flex layout values
-- `lib/ui/design_system/font_size.dart`: Typography scale for text sizes
-- `lib/ui/design_system/font_weight.dart`: Consistent font weights
-- `lib/ui/design_system/padding.dart`: Standard padding and margin values
-- `lib/ui/design_system/app_theme.dart`: Complete theme definition combining all design elements
-- `lib/ui/design_system/design_system.dart`: Export file to import all design system components
+- `lib/core/design_system/app_colors.dart`: Theme colors for the application
+- `lib/core/design_system/border_radius.dart`: Consistent border radius values
+- `lib/core/design_system/box_shadow.dart`: Standard box shadow styles
+- `lib/core/design_system/flex.dart`: Consistent flex layout values
+- `lib/core/design_system/font_size.dart`: Typography scale for text sizes
+- `lib/core/design_system/font_weight.dart`: Consistent font weights
+- `lib/core/design_system/padding.dart`: Standard padding and margin values
+- `lib/core/design_system/app_theme.dart`: Complete theme definition combining all design elements
+- `lib/core/design_system/design_system.dart`: Export file to import all design system components
 
 ### Theme Usage
 - The application uses AppTheme.lightTheme and AppTheme.darkTheme from app_theme.dart
