@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:mindlog/controllers/note_controller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
+import 'package:mindlog/services/image_compression_service.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
@@ -183,28 +184,42 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
     try {
       final controller = Get.find<NoteController>();
-      List<Future> futures = [];
 
       if (_isNewNote && !_noteCreated) {
         // For a new note that hasn't been created yet
         if (_images.isNotEmpty) {
-          // If images were already added, create with all images
-          _currentNoteId = await controller.createNoteWithImage(
-            content: _contentController.text,
-            imagePath: _images.first,
-            notebookId: widget.notebookId,
-          );
-          _noteCreated = true; // Mark that note is now created
+          // Process images and add them to the note
+          for (int i = 0; i < _images.length; i++) {
+            final imagePath = _images[i];
+            final imageFile = File(imagePath);
+            if (await imageFile.exists()) {
+              // Use compressAndSaveImage to handle both compression and saving
+              final savedImagePath =
+                  await ImageCompressionService.compressAndSaveImage(
+                    '', // Will be set when note is created
+                    imageFile,
+                    null,
+                  );
 
-          // Add any additional images to the note as futures
-          for (int i = 1; i < _images.length; i++) {
-            futures.add(
-              controller.addImageToNote(
-                noteId: _currentNoteId!,
-                imagePath: _images[i],
-                content: _contentController.text,
-              ),
-            );
+              final savedImageFile = File(savedImagePath);
+
+              // On first image, create the note, on subsequent images add them
+              if (i == 0) {
+                _currentNoteId = await controller.createNoteWithImage(
+                  content: _contentController.text,
+                  imagePath: savedImageFile.path,
+                  notebookId: widget.notebookId,
+                );
+                _noteCreated = true; // Mark that note is now created
+              } else {
+                // Add additional images to the newly created note
+                await controller.addImageToNote(
+                  noteId: _currentNoteId!,
+                  imagePath: savedImageFile.path,
+                  content: _contentController.text,
+                );
+              }
+            }
           }
         } else {
           // If no images, create a regular note
@@ -230,47 +245,48 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           return;
         }
 
-        // Add the note update to the futures list
-        futures.add(
-          controller.updateNote(
-            id: noteId,
-            content: _contentController.text,
-            notebookId: widget.notebookId,
-          ),
-        );
-
-        // Add any new images to the existing note
         // First, get the current note to check for existing images
         final currentNote = await controller.getNoteById(noteId);
         List<String> existingImageNames = currentNote?.images ?? [];
 
-        // Add any new images that aren't already in the note
+        // Determine which images are new and need to be added
+        List<String> newImagePaths = [];
         for (final imagePath in _images) {
           String imageName = imagePath.split('/').last;
           if (!existingImageNames.contains(imageName)) {
-            futures.add(
-              controller.addImageToNote(
-                noteId: noteId,
-                imagePath: imagePath,
-                content: _contentController.text,
-              ),
-            );
+            newImagePaths.add(imagePath);
           }
         }
 
-        // Reload the note to get the updated list of images only if new images were added
-        bool imagesAdded = _images.any(
-          (imagePath) =>
-              !existingImageNames.contains(imagePath.split('/').last),
+        // Update the note content first
+        await controller.updateNote(
+          id: noteId,
+          content: _contentController.text,
+          notebookId: widget.notebookId,
         );
-        if (imagesAdded) {
-          await _loadNote();
-        }
-      }
 
-      // Wait for all asynchronous operations to complete
-      if (futures.isNotEmpty) {
-        await Future.wait(futures);
+        // Add and process new images individually
+        for (final imagePath in newImagePaths) {
+          final imageFile = File(imagePath);
+          if (await imageFile.exists()) {
+            // Use compressAndSaveImage to handle both compression and saving
+            final savedImagePath =
+                await ImageCompressionService.compressAndSaveImage(
+                  noteId,
+                  imageFile,
+                  null,
+                );
+
+            final savedImageFile = File(savedImagePath);
+
+            // Add the processed image to the note
+            await controller.addImageToNote(
+              noteId: noteId,
+              imagePath: savedImageFile.path,
+              content: _contentController.text,
+            );
+          }
+        }
       }
 
       // Final check to make sure the note data is updated
@@ -332,40 +348,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         final file = File(image.path);
         if (await file.exists()) {
           // For both new and existing notes, just add the image to the local list
+          // Don't add image to the note yet - only compress and add during save
           _images.add(image.path);
-
-          // If it's a new note that hasn't been created yet, save the image path for later
-          if (_isNewNote && !_noteCreated) {
-            // Just add the image to the pending list, don't create the note yet
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Image added. Save note to store image.'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
-            });
-          } else {
-            // If it's an existing note or a note that's already been created,
-            // add the image to the existing note
-            final controller = Get.find<NoteController>();
-            await controller.addImageToNote(
-              noteId: _currentNoteId ?? widget.noteId!,
-              imagePath: image.path, // Add the new image to existing note
-              content: _contentController.text,
-            );
-
-            // Reload the note to get the updated list of images
-            if (!_isNewNote) {
-              await _loadNote();
-            } else if (_noteCreated && _currentNoteId != null) {
-              // If it's a new note that has been created, load the created note
-              await _loadNoteForId(_currentNoteId!);
-            }
-          }
         } else {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
@@ -387,7 +371,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Error adding image: $e'),
+                content: Text('Error selecting image: $e'),
                 duration: const Duration(seconds: 2),
               ),
             );
@@ -398,7 +382,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Unexpected error adding image: $e'),
+                content: Text('Unexpected error selecting image: $e'),
                 duration: const Duration(seconds: 2),
               ),
             );
@@ -552,35 +536,25 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       String? noteId = widget.noteId ?? _currentNoteId;
 
       if (noteId != null) {
-        // Sort indices in descending order to avoid index shifting during removal
-        List<int> indicesToDelete = _selectedImageIndices.toList()
-          ..sort((a, b) => b.compareTo(a));
+        // Get the note to retrieve the list of image names
+        final note = await controller.getNoteById(noteId);
+        List<String> currentImageNames = note?.images ?? [];
 
-        for (int index in indicesToDelete) {
+        // Determine which image names to delete
+        List<String> imagesToDelete = [];
+        for (int index in _selectedImageIndices) {
           if (index < _images.length) {
             String imagePath = _images[index];
-
-            // Delete the image file
-            final file = File(imagePath);
-            if (await file.exists()) {
-              await file.delete();
-            }
+            String imageName = imagePath.split('/').last;
+            imagesToDelete.add(imageName);
           }
         }
 
-        // Update the local list of images
-        List<String> remainingImages = [];
-        for (int i = 0; i < _images.length; i++) {
-          if (!_selectedImageIndices.contains(i)) {
-            remainingImages.add(_images[i]);
-          }
+        // Remove the selected images from the current list
+        List<String> updatedImageNames = List.from(currentImageNames);
+        for (String imageName in imagesToDelete) {
+          updatedImageNames.remove(imageName);
         }
-        _images = remainingImages;
-
-        // Update the note in the database with the new list of images
-        List<String> updatedImageNames = _images
-            .map((path) => path.split('/').last)
-            .toList();
 
         // Update note media (passing the same content to update images)
         await controller.updateNoteMedia(
@@ -589,6 +563,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           noteContent: _contentController.text,
           notebookId: widget.notebookId,
         );
+
+        // Update the local list of images based on updated image names
+        _images = await _getImagePaths(noteId, updatedImageNames);
       }
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -648,45 +625,33 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     });
 
     try {
-      String imagePath = _images[index];
-
-      // Delete the image file
-      final file = File(imagePath);
-      if (await file.exists()) {
-        await file.delete();
-      }
-
-      // Remove from the local list
-      _images.removeAt(index);
-
-      // Update the note in the database with the new list of images
-      final controller = Get.find<NoteController>();
       String? noteId = widget.noteId ?? _currentNoteId;
 
-      if (noteId != null) {
-        List<String> updatedImageNames = _images
-            .map((path) => path.split('/').last)
-            .toList();
+      if (noteId != null && index < _images.length) {
+        // Get the note to retrieve the list of image names
+        final note = await Get.find<NoteController>().getNoteById(noteId);
+        List<String> currentImageNames = note?.images ?? [];
+
+        // Get the name of the image to delete
+        String imagePath = _images[index];
+        String imageName = imagePath.split('/').last;
+
+        // Remove the image name from the current list
+        List<String> updatedImageNames = List.from(currentImageNames)
+          ..remove(imageName);
 
         // Update note media (passing the same content to update images)
+        final controller = Get.find<NoteController>();
         await controller.updateNoteMedia(
           noteId: noteId,
           imageNames: updatedImageNames,
           noteContent: _contentController.text,
           notebookId: widget.notebookId,
         );
-      }
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Image deleted successfully'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
-      });
+        // Update the local list of images based on updated image names
+        _images = await _getImagePaths(noteId, updatedImageNames);
+      }
     } catch (e) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {

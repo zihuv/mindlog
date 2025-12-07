@@ -2,6 +2,7 @@ import 'note_business_service.dart';
 import 'media_service.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/data/note_service.dart';
+import 'dart:io';
 
 class CombinedNoteService {
   final NoteBusinessService _noteService = NoteBusinessService();
@@ -31,6 +32,7 @@ class CombinedNoteService {
     // Copy media files to the appropriate directories
     if (imagesToCopy != null) {
       for (final imagePath in imagesToCopy) {
+        // Images are already compressed, just save them
         await _mediaService.saveImage(
           noteId,
           imagePath.split('/').last,
@@ -115,6 +117,7 @@ class CombinedNoteService {
     if (newImagesToCopy != null) {
       List<String> newImageNames = [];
       for (final imagePath in newImagesToCopy) {
+        // Images are already compressed, just save them
         await _mediaService.saveImage(id, imagePath.split('/').last, imagePath);
         newImageNames.add(imagePath.split('/').last);
       }
