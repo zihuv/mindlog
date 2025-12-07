@@ -4,12 +4,11 @@ import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:mindlog/database/app_database.dart';
 import 'package:mindlog/database/note_dao.dart';
-import 'package:mindlog/media/media_manager.dart';
+import 'package:mindlog/utils/media_util.dart';
 
 class NoteService extends GetxService {
   late AppDatabase _database;
   late NoteDao _noteDao;
-  late MediaManager _mediaManager;
   static const uuid = Uuid();
 
   // Initialize the service and set up database
@@ -18,7 +17,6 @@ class NoteService extends GetxService {
     super.onInit();
     _database = AppDatabase();
     _noteDao = NoteDao(_database);
-    _mediaManager = MediaManager();
   }
 
   @override
@@ -94,13 +92,13 @@ class NoteService extends GetxService {
   Future<void> deleteNote(String id) async {
     await _noteDao.deleteNote(id);
     // Optionally delete associated media files as well
-    await _mediaManager.deleteNoteMedia(id);
+    await MediaUtil.deleteNoteMedia(id);
   }
 
   // Permanently delete a note
   Future<void> permanentlyDeleteNote(String id) async {
     await _noteDao.permanentlyDeleteNote(id);
-    await _mediaManager.deleteNoteMedia(id);
+    await MediaUtil.deleteNoteMedia(id);
   }
 
   // Search notes by content
@@ -117,19 +115,19 @@ class NoteService extends GetxService {
   }) async {
     switch (mediaType.toLowerCase()) {
       case 'image':
-        return await _mediaManager.saveImage(
+        return await MediaUtil.saveImage(
           noteId,
           mediaFile,
           fileName: fileName,
         );
       case 'video':
-        return await _mediaManager.saveVideo(
+        return await MediaUtil.saveVideo(
           noteId,
           mediaFile,
           fileName: fileName,
         );
       case 'audio':
-        return await _mediaManager.saveAudio(
+        return await MediaUtil.saveAudio(
           noteId,
           mediaFile,
           fileName: fileName,
@@ -147,11 +145,11 @@ class NoteService extends GetxService {
   ) async {
     switch (mediaType.toLowerCase()) {
       case 'image':
-        return await _mediaManager.getImagePath(noteId, mediaName);
+        return await MediaUtil.getImagePath(noteId, mediaName);
       case 'video':
-        return await _mediaManager.getVideoPath(noteId, mediaName);
+        return await MediaUtil.getVideoPath(noteId, mediaName);
       case 'audio':
-        return await _mediaManager.getAudioPath(noteId, mediaName);
+        return await MediaUtil.getAudioPath(noteId, mediaName);
       default:
         throw Exception('Unsupported media type: $mediaType');
     }
@@ -159,17 +157,17 @@ class NoteService extends GetxService {
 
   // Get all images for a specific note
   Future<List<String>> getNoteImages(String noteId) async {
-    return await _mediaManager.getNoteImages(noteId);
+    return await MediaUtil.getNoteImages(noteId);
   }
 
   // Get all videos for a specific note
   Future<List<String>> getNoteVideos(String noteId) async {
-    return await _mediaManager.getNoteVideos(noteId);
+    return await MediaUtil.getNoteVideos(noteId);
   }
 
   // Get all audio files for a specific note
   Future<List<String>> getNoteAudio(String noteId) async {
-    return await _mediaManager.getNoteAudio(noteId);
+    return await MediaUtil.getNoteAudio(noteId);
   }
 
   // Delete a specific media file for a note
@@ -180,13 +178,13 @@ class NoteService extends GetxService {
   ) async {
     switch (mediaType.toLowerCase()) {
       case 'image':
-        await _mediaManager.deleteImage(noteId, mediaName);
+        await MediaUtil.deleteImage(noteId, mediaName);
         break;
       case 'video':
-        await _mediaManager.deleteVideo(noteId, mediaName);
+        await MediaUtil.deleteVideo(noteId, mediaName);
         break;
       case 'audio':
-        await _mediaManager.deleteAudio(noteId, mediaName);
+        await MediaUtil.deleteAudio(noteId, mediaName);
         break;
       default:
         throw Exception('Unsupported media type: $mediaType');

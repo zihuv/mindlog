@@ -9,15 +9,15 @@ import 'package:mindlog/database/app_database.dart';
 import 'package:get/get.dart';
 import 'package:mindlog/utils/log_util.dart';
 
-class DataExportService {
+class DataExportUtil {
   /// Gets the path to the database file
-  Future<String> _getDatabasePath() async {
+  static Future<String> _getDatabasePath() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     return path.join(dbFolder.path, 'mindlog_db.sqlite');
   }
 
   /// Exports all notes, notebooks, and associated media files to a ZIP file at a specified location
-  Future<String> exportDataToZip() async {
+  static Future<String> exportDataToZip() async {
     // This method creates the archive in a temporary location first
     // Use app's cache directory instead of system temp directory for better Android compatibility
     String tempPath;
@@ -59,7 +59,7 @@ class DataExportService {
   }
 
   /// Exports all notes, notebooks, and associated media files to a ZIP file at a user-specified location
-  Future<bool> exportDataToZipWithSaveDialog() async {
+  static Future<bool> exportDataToZipWithSaveDialog() async {
     try {
       // First create the archive in temporary location
       logger.debug('Starting export process...');
@@ -171,7 +171,7 @@ class DataExportService {
   }
 
   /// Exports all media files to the archive
-  Future<void> _exportMediaFiles(Archive archive) async {
+  static Future<void> _exportMediaFiles(Archive archive) async {
     final appDir = await getApplicationDocumentsDirectory();
 
     // Export images directory
@@ -275,7 +275,7 @@ class DataExportService {
   }
 
   /// Imports data from a ZIP file, restoring notes, notebooks, and media files
-  Future<void> importDataFromZip(
+  static Future<void> importDataFromZip(
     String zipFilePath, {
     Function(double)? onProgress,
   }) async {
@@ -331,7 +331,7 @@ class DataExportService {
   }
 
   /// Imports the database file from the archive
-  Future<void> _importDatabaseFromArchive(Archive archive) async {
+  static Future<void> _importDatabaseFromArchive(Archive archive) async {
     ArchiveFile? dbFile;
     for (final file in archive) {
       if (file.name == 'database/mindlog_db.sqlite') {
@@ -392,7 +392,7 @@ class DataExportService {
   }
 
   /// Reinitializes the database connection after importing a new database file
-  Future<void> _reinitializeDatabaseConnection() async {
+  static Future<void> _reinitializeDatabaseConnection() async {
     try {
       // Close the existing database connection
       await Get.find<DatabaseProvider>().close();
@@ -411,7 +411,7 @@ class DataExportService {
   }
 
   /// Imports media files from the archive
-  Future<void> _importMediaFilesFromArchive(
+  static Future<void> _importMediaFilesFromArchive(
     Archive archive, {
     Function(double)? onProgress,
   }) async {
@@ -477,7 +477,7 @@ class DataExportService {
   }
 
   /// Creates a symbolic link to a file (Unix-like systems only)
-  Future<void> _createSymbolicLink(String originalPath, String linkPath) async {
+  static Future<void> _createSymbolicLink(String originalPath, String linkPath) async {
     try {
       // Delete existing file or link at the destination
       final linkFile = File(linkPath);

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:mindlog/services/data_export_service.dart';
+import 'package:mindlog/utils/data_export_util.dart';
 import 'package:mindlog/controllers/note_controller.dart';
 import 'package:mindlog/controllers/notebooks/notebook_controller.dart';
 import 'package:mindlog/database/app_database.dart';
@@ -11,8 +11,6 @@ import 'package:mindlog/features/notebooks/notebook_service.dart';
 import 'package:mindlog/utils/log_util.dart';
 
 class BackupScreen extends StatelessWidget {
-  final DataExportService _exportService = DataExportService();
-
   BackupScreen({super.key});
 
   @override
@@ -108,7 +106,7 @@ class BackupScreen extends StatelessWidget {
         Get.context!,
       ).showSnackBar(const SnackBar(content: Text('Starting data export...')));
 
-      bool exportSuccess = await _exportService.exportDataToZipWithSaveDialog();
+      bool exportSuccess = await DataExportUtil.exportDataToZipWithSaveDialog();
 
       if (exportSuccess) {
         // Use ScaffoldMessenger instead of Get.snackbar to avoid Overlay issues
@@ -206,7 +204,7 @@ class BackupScreen extends StatelessWidget {
       );
 
       // Perform the import with progress callback
-      await _exportService.importDataFromZip(
+      await DataExportUtil.importDataFromZip(
         filePath,
         onProgress: (double p) async {
           progress.value = p;

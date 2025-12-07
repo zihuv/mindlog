@@ -5,7 +5,7 @@ import 'package:mindlog/features/notebooks/domain/entities/notebook.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:mindlog/services/filename_utility_service.dart';
+import 'package:mindlog/utils/media_util.dart';
 import 'package:mindlog/utils/log_util.dart';
 
 class NotebookController extends GetxController {
@@ -138,7 +138,7 @@ class NotebookController extends GetxController {
         }
 
         // Generate a unique filename using UUID v7
-        final newFileName = FilenameUtilityService.generateImageFilename(image.path);
+        final newFileName = MediaUtil.generateImageFilename(image.path);
         final savedImage = await File(
           image.path,
         ).copy('${notebookImagesDir.path}/$newFileName');

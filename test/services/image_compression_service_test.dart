@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mindlog/services/image_compression_service.dart';
+import 'package:mindlog/utils/media_util.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
@@ -20,35 +20,35 @@ void main() {
 
     test('getImageQuality returns correct quality level', () async {
       // Test default value (should be 'standard')
-      ImageQuality quality = await ImageCompressionService.getImageQuality();
+      ImageQuality quality = await MediaUtil.getImageQuality();
       expect(quality, equals(ImageQuality.standard));
 
       // Test 'low' quality
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('image_compression_quality', 'low');
-      quality = await ImageCompressionService.getImageQuality();
+      quality = await MediaUtil.getImageQuality();
       expect(quality, equals(ImageQuality.low));
 
       // Test 'high' quality
       await prefs.setString('image_compression_quality', 'high');
-      quality = await ImageCompressionService.getImageQuality();
+      quality = await MediaUtil.getImageQuality();
       expect(quality, equals(ImageQuality.high));
 
       // Test 'original' quality
       await prefs.setString('image_compression_quality', 'original');
-      quality = await ImageCompressionService.getImageQuality();
+      quality = await MediaUtil.getImageQuality();
       expect(quality, equals(ImageQuality.original));
     });
 
     test('isCompressionEnabled returns correct value', () async {
       // Test default value (should be true)
-      bool enabled = await ImageCompressionService.isCompressionEnabled();
+      bool enabled = await MediaUtil.isCompressionEnabled();
       expect(enabled, isTrue);
 
       // Test when disabled
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('image_compression_enabled', false);
-      enabled = await ImageCompressionService.isCompressionEnabled();
+      enabled = await MediaUtil.isCompressionEnabled();
       expect(enabled, isFalse);
     });
 
@@ -64,7 +64,7 @@ void main() {
       await testImageFile.writeAsBytes([0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00]);
 
       // Compress image (should return original since compression is disabled)
-      final resultFile = await ImageCompressionService.compressImage(testImageFile);
+      final resultFile = await MediaUtil.compressImage(testImageFile);
 
       // Should return the original file when compression is disabled
       expect(resultFile.path, equals(testImageFile.path));
@@ -85,7 +85,7 @@ void main() {
       await testImageFile.writeAsBytes([0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00]);
 
       // Compress image (should return original since quality is original)
-      final resultFile = await ImageCompressionService.compressImage(testImageFile);
+      final resultFile = await MediaUtil.compressImage(testImageFile);
 
       // Should return the original file when original quality is selected
       expect(resultFile.path, equals(testImageFile.path));
@@ -97,7 +97,7 @@ void main() {
     test('compressAndSaveImage method exists', () {
       // The compressAndSaveImage method is a public API method
       // We're testing that it exists in the class
-      expect(ImageCompressionService.compressAndSaveImage, isNotNull);
+      expect(MediaUtil.compressAndSaveImage, isNotNull);
     });
   });
 }

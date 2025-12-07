@@ -1,13 +1,11 @@
 import 'note_business_service.dart';
-import 'media_service.dart';
+import 'package:mindlog/utils/media_util.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/data/note_service.dart';
-import 'package:mindlog/services/filename_utility_service.dart';
 import 'package:get/get.dart';
 
 class CombinedNoteService {
   final NoteBusinessService _noteService = NoteBusinessService();
-  final MediaService _mediaService = MediaService();
 
   Future<void> init() async {
     await _noteService.init();
@@ -22,9 +20,9 @@ class CombinedNoteService {
     String? notebookId,
   }) async {
     // Generate new UUID-based filenames for all media files
-    final imageNames = imagesToCopy?.map((e) => FilenameUtilityService.generateImageFilename(e)).toList();
-    final videoNames = videosToCopy?.map((e) => FilenameUtilityService.generateVideoFilename(e)).toList();
-    final audioNames = audiosToCopy?.map((e) => FilenameUtilityService.generateAudioFilename(e)).toList();
+    final imageNames = imagesToCopy?.map((e) => MediaUtil.generateImageFilename(e)).toList();
+    final videoNames = videosToCopy?.map((e) => MediaUtil.generateVideoFilename(e)).toList();
+    final audioNames = audiosToCopy?.map((e) => MediaUtil.generateAudioFilename(e)).toList();
 
     // Create the note first with the new UUID-based filenames
     final noteId = await _noteService.createNote(
@@ -38,7 +36,7 @@ class CombinedNoteService {
     // Copy media files to the appropriate directories using the UUID-based filenames
     if (imagesToCopy != null) {
       for (int i = 0; i < imagesToCopy.length; i++) {
-        await _mediaService.saveImage(
+        await MediaUtil.saveImageToNote(
           noteId,
           imageNames![i],
           imagesToCopy[i],
@@ -48,7 +46,7 @@ class CombinedNoteService {
 
     if (videosToCopy != null) {
       for (int i = 0; i < videosToCopy.length; i++) {
-        await _mediaService.saveVideo(
+        await MediaUtil.saveVideoToNote(
           noteId,
           videoNames![i],
           videosToCopy[i],
@@ -58,7 +56,7 @@ class CombinedNoteService {
 
     if (audiosToCopy != null) {
       for (int i = 0; i < audiosToCopy.length; i++) {
-        await _mediaService.saveAudio(
+        await MediaUtil.saveAudioToNote(
           noteId,
           audioNames![i],
           audiosToCopy[i],
@@ -73,7 +71,7 @@ class CombinedNoteService {
       if (videosToCopy != null) allMediaPaths.addAll(videosToCopy);
       if (audiosToCopy != null) allMediaPaths.addAll(audiosToCopy);
 
-      await _mediaService.cleanupCacheFiles(allMediaPaths);
+      await MediaUtil.cleanupCacheFiles(allMediaPaths);
     }
 
     return noteId;
@@ -96,7 +94,7 @@ class CombinedNoteService {
 
   // Get all media paths for a note
   Future<Map<String, List<String>>> getNoteMedia(String noteId) async {
-    return await _mediaService.getNoteMedia(noteId);
+    return await MediaUtil.getNoteMedia(noteId);
   }
 
   // Update a note with optional media additions
@@ -122,8 +120,8 @@ class CombinedNoteService {
     if (newImagesToCopy != null) {
       List<String> newImageNames = [];
       for (final imagePath in newImagesToCopy) {
-        final newImageName = FilenameUtilityService.generateImageFilename(imagePath);
-        await _mediaService.saveImage(id, newImageName, imagePath);
+        final newImageName = MediaUtil.generateImageFilename(imagePath);
+        await MediaUtil.saveImageToNote(id, newImageName, imagePath);
         newImageNames.add(newImageName);
       }
       updatedImageNames = [...existingNote.images, ...newImageNames];
@@ -132,8 +130,8 @@ class CombinedNoteService {
     if (newVideosToCopy != null) {
       List<String> newVideoNames = [];
       for (final videoPath in newVideosToCopy) {
-        final newVideoName = FilenameUtilityService.generateVideoFilename(videoPath);
-        await _mediaService.saveVideo(id, newVideoName, videoPath);
+        final newVideoName = MediaUtil.generateVideoFilename(videoPath);
+        await MediaUtil.saveVideoToNote(id, newVideoName, videoPath);
         newVideoNames.add(newVideoName);
       }
       updatedVideoNames = [...existingNote.videos, ...newVideoNames];
@@ -142,8 +140,8 @@ class CombinedNoteService {
     if (newAudiosToCopy != null) {
       List<String> newAudioNames = [];
       for (final audioPath in newAudiosToCopy) {
-        final newAudioName = FilenameUtilityService.generateAudioFilename(audioPath);
-        await _mediaService.saveAudio(id, newAudioName, audioPath);
+        final newAudioName = MediaUtil.generateAudioFilename(audioPath);
+        await MediaUtil.saveAudioToNote(id, newAudioName, audioPath);
         newAudioNames.add(newAudioName);
       }
       updatedAudioNames = [...existingNote.audios, ...newAudioNames];
@@ -169,7 +167,7 @@ class CombinedNoteService {
       if (newVideosToCopy != null) allMediaPaths.addAll(newVideosToCopy);
       if (newAudiosToCopy != null) allMediaPaths.addAll(newAudiosToCopy);
 
-      await _mediaService.cleanupCacheFiles(allMediaPaths);
+      await MediaUtil.cleanupCacheFiles(allMediaPaths);
     }
   }
 
@@ -233,15 +231,15 @@ class CombinedNoteService {
 
     // Delete the media files that are no longer needed
     for (String imageName in deletedImages) {
-      await _mediaService.deleteImage(noteId, imageName);
+      await MediaUtil.deleteImageFromMediaService(noteId, imageName);
     }
 
     for (String videoName in deletedVideos) {
-      await _mediaService.deleteVideo(noteId, videoName);
+      await MediaUtil.deleteVideoFromMediaService(noteId, videoName);
     }
 
     for (String audioName in deletedAudios) {
-      await _mediaService.deleteAudio(noteId, audioName);
+      await MediaUtil.deleteAudioFromMediaService(noteId, audioName);
     }
   }
 
@@ -262,7 +260,7 @@ class CombinedNoteService {
     }
 
     // Delete all associated media files
-    await _mediaService.deleteNoteMedia(id);
+    await MediaUtil.deleteNoteMediaFromMediaService(id);
 
     // Then mark the note as deleted (soft delete with is_deleted=true)
     await _noteService.deleteNote(id);

@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:mindlog/controllers/note_controller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
-import 'package:mindlog/services/image_compression_service.dart';
+import 'package:mindlog/utils/media_util.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
@@ -195,7 +195,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             if (await imageFile.exists()) {
               // Use compressAndSaveImage to handle both compression and saving
               final savedImagePath =
-                  await ImageCompressionService.compressAndSaveImage(
+                  await MediaUtil.compressAndSaveImage(
                     '', // Will be set when note is created
                     imageFile,
                     null,
@@ -271,7 +271,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           if (await imageFile.exists()) {
             // Use compressAndSaveImage to handle both compression and saving
             final savedImagePath =
-                await ImageCompressionService.compressAndSaveImage(
+                await MediaUtil.compressAndSaveImage(
                   noteId,
                   imageFile,
                   null,

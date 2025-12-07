@@ -1,15 +1,13 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mindlog/data/services/media_service.dart';
+import 'package:mindlog/utils/media_util.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  late MediaService mediaService;
 
   setUp(() async {
-    mediaService = MediaService();
   });
 
   group('MediaService Tests', () {
@@ -28,34 +26,34 @@ void main() {
       await testAudioFile.writeAsBytes([10, 11, 12, 13, 14]);
 
       // Test creating image directory by saving an image
-      await mediaService.saveImage(
+      await MediaUtil.saveImageToNote(
         noteId,
         'test_image.jpg',
         testImageFile.path,
       );
-      final images = await mediaService.getNoteImages(noteId);
+      final images = await MediaUtil.getNoteImagesFromMediaService(noteId);
       expect(images.length, greaterThan(0));
 
       // Test creating video directory by saving a video
-      await mediaService.saveVideo(
+      await MediaUtil.saveVideoToNote(
         noteId,
         'test_video.mp4',
         testVideoFile.path,
       );
-      final videos = await mediaService.getNoteVideos(noteId);
+      final videos = await MediaUtil.getNoteVideosFromMediaService(noteId);
       expect(videos.length, greaterThan(0));
 
       // Test creating audio directory by saving audio
-      await mediaService.saveAudio(
+      await MediaUtil.saveAudioToNote(
         noteId,
         'test_audio.mp3',
         testAudioFile.path,
       );
-      final audios = await mediaService.getNoteAudios(noteId);
+      final audios = await MediaUtil.getNoteAudiosFromMediaService(noteId);
       expect(audios.length, greaterThan(0));
 
       // Clean up
-      await mediaService.deleteNoteMedia(noteId);
+      await MediaUtil.deleteNoteMediaFromMediaService(noteId);
       await testImageFile.delete();
       await testVideoFile.delete();
       await testAudioFile.delete();
@@ -70,7 +68,7 @@ void main() {
       await testFile.writeAsBytes([0, 1, 2, 3, 4]); // Write dummy data
 
       // Save the image to the note's directory
-      final savedPath = await mediaService.saveImage(
+      final savedPath = await MediaUtil.saveImageToNote(
         noteId,
         'test_image.jpg',
         testFile.path,
@@ -81,7 +79,7 @@ void main() {
       expect(savedPath.contains('test_image.jpg'), isTrue);
 
       // Check if we can retrieve the image
-      final images = await mediaService.getNoteImages(noteId);
+      final images = await MediaUtil.getNoteImagesFromMediaService(noteId);
       expect(images.length, equals(1));
       expect(images.first, equals(savedPath));
 
@@ -107,12 +105,12 @@ void main() {
       await testAudio.writeAsBytes([10, 11, 12, 13, 14]);
 
       // Save all media types to the note
-      await mediaService.saveImage(noteId, 'test_image.jpg', testImage.path);
-      await mediaService.saveVideo(noteId, 'test_video.mp4', testVideo.path);
-      await mediaService.saveAudio(noteId, 'test_audio.mp3', testAudio.path);
+      await MediaUtil.saveImageToNote(noteId, 'test_image.jpg', testImage.path);
+      await MediaUtil.saveVideoToNote(noteId, 'test_video.mp4', testVideo.path);
+      await MediaUtil.saveAudioToNote(noteId, 'test_audio.mp3', testAudio.path);
 
       // Get all media for the note
-      final noteMedia = await mediaService.getNoteMedia(noteId);
+      final noteMedia = await MediaUtil.getNoteMedia(noteId);
 
       expect(noteMedia['images']!.length, equals(1));
       expect(noteMedia['videos']!.length, equals(1));
@@ -142,17 +140,17 @@ void main() {
       await testImage.writeAsBytes([0, 1, 2, 3, 4]);
 
       // Save image to note
-      await mediaService.saveImage(noteId, 'test_image.jpg', testImage.path);
+      await MediaUtil.saveImageToNote(noteId, 'test_image.jpg', testImage.path);
 
       // Verify file exists
-      final imagesBefore = await mediaService.getNoteImages(noteId);
+      final imagesBefore = await MediaUtil.getNoteImagesFromMediaService(noteId);
       expect(imagesBefore.length, equals(1));
 
       // Delete all media for the note
-      await mediaService.deleteNoteMedia(noteId);
+      await MediaUtil.deleteNoteMediaFromMediaService(noteId);
 
       // Verify files are deleted
-      final imagesAfter = await mediaService.getNoteImages(noteId);
+      final imagesAfter = await MediaUtil.getNoteImagesFromMediaService(noteId);
       expect(imagesAfter.length, equals(0));
 
       // Clean up
