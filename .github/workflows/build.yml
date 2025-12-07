@@ -24,11 +24,11 @@ jobs:
         fi
         
         echo "Tag name: $TAG_NAME"
-        echo "::set-output name=tag::$TAG_NAME"
+        echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
         
         # Extract version from tag (removing 'v' prefix if present)
         VERSION=$(echo "$TAG_NAME" | sed 's/^v//')
-        echo "::set-output name=version::$VERSION"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
     
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -88,11 +88,11 @@ jobs:
         fi
         
         echo "Tag name: $TAG_NAME"
-        echo "::set-output name=tag::$TAG_NAME"
+        echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
         
         # Extract version from tag (removing 'v' prefix if present)
         VERSION=$(echo "$TAG_NAME" | sed 's/^v//')
-        echo "::set-output name=version::$VERSION"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
     
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
@@ -138,11 +138,11 @@ jobs:
         fi
         
         echo "Tag name: $TAG_NAME"
-        echo "::set-output name=tag::$TAG_NAME"
+        echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
         
         # Extract version from tag (removing 'v' prefix if present)
         VERSION=$(echo "$TAG_NAME" | sed 's/^v//')
-        echo "::set-output name=version::$VERSION"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
     
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
@@ -195,11 +195,11 @@ jobs:
         fi
         
         echo "Tag name: $TAG_NAME"
-        echo "::set-output name=tag::$TAG_NAME"
+        echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
         
         # Extract version from tag (removing 'v' prefix if present)
         VERSION=$(echo "$TAG_NAME" | sed 's/^v//')
-        echo "::set-output name=version::$VERSION"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Download all artifacts
       uses: actions/download-artifact@v4
