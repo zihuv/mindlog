@@ -3,6 +3,7 @@ import 'media_service.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/data/note_service.dart';
 import 'package:mindlog/services/filename_utility_service.dart';
+import 'package:get/get.dart';
 
 class CombinedNoteService {
   final NoteBusinessService _noteService = NoteBusinessService();
@@ -311,7 +312,10 @@ class CombinedNoteService {
       audios: audios ?? [],
     );
 
-    await NoteService.instance.saveNote(note);
+    final service = Get.find<NoteService>();
+    // Ensure the service is initialized before using it
+    await service.init();
+    await service.saveNote(note);
   }
 
   // Close the services

@@ -119,10 +119,6 @@ class NoteController extends GetxController {
     }
   }
 
-  Future<List<Note>> getAllNotes() async {
-    return await _service.getAllNotes();
-  }
-
   Future<Note?> getNoteById(String id) async {
     logger.debug('NoteController.getNoteById: $id');
     final note = await _service.getNoteById(id);

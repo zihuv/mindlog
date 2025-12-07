@@ -7,6 +7,7 @@ import 'package:mindlog/features/notes/presentation/widgets/note_editor_screen.d
 
 import 'package:mindlog/features/settings/presentation/pages/settings_page.dart';
 import 'package:mindlog/utils/log_util.dart';
+import 'package:get/get.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
@@ -27,7 +28,7 @@ class _NotesPageState extends State<NotesPage> {
 
   Future<void> _loadNotes() async {
     try {
-      _allNotes = await NoteService.instance.getAllNotes();
+      _allNotes = await Get.find<NoteService>().getAllNotes();
       _sortNotes();
       setState(() {
         _isLoading = false;
@@ -114,7 +115,7 @@ class _NotesPageState extends State<NotesPage> {
       if (!contextLocal.mounted) return;
 
       try {
-        await NoteService.instance.deleteNote(note.id);
+        await Get.find<NoteService>().deleteNote(note.id);
         setState(() {
           _allNotes.removeWhere((m) => m.id == note.id);
         });

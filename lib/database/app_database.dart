@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:get/get.dart' hide Value;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:mindlog/utils/log_util.dart';
@@ -108,12 +109,8 @@ class AppDatabase extends _$AppDatabase {
 }
 
 // Singleton instance to ensure only one database instance exists
-class DatabaseProvider {
-  static DatabaseProvider? _instance;
-  static DatabaseProvider get instance {
-    _instance ??= DatabaseProvider();
-    return _instance!;
-  }
+class DatabaseProvider extends GetxService {
+  static DatabaseProvider get instance => Get.find();
 
   AppDatabase? _database;
 

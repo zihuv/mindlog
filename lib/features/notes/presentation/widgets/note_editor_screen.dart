@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/data/note_service.dart';
 import 'package:uuid/uuid.dart';
+import 'package:get/get.dart';
 
 class NoteEditorScreen extends StatefulWidget {
   final Function(Note note)? onSave;
@@ -180,7 +181,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     }
 
     // Save to storage
-    await NoteService.instance.saveNote(note);
+    await Get.find<NoteService>().saveNote(note);
 
     // Check if the context is still valid before proceeding
     if (!contextLocal.mounted) return;

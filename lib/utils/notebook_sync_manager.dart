@@ -6,6 +6,7 @@ import 'package:webdav_client/webdav_client.dart' as webdav;
 
 import 'package:mindlog/features/notebooks/domain/entities/notebook.dart';
 import 'package:mindlog/features/notebooks/notebook_service.dart';
+import 'package:get/get.dart';
 import 'log_util.dart';
 
 class NotebookSyncManager {
@@ -17,7 +18,7 @@ class NotebookSyncManager {
   late NotebookService _notebookService;
 
   NotebookSyncManager({NotebookService? notebookService}) {
-    _notebookService = notebookService ?? NotebookService.instance;
+    _notebookService = notebookService ?? Get.find<NotebookService>();
   }
 
   Future<void> initClient(

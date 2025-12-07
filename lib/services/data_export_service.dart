@@ -342,7 +342,7 @@ class DataExportService {
 
     if (dbFile != null) {
       // Close current database connection
-      await DatabaseProvider.instance.close();
+      await Get.find<DatabaseProvider>().close();
 
       // Write the database file to the appropriate location
       final appDir = await getApplicationDocumentsDirectory();
@@ -370,7 +370,7 @@ class DataExportService {
 
       if (dbFile != null) {
         // Close current database connection
-        await DatabaseProvider.instance.close();
+        await Get.find<DatabaseProvider>().close();
 
         // Write the database file to the appropriate location
         final appDir = await getApplicationDocumentsDirectory();
@@ -395,13 +395,13 @@ class DataExportService {
   Future<void> _reinitializeDatabaseConnection() async {
     try {
       // Close the existing database connection
-      await DatabaseProvider.instance.close();
+      await Get.find<DatabaseProvider>().close();
 
       // Wait a moment to ensure connection is fully closed
       await Future.delayed(const Duration(milliseconds: 100));
 
       // Reset the database provider to force reinitialization
-      await DatabaseProvider.instance.reset();
+      await Get.find<DatabaseProvider>().reset();
 
       // The database will be reinitialized when accessed again
       logger.debug('Database connection reinitialized successfully');

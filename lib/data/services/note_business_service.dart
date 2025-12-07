@@ -1,12 +1,15 @@
 import 'package:mindlog/features/notes/data/note_service.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:uuid/uuid.dart';
+import 'package:get/get.dart';
 
 class NoteBusinessService {
   static const Uuid _uuid = Uuid();
 
   Future<void> init() async {
-    await NoteService.instance.init();
+    final service = Get.find<NoteService>();
+    // Ensure the service is initialized before using it
+    await service.init();
   }
 
   // Create a new note
@@ -32,23 +35,23 @@ class NoteBusinessService {
       audios: audioName ?? [],
     );
 
-    await NoteService.instance.saveNote(note);
+    await Get.find<NoteService>().saveNote(note);
     return noteId;
   }
 
   // Get all notes
   Future<List<Note>> getAllNotes() async {
-    return await NoteService.instance.getAllNotes();
+    return await Get.find<NoteService>().getAllNotes();
   }
 
   // Get all notes including deleted ones for sync purposes
   Future<List<Note>> getAllNotesForSync() async {
-    return await NoteService.instance.getAllNotesForSync();
+    return await Get.find<NoteService>().getAllNotesForSync();
   }
 
   // Get a note by ID
   Future<Note?> getNoteById(String id) async {
-    return await NoteService.instance.getNoteById(id);
+    return await Get.find<NoteService>().getNoteById(id);
   }
 
   // Update a note
@@ -61,7 +64,7 @@ class NoteBusinessService {
     String? notebookId,
     DateTime? updateTime, // Allow specifying updateTime from cloud
   }) async {
-    final existingNote = await NoteService.instance.getNoteById(id);
+    final existingNote = await Get.find<NoteService>().getNoteById(id);
     if (existingNote == null) {
       throw Exception('Note with id $id does not exist');
     }
@@ -78,12 +81,12 @@ class NoteBusinessService {
       audios: audioName ?? existingNote.audios,
     );
 
-    await NoteService.instance.updateNote(updatedNote);
+    await Get.find<NoteService>().updateNote(updatedNote);
   }
 
   // Delete a note
   Future<void> deleteNote(String id) async {
-    await NoteService.instance.deleteNote(id);
+    await Get.find<NoteService>().deleteNote(id);
   }
 
   // Search notes by content
@@ -91,22 +94,22 @@ class NoteBusinessService {
     if (query.trim().isEmpty) {
       return await getAllNotes();
     }
-    return await NoteService.instance.searchNotes(query);
+    return await Get.find<NoteService>().searchNotes(query);
   }
 
   // Get notes by notebook ID
   Future<List<Note>> getNotesByNotebookId(String notebookId) async {
-    return await NoteService.instance.getNotesByNotebookId(notebookId);
+    return await Get.find<NoteService>().getNotesByNotebookId(notebookId);
   }
 
   // Get notes by date
   Future<List<Note>> getNotesByDate(DateTime date) async {
-    return await NoteService.instance.getNotesByDate(date);
+    return await Get.find<NoteService>().getNotesByDate(date);
   }
 
   // Get all unique tags
   Future<List<String>> getAllTags() async {
-    return await NoteService.instance.getAllTags();
+    return await Get.find<NoteService>().getAllTags();
   }
 
   // Close the connection

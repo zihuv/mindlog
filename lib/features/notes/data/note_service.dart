@@ -1,21 +1,25 @@
 import 'package:mindlog/features/notes/data/note_storage_repository.dart';
 import 'package:mindlog/features/notes/data/note_database_repository.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
+import 'package:get/get.dart';
 
-class NoteService {
+class NoteService extends GetxService {
   NoteStorageRepository? _repository;
 
-  static NoteService? _instance;
-  static NoteService get instance {
-    _instance ??= NoteService();
-    return _instance!;
-  }
+  static NoteService get instance => Get.find<NoteService>();
 
   NoteStorageRepository get repository {
     if (_repository == null) {
       throw Exception('NoteService not initialized. Call init() first.');
     }
     return _repository!;
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Initialize the service when GetX creates it
+    init();
   }
 
   Future<void> init() async {

@@ -1,21 +1,25 @@
 import 'package:mindlog/utils/log_util.dart';
 import 'package:mindlog/features/notebooks/data/notebook_database_repository.dart';
 import 'package:mindlog/features/notebooks/domain/entities/notebook.dart';
+import 'package:get/get.dart';
 
-class NotebookService {
+class NotebookService extends GetxService {
   NotebookDatabaseRepository? _repository;
 
-  static NotebookService? _instance;
-  static NotebookService get instance {
-    _instance ??= NotebookService();
-    return _instance!; // This is safe because we just assigned it if it was null
-  }
+  static NotebookService get instance => Get.find<NotebookService>();
 
   NotebookDatabaseRepository get repository {
     if (_repository == null) {
       throw Exception('NotebookService not initialized. Call init() first.');
     }
     return _repository!;
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Initialize the service when GetX creates it
+    init();
   }
 
   Future<void> init() async {

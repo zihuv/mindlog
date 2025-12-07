@@ -1,7 +1,7 @@
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mindlog/controllers/note_controller.dart';
+import 'package:mindlog/features/notes/data/note_service.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/presentation/screens/note_detail_screen.dart';
 import 'package:mindlog/features/notes/presentation/widgets/note_card.dart';
@@ -19,7 +19,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedMonth = DateTime.now();
   List<Note> _notesForSelectedDate = [];
-  NoteController? _noteController;
   bool _isLoading = false;
   CalendarFormat _calendarFormat = CalendarFormat.month;
   Map<DateTime, List<NoteEvent>> _events = {};
@@ -27,13 +26,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    // Try to find the controller, and if not found, initialize it
-    try {
-      _noteController = Get.find<NoteController>();
-    } catch (e) {
-      // If the controller is not found, create and register it
-      _noteController = Get.put(NoteController());
-    }
     _currentDate = DateTime.now();
     _focusedDay = DateTime.now();
     _selectedMonth = DateTime.now();
@@ -45,7 +37,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void _loadAllEvents() async {
-    final notes = await _noteController!.getAllNotes();
+    final notes = await Get.find<NoteService>().getAllNotes();
     final events = <DateTime, List<NoteEvent>>{};
 
     for (final note in notes) {
@@ -71,8 +63,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     });
 
     try {
-      // Get notes specifically for the selected date using the controller's method
-      final notesForDate = await _noteController!.getNotesByDate(date);
+      // Get notes specifically for the selected date using the service directly
+      final notesForDate = await Get.find<NoteService>().getNotesByDate(date);
 
       setState(() {
         _notesForSelectedDate = notesForDate;

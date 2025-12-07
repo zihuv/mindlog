@@ -5,6 +5,9 @@ import 'controllers/note_controller.dart';
 import 'controllers/notebooks/notebook_controller.dart';
 import 'ui/design_system/app_theme.dart';
 import 'utils/log_util.dart';
+import 'features/notes/data/note_service.dart';
+import 'features/notebooks/notebook_service.dart';
+import 'database/app_database.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +33,10 @@ class MyApp extends StatelessWidget {
 class AppBindings extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<NoteController>(() => NoteController());
-    Get.lazyPut<NotebookController>(() => NotebookController());
+    Get.put(DatabaseProvider());
+    Get.put(NoteService());
+    Get.put(NotebookService());
+    Get.put<NoteController>(NoteController());
+    Get.put<NotebookController>(NotebookController());
   }
 }

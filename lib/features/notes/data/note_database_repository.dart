@@ -3,6 +3,7 @@ import 'package:mindlog/database/app_database.dart' as db;
 import 'package:mindlog/database/note_dao.dart' show NoteDao, NoteData;
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:uuid/uuid.dart';
+import 'package:get/get.dart';
 
 import 'note_storage_repository.dart';
 import 'package:mindlog/utils/log_util.dart';
@@ -14,7 +15,7 @@ class NoteDatabaseRepository implements NoteStorageRepository {
 
   @override
   Future<void> initialize() async {
-    _database = db.DatabaseProvider.instance.database;
+    _database = Get.find<db.DatabaseProvider>().database;
     _noteDao = NoteDao(_database);
   }
 

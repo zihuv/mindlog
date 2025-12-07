@@ -5,7 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:mindlog/services/data_export_service.dart';
 import 'package:mindlog/controllers/note_controller.dart';
 import 'package:mindlog/controllers/notebooks/notebook_controller.dart';
-import 'package:mindlog/database/app_database.dart' as db;
+import 'package:mindlog/database/app_database.dart';
 import 'package:mindlog/features/notes/data/note_service.dart';
 import 'package:mindlog/features/notebooks/notebook_service.dart';
 import 'package:mindlog/utils/log_util.dart';
@@ -234,11 +234,11 @@ class BackupScreen extends StatelessWidget {
       await Future.delayed(const Duration(milliseconds: 500));
 
       // Force reinitialization of database provider
-      await db.DatabaseProvider.instance.reset();
+      await Get.find<DatabaseProvider>().reset();
 
       // Reset services to force re-initialization with new database
-      await NoteService.instance.reset();
-      await NotebookService.instance.reset();
+      await Get.find<NoteService>().reset();
+      await Get.find<NotebookService>().reset();
 
       // Add another delay to ensure database is fully reset
       await Future.delayed(const Duration(milliseconds: 200));

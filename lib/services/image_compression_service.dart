@@ -51,8 +51,7 @@ class ImageCompressionService {
       case ImageQuality.original:
         return _originalQuality;
       case ImageQuality.standard:
-      default:
-        return _standardQuality;
+      return _standardQuality;
     }
   }
 

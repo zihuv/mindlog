@@ -1,9 +1,10 @@
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:mindlog/database/app_database.dart';
 import 'package:mindlog/database/note_dao.dart';
 import 'package:mindlog/features/notebooks/domain/entities/notebook.dart'
     as domain_notebook;
 import 'package:uuid/uuid.dart';
+import 'package:get/get.dart';
 
 import 'notebook_storage_repository.dart';
 
@@ -14,7 +15,7 @@ class NotebookDatabaseRepository implements NotebookStorageRepository {
 
   @override
   Future<void> initialize() async {
-    _database = DatabaseProvider.instance.database;
+    _database = Get.find<DatabaseProvider>().database;
     _noteDao = NoteDao(_database);
   }
 
@@ -41,14 +42,14 @@ class NotebookDatabaseRepository implements NotebookStorageRepository {
 
     await _noteDao.insertNotebook(
       NotebooksCompanion(
-        id: Value(id),
-        title: Value(notebook.title),
-        description: Value(notebook.description),
-        coverImage: Value(notebook.coverImage),
-        type: Value(notebook.type.toString().split('.').last.toLowerCase()),
-        sortIndex: Value(notebook.sortIndex),
-        createTime: Value(notebook.createTime),
-        updateTime: Value(notebook.updateTime),
+        id: drift.Value(id),
+        title: drift.Value(notebook.title),
+        description: drift.Value(notebook.description),
+        coverImage: drift.Value(notebook.coverImage),
+        type: drift.Value(notebook.type.toString().split('.').last.toLowerCase()),
+        sortIndex: drift.Value(notebook.sortIndex),
+        createTime: drift.Value(notebook.createTime),
+        updateTime: drift.Value(notebook.updateTime),
       ),
     );
 
@@ -59,15 +60,15 @@ class NotebookDatabaseRepository implements NotebookStorageRepository {
   Future<void> updateNotebook(domain_notebook.Notebook notebook) async {
     await _noteDao.updateNotebook(
       NotebooksCompanion(
-        title: Value(notebook.title),
-        description: Value(notebook.description),
-        coverImage: Value(notebook.coverImage),
-        type: Value(notebook.type.toString().split('.').last.toLowerCase()),
-        sortIndex: Value(notebook.sortIndex),
-        createTime: Value(
+        title: drift.Value(notebook.title),
+        description: drift.Value(notebook.description),
+        coverImage: drift.Value(notebook.coverImage),
+        type: drift.Value(notebook.type.toString().split('.').last.toLowerCase()),
+        sortIndex: drift.Value(notebook.sortIndex),
+        createTime: drift.Value(
           notebook.createTime,
         ), // Keep original creation createTime
-        updateTime: Value(notebook.updateTime ?? DateTime.now()),
+        updateTime: drift.Value(notebook.updateTime ?? DateTime.now()),
       ),
       notebook.id,
     );
