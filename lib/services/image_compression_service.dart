@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mindlog/data/services/media_service.dart';
 import 'package:mindlog/utils/log_util.dart';
+import 'package:mindlog/services/filename_utility_service.dart';
 
 enum ImageQuality { low, standard, high, original }
 
@@ -127,15 +128,15 @@ class ImageCompressionService {
     String? fileName,
   ) async {
     logger.info('Starting compressAndSaveImage for noteId: $noteId');
-    
+
     // First compress the image
     final compressedFile = await compressImage(imageFile);
 
     // Get media service instance
     final mediaService = MediaService();
 
-    final newFileName = fileName ??
-        '${DateTime.now().millisecondsSinceEpoch}.${_getFileExtension(compressedFile.path)}';
+    // Generate new filename with UUID v7 if no filename provided
+    final newFileName = fileName ?? FilenameUtilityService.generateImageFilename(compressedFile.path);
 
     // Save the compressed file to the note's media directory
     final savedPath = await mediaService.saveImage(
@@ -159,14 +160,4 @@ class ImageCompressionService {
     return savedPath;
   }
 
-  // Helper method to get file extension
-  static String _getFileExtension(String filePath) {
-    final extension = filePath.split('.').last.toLowerCase();
-    // Ensure we return a valid image extension
-    if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp'].contains(extension)) {
-      return extension;
-    }
-    // Default to jpg if extension is not recognized
-    return 'jpg';
-  }
 }

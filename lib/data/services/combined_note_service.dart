@@ -2,7 +2,7 @@ import 'note_business_service.dart';
 import 'media_service.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/data/note_service.dart';
-import 'dart:io';
+import 'package:mindlog/services/filename_utility_service.dart';
 
 class CombinedNoteService {
   final NoteBusinessService _noteService = NoteBusinessService();
@@ -20,43 +20,47 @@ class CombinedNoteService {
     List<String>? audiosToCopy, // Source paths for audios to be copied
     String? notebookId,
   }) async {
-    // Create the note first
+    // Generate new UUID-based filenames for all media files
+    final imageNames = imagesToCopy?.map((e) => FilenameUtilityService.generateImageFilename(e)).toList();
+    final videoNames = videosToCopy?.map((e) => FilenameUtilityService.generateVideoFilename(e)).toList();
+    final audioNames = audiosToCopy?.map((e) => FilenameUtilityService.generateAudioFilename(e)).toList();
+
+    // Create the note first with the new UUID-based filenames
     final noteId = await _noteService.createNote(
       content: content,
-      imageName: imagesToCopy?.map((e) => e.split('/').last).toList(),
-      videoName: videosToCopy?.map((e) => e.split('/').last).toList(),
-      audioName: audiosToCopy?.map((e) => e.split('/').last).toList(),
+      imageName: imageNames,
+      videoName: videoNames,
+      audioName: audioNames,
       notebookId: notebookId,
     );
 
-    // Copy media files to the appropriate directories
+    // Copy media files to the appropriate directories using the UUID-based filenames
     if (imagesToCopy != null) {
-      for (final imagePath in imagesToCopy) {
-        // Images are already compressed, just save them
+      for (int i = 0; i < imagesToCopy.length; i++) {
         await _mediaService.saveImage(
           noteId,
-          imagePath.split('/').last,
-          imagePath,
+          imageNames![i],
+          imagesToCopy[i],
         );
       }
     }
 
     if (videosToCopy != null) {
-      for (final videoPath in videosToCopy) {
+      for (int i = 0; i < videosToCopy.length; i++) {
         await _mediaService.saveVideo(
           noteId,
-          videoPath.split('/').last,
-          videoPath,
+          videoNames![i],
+          videosToCopy[i],
         );
       }
     }
 
     if (audiosToCopy != null) {
-      for (final audioPath in audiosToCopy) {
+      for (int i = 0; i < audiosToCopy.length; i++) {
         await _mediaService.saveAudio(
           noteId,
-          audioPath.split('/').last,
-          audioPath,
+          audioNames![i],
+          audiosToCopy[i],
         );
       }
     }
@@ -117,9 +121,9 @@ class CombinedNoteService {
     if (newImagesToCopy != null) {
       List<String> newImageNames = [];
       for (final imagePath in newImagesToCopy) {
-        // Images are already compressed, just save them
-        await _mediaService.saveImage(id, imagePath.split('/').last, imagePath);
-        newImageNames.add(imagePath.split('/').last);
+        final newImageName = FilenameUtilityService.generateImageFilename(imagePath);
+        await _mediaService.saveImage(id, newImageName, imagePath);
+        newImageNames.add(newImageName);
       }
       updatedImageNames = [...existingNote.images, ...newImageNames];
     }
@@ -127,8 +131,9 @@ class CombinedNoteService {
     if (newVideosToCopy != null) {
       List<String> newVideoNames = [];
       for (final videoPath in newVideosToCopy) {
-        await _mediaService.saveVideo(id, videoPath.split('/').last, videoPath);
-        newVideoNames.add(videoPath.split('/').last);
+        final newVideoName = FilenameUtilityService.generateVideoFilename(videoPath);
+        await _mediaService.saveVideo(id, newVideoName, videoPath);
+        newVideoNames.add(newVideoName);
       }
       updatedVideoNames = [...existingNote.videos, ...newVideoNames];
     }
@@ -136,8 +141,9 @@ class CombinedNoteService {
     if (newAudiosToCopy != null) {
       List<String> newAudioNames = [];
       for (final audioPath in newAudiosToCopy) {
-        await _mediaService.saveAudio(id, audioPath.split('/').last, audioPath);
-        newAudioNames.add(audioPath.split('/').last);
+        final newAudioName = FilenameUtilityService.generateAudioFilename(audioPath);
+        await _mediaService.saveAudio(id, newAudioName, audioPath);
+        newAudioNames.add(newAudioName);
       }
       updatedAudioNames = [...existingNote.audios, ...newAudioNames];
     }
