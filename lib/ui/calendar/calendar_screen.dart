@@ -158,18 +158,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
             // Table Calendar
             SliverToBoxAdapter(
-              child: Listener(
-                onPointerMove: (event) {
-                  // 捕获垂直滑动
-                  final delta = event.delta.dy;
-                  if (delta != 0) {
-                    // 模拟滚动
-                    _scrollController.jumpTo(
-                      _scrollController.offset - delta,
-                    );
-                  }
-                },
-                child: Container(
+              child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TableCalendar<NoteEvent>(
                   firstDay: DateTime.utc(2020, 1, 1),
@@ -248,7 +237,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     },
                   ),
                 ),
-              ),
               ),
             ),
 
