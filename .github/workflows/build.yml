@@ -213,14 +213,14 @@ jobs:
     - name: Read CHANGELOG.md
       id: changelog
       run: |
-        # Extract version from tag (removing 'v' prefix if present)
-        VERSION=${{ steps.get_tag.outputs.version }}
+        # Get the tag name which includes the 'v' prefix
+        TAG_NAME=${{ steps.get_tag.outputs.tag }}
         # Create release notes from CHANGELOG.md
         # We'll extract everything between the version header and the next version header or end of file
-        awk '/^## \['"${VERSION}"'\]/,/^## \[.*\]/' CHANGELOG.md | sed '$d' > RELEASE_NOTES.md
+        awk "/^## \\\[${TAG_NAME}\\\]/,/^## \\\[.*\\\]/" CHANGELOG.md | sed '$d' > RELEASE_NOTES.md
         # If RELEASE_NOTES.md is empty, it means the version wasn't found in CHANGELOG.md
         if [ ! -s RELEASE_NOTES.md ]; then
-          echo "Version ${VERSION} not found in CHANGELOG.md. Using default release notes."
+          echo "Version ${TAG_NAME} not found in CHANGELOG.md. Using default release notes."
           echo "# Release Notes" > RELEASE_NOTES.md
           echo "" >> RELEASE_NOTES.md
           echo "No specific release notes found for this version in CHANGELOG.md." >> RELEASE_NOTES.md
