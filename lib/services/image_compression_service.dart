@@ -61,7 +61,7 @@ class ImageCompressionService {
     final compressionEnabled = await isCompressionEnabled();
     if (!compressionEnabled) {
       // If compression is disabled, return the original file
-      logger.info('Image compression is disabled, returning original file');
+      logger.debug('Image compression is disabled, returning original file');
       return originalFile;
     }
 
@@ -70,11 +70,11 @@ class ImageCompressionService {
 
     // 获取原始文件大小
     final originalFileSize = await originalFile.length();
-    logger.info('Original image file size: ${originalFileSize / 1024} KB');
+    logger.debug('Original image file size: ${originalFileSize / 1024} KB');
 
     if (qualityValue >= _originalQuality) {
       // If original quality is selected, return the original file
-      logger.info('Original quality selected, returning original file');
+      logger.debug('Original quality selected, returning original file');
       return originalFile;
     }
 
@@ -83,8 +83,6 @@ class ImageCompressionService {
     final compressedPath =
         '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}_${originalFile.path.split('/').last}';
     final compressedFile = File(compressedPath);
-
-    logger.info('Starting image compression with quality: $qualityValue');
 
     // Compress the image with new dimensions
     await FlutterImageCompress.compressAndGetFile(
@@ -127,8 +125,6 @@ class ImageCompressionService {
     File imageFile,
     String? fileName,
   ) async {
-    logger.info('Starting compressAndSaveImage for noteId: $noteId');
-
     // First compress the image
     final compressedFile = await compressImage(imageFile);
 
@@ -156,7 +152,7 @@ class ImageCompressionService {
       }
     }
 
-    logger.info('Image saved to: $savedPath');
+    logger.debug('Image saved to: $savedPath');
     return savedPath;
   }
 
