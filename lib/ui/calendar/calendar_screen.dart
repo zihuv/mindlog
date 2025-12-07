@@ -1,14 +1,11 @@
-import 'dart:io';
-import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:mindlog/controllers/note_controller.dart';
 import 'package:mindlog/features/notes/domain/entities/note.dart';
 import 'package:mindlog/features/notes/presentation/screens/note_detail_screen.dart';
+import 'package:mindlog/features/notes/presentation/widgets/note_card.dart';
 import 'package:mindlog/ui/design_system/design_system.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -19,8 +16,13 @@ class CalendarScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<CalendarScreen> {
   DateTime? _currentDate;
+  DateTime _focusedDay = DateTime.now();
+  DateTime _selectedMonth = DateTime.now();
   List<Note> _notesForSelectedDate = [];
   NoteController? _noteController;
+  bool _isLoading = false;
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+  Map<DateTime, List<NoteEvent>> _events = {};
 
   @override
   void initState() {
@@ -33,62 +35,203 @@ class _CalendarScreenState extends State<CalendarScreen> {
       _noteController = Get.put(NoteController());
     }
     _currentDate = DateTime.now();
+    _focusedDay = DateTime.now();
+    _selectedMonth = DateTime.now();
     // Load notes for the current date
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadNotesForDate(_currentDate!);
+      _loadAllEvents();
     });
   }
 
-  Future<void> _loadNotesForDate(DateTime date) async {
-    if (_noteController?.isLoading ?? true) return;
+  void _loadAllEvents() async {
+    final notes = await _noteController!.getAllNotes();
+    final events = <DateTime, List<NoteEvent>>{};
 
-    // Get notes specifically for the selected date using the controller's method
-    final notesForDate = await _noteController!.getNotesByDate(date);
+    for (final note in notes) {
+      final date = DateTime(note.createTime.year, note.createTime.month, note.createTime.day);
+      if (!events.containsKey(date)) {
+        events[date] = [];
+      }
+      events[date]!.add(NoteEvent(note));
+    }
 
     setState(() {
-      _notesForSelectedDate = notesForDate;
+      _events = events;
     });
+  }
+
+  List<NoteEvent> _getEventsForDay(DateTime day) {
+    return _events[day] ?? [];
+  }
+
+  Future<void> _loadNotesForDate(DateTime date) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Get notes specifically for the selected date using the controller's method
+      final notesForDate = await _noteController!.getNotesByDate(date);
+
+      setState(() {
+        _notesForSelectedDate = notesForDate;
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _onMonthChanged(DateTime month) {
+    setState(() {
+      _selectedMonth = month;
+      _focusedDay = month;
+    });
+  }
+
+  void _showMonthPicker() async {
+    final selectedMonth = await showDatePicker(
+      context: context,
+      initialDate: _selectedMonth,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme,
+          ),
+          child: child!,
+        );
+      },
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
+    );
+    
+    if (selectedMonth != null) {
+      _onMonthChanged(DateTime(selectedMonth.year, selectedMonth.month));
+    }
+  }
+
+  // Helper function to check if two dates are in the same month
+  bool _isSameMonth(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Calendar',
-          style: TextStyle(
-            fontSize: AppFontSize.extraLarge,
-            fontWeight: AppFontWeight.bold,
-          ),
-        ),
-      ),
       body: Column(
         children: [
-          // Calendar picker
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: CalendarDatePicker2(
-              config: CalendarDatePicker2Config(
-                calendarType: CalendarDatePicker2Type.single,
-                selectedDayHighlightColor: Theme.of(
-                  context,
-                ).colorScheme.primary,
-                weekdayLabelTextStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontWeight: AppFontWeight.medium,
+          // Year-Month Selector
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${_selectedMonth.year}年${_selectedMonth.month}月',
+                  style: TextStyle(
+                    fontSize: AppFontSize.large,
+                    fontWeight: AppFontWeight.semiBold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
-                dayTextStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
+                IconButton(
+                  icon: Icon(
+                    Icons.calendar_month,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  onPressed: _showMonthPicker,
+                ),
+              ],
+            ),
+          ),
+
+          // Table Calendar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: TableCalendar<NoteEvent>(
+              firstDay: DateTime.utc(2020, 1, 1),
+              lastDay: DateTime.utc(2030, 12, 31),
+              focusedDay: _focusedDay,
+              selectedDayPredicate: (day) {
+                return isSameDay(_currentDate, day);
+              },
+              calendarFormat: _calendarFormat,
+              onFormatChanged: (format) {
+                setState(() {
+                  _calendarFormat = format;
+                });
+              },
+              onPageChanged: (focusedDay) {
+                _focusedDay = focusedDay;
+                // 同步更新顶部显示的月份
+                if (!_isSameMonth(_selectedMonth, focusedDay)) {
+                  setState(() {
+                    _selectedMonth = DateTime(focusedDay.year, focusedDay.month);
+                  });
+                }
+              },
+              eventLoader: _getEventsForDay,
+              weekendDays: const [DateTime.sunday, DateTime.saturday],
+              startingDayOfWeek: StartingDayOfWeek.sunday,
+              onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  _currentDate = selectedDay;
+                  _focusedDay = focusedDay;
+                });
+                _loadNotesForDate(selectedDay);
+              },
+              calendarStyle: CalendarStyle(
+                outsideDaysVisible: false,
+                selectedDecoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  shape: BoxShape.circle,
+                ),
+                todayDecoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2.0,
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                todayTextStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: AppFontWeight.bold,
+                ),
+                markerDecoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondary,
+                  shape: BoxShape.circle,
+                ),
+                weekendTextStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
                   fontWeight: AppFontWeight.normal,
                 ),
               ),
-              value: _currentDate != null ? [_currentDate!] : [],
-              onValueChanged: (List<DateTime?> dates) {
-                setState(() {
-                  _currentDate = dates.first;
-                });
-                _loadNotesForDate(_currentDate!);
-              },
+              headerStyle: const HeaderStyle(
+                formatButtonVisible: false,
+                titleCentered: true,
+                leftChevronVisible: false,
+                rightChevronVisible: false,
+                headerMargin: EdgeInsets.zero,
+                headerPadding: EdgeInsets.zero,
+                decoration: BoxDecoration(),
+              ),
+              daysOfWeekStyle: DaysOfWeekStyle(
+                weekdayStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontWeight: AppFontWeight.medium,
+                ),
+                weekendStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontWeight: AppFontWeight.medium,
+                ),
+                dowTextFormatter: (date, locale) {
+                  final weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+                  return weekdays[date.weekday % 7];
+                },
+              ),
             ),
           ),
 
@@ -100,7 +243,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${_currentDate!.day} ${_currentDate!.month} ${_currentDate!.year}',
+                    '${_currentDate!.year}-${_currentDate!.month}-${_currentDate!.day}',
                     style: TextStyle(
                       fontSize: AppFontSize.medium,
                       fontWeight: AppFontWeight.semiBold,
@@ -108,7 +251,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ),
                   ),
                   Text(
-                    '${_notesForSelectedDate.length} note(s)',
+                    '${_notesForSelectedDate.length} 条笔记',
                     style: TextStyle(
                       fontSize: AppFontSize.small,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -120,12 +263,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
           // Notes list for selected date
           Expanded(
-            child: (_noteController?.isLoading ?? true)
+            child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _notesForSelectedDate.isEmpty
                 ? Center(
                     child: Text(
-                      'No notes for this date',
+                      '该日期没有笔记',
                       style: TextStyle(
                         fontSize: AppFontSize.large,
                         fontWeight: AppFontWeight.normal,
@@ -143,90 +286,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       itemCount: _notesForSelectedDate.length,
                       itemBuilder: (context, index) {
                         final note = _notesForSelectedDate[index];
-                        return Card(
-                          margin: AppPadding.small,
-                          child: Stack(
-                            children: [
-                              // Full card tap gesture
-                              Positioned.fill(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Get.to(
-                                      () => NoteDetailScreen(noteId: note.id),
-                                    );
-                                  },
-                                  // This allows the gesture detector to be behind other widgets
-                                  behavior: HitTestBehavior.translucent,
-                                ),
-                              ),
-                              // Content and images
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Content area (always shown)
-                                  Container(
-                                    padding:
-                                        AppPadding.small, // Reduced padding
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          constraints: const BoxConstraints(
-                                            maxHeight:
-                                                60, // Limit height to 2 lines
-                                          ),
-                                          child: Text(
-                                            note.content.length > 50
-                                                ? '${note.content.substring(0, 50)}...'
-                                                : note.content,
-                                            style: TextStyle(
-                                              fontSize: AppFontSize.body,
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.onSurface,
-                                            ),
-                                          ),
-                                        ),
-                                        const Gap(2), // Reduced spacing
-                                        Text(
-                                          _formatDateTime(note.createTime),
-                                          style: TextStyle(
-                                            fontSize: AppFontSize
-                                                .small, // Smaller font size
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  // Image thumbnails grid if available (up to 9 images in 3x3 grid)
-                                  if (note.images.isNotEmpty)
-                                    FutureBuilder<List<String>>(
-                                      future: _getImagePaths(
-                                        note.id,
-                                        note.images.take(9).toList(),
-                                      ), // Limit to first 9 images
-                                      builder: (context, snapshot) {
-                                        if (snapshot.hasData &&
-                                            snapshot.data!.isNotEmpty) {
-                                          final imagePaths = snapshot.data!;
-                                          return Container(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: _buildImagesGrid(imagePaths),
-                                          );
-                                        } else {
-                                          // If image paths couldn't be retrieved, don't show any images
-                                          return const SizedBox.shrink();
-                                        }
-                                      },
-                                    ),
-                                ],
-                              ),
-                            ],
-                          ),
+                        return NoteCard(
+                          note: note,
+                          onEdit: () {
+                            Get.to(
+                              () => NoteDetailScreen(noteId: note.id),
+                            );
+                          },
                         );
                       },
                     ),
@@ -237,131 +303,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  String _formatDateTime(DateTime? dateTime) {
-    if (dateTime == null) {
-      return 'No date';
-    }
-    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
+}
 
-  // Convert image names to full file paths
-  Future<List<String>> _getImagePaths(
-    String noteId,
-    List<String> imageNames,
-  ) async {
-    final paths = <String>[];
-    for (final imageName in imageNames) {
-      try {
-        // According to MediaService implementation, images are stored in {appDir}/images/{noteId}/{imageName}
-        final appDir = await getApplicationDocumentsDirectory();
-        String imagePath = path.join(appDir.path, 'images', noteId, imageName);
-        paths.add(imagePath);
-      } catch (e) {
-        // If we can't get the path, return the original path as fallback
-        paths.add(imageName);
-      }
-    }
-    return paths;
-  }
+class NoteEvent {
+  Note note;
 
-  Future<bool> _isFileAccessible(String imagePath) async {
-    try {
-      final file = File(imagePath);
-      return await file.exists();
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Widget _buildImagesGrid(List<String> imagePaths) {
-    // Show up to 9 images in a grid with consistent 3x3 layout
-    final imagesToShow = imagePaths.length > 9
-        ? imagePaths.take(9).toList()
-        : imagePaths;
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics:
-          const NeverScrollableScrollPhysics(), // Disable scrolling in the grid
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3, // Always use 3 columns for consistent layout
-        crossAxisSpacing: 4.0,
-        mainAxisSpacing: 4.0,
-        childAspectRatio: 1.0, // Square aspect ratio
-      ),
-      itemCount: imagesToShow.length,
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () {
-            // Show image in fullscreen when tapped (not navigating to note detail)
-            _showFullscreenImage(context, imagesToShow[index]);
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4.0),
-              border: Border.all(
-                color: Theme.of(context).dividerColor,
-                width: 0.5,
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(4.0),
-              child: FutureBuilder<bool>(
-                future: _isFileAccessible(imagesToShow[index]),
-                builder: (context, snapshot) {
-                  if (snapshot.data == true) {
-                    return Image.file(
-                      File(imagesToShow[index]),
-                      fit: BoxFit.cover,
-                    );
-                  } else {
-                    return Container(
-                      color: Theme.of(context).dividerColor,
-                      child: const Icon(Icons.broken_image, color: Colors.grey),
-                    );
-                  }
-                },
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showFullscreenImage(BuildContext context, String imagePath) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Image View'),
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
-          ),
-          backgroundColor: Colors.black,
-          body: InteractiveViewer(
-            minScale: 0.1,
-            maxScale: 5.0,
-            child: Container(
-              constraints: const BoxConstraints.expand(),
-              child: FutureBuilder<bool>(
-                future: _isFileAccessible(imagePath),
-                builder: (context, snapshot) {
-                  if (snapshot.data == true) {
-                    return Image.file(File(imagePath), fit: BoxFit.contain);
-                  } else {
-                    return const Icon(
-                      Icons.broken_image,
-                      color: Colors.grey,
-                      size: 50,
-                    );
-                  }
-                },
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  NoteEvent(this.note);
 }
