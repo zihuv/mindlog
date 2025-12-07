@@ -1,8 +1,7 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:mindlog/data/database/app_database.dart';
 import 'package:mindlog/data/database/notebooks_dao.dart';
-import 'package:mindlog/data/models/notebook.dart'
-    as domain_notebook;
+import 'package:mindlog/data/models/notebook.dart' as domain_notebook;
 import 'package:uuid/uuid.dart';
 import 'package:get/get.dart';
 
@@ -45,7 +44,9 @@ class NotebookDatabaseRepository implements NotebookStorageRepository {
         title: drift.Value(notebook.title),
         description: drift.Value(notebook.description),
         coverImage: drift.Value(notebook.coverImage),
-        type: drift.Value(notebook.type.toString().split('.').last.toLowerCase()),
+        type: drift.Value(
+          notebook.type.toString().split('.').last.toLowerCase(),
+        ),
         sortIndex: drift.Value(notebook.sortIndex),
         createTime: drift.Value(notebook.createTime),
         updateTime: drift.Value(notebook.updateTime),
@@ -62,12 +63,12 @@ class NotebookDatabaseRepository implements NotebookStorageRepository {
         title: drift.Value(notebook.title),
         description: drift.Value(notebook.description),
         coverImage: drift.Value(notebook.coverImage),
-        type: drift.Value(notebook.type.toString().split('.').last.toLowerCase()),
+        type: drift.Value(
+          notebook.type.toString().split('.').last.toLowerCase(),
+        ),
         sortIndex: drift.Value(notebook.sortIndex),
-        createTime: drift.Value(
-          notebook.createTime,
-        ), // Keep original creation createTime
-        updateTime: drift.Value(notebook.updateTime ?? DateTime.now()),
+        createTime: drift.Value(notebook.createTime),
+        updateTime: drift.Value(DateTime.now()),
       ),
       notebook.id,
     );

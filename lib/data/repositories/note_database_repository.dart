@@ -76,10 +76,8 @@ class NoteDatabaseRepository implements NoteStorageRepository {
     await _noteDao.updateNote(
       db.NotesCompanion(
         content: drift.Value(note.content),
-        createTime: drift.Value(
-          note.createTime,
-        ), // Keep original creation createTime from cloud
-        updateTime: drift.Value(note.updateTime ?? DateTime.now()),
+        createTime: drift.Value(note.createTime),
+        updateTime: drift.Value(DateTime.now()),
         imageName: drift.Value(note.images),
         audioName: drift.Value(note.audios),
         videoName: drift.Value(note.videos),
