@@ -136,92 +136,93 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
         bottom: false,
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : Column(
-                children: [
-                  // Notebook title as a header with back button
-                  Container(
-                    width: double.infinity,
-                    height: 40, // Very compact height
-                    padding: EdgeInsets.zero,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).appBarTheme.backgroundColor,
-                      boxShadow: AppBoxShadow.appBar,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          width: 36,
-                          height: 36,
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            iconSize: 20,
-                            icon: const Icon(Icons.arrow_back),
-                            onPressed: () {
-                              Get.back(); // Navigate back to previous screen
-                            },
+            : RefreshIndicator(
+                onRefresh: () async {
+                  await _loadNotes();
+                },
+                child: NestedScrollView(
+                  headerSliverBuilder: (context, innerBoxIsScrolled) {
+                    return [
+                      // Notebook title as a header with back button
+                      SliverToBoxAdapter(
+                        child: Container(
+                          width: double.infinity,
+                          height: 40, // Very compact height
+                          padding: EdgeInsets.zero,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).appBarTheme.backgroundColor,
+                            boxShadow: AppBoxShadow.appBar,
                           ),
-                        ),
-                        const Gap(4.0),
-                        Expanded(
-                          child: Text(
-                            _notebook?.title ?? 'Notes',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: AppFontWeight.medium,
-                              color: Theme.of(
-                                context,
-                              ).appBarTheme.titleTextStyle?.color,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                        const Gap(8.0),
-                      ],
-                    ),
-                  ),
-                  // Notes list
-                  Expanded(
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        await _loadNotes();
-                      },
-                      child: _notes.isEmpty
-                          ? const Center(
-                              child: Text(
-                                'No notes yet',
-                                style: TextStyle(
-                                  fontSize: AppFontSize.body,
-                                  color: Colors.grey,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 36,
+                                height: 36,
+                                child: IconButton(
+                                  padding: EdgeInsets.zero,
+                                  iconSize: 20,
+                                  icon: const Icon(Icons.arrow_back),
+                                  onPressed: () {
+                                    Get.back(); // Navigate back to previous screen
+                                  },
                                 ),
                               ),
-                            )
-                          : ListView.builder(
-                              itemCount: _notes.length,
-                              itemBuilder: (context, index) {
-                                final note = _notes[index];
-                                return NoteCard(
-                                  note: note,
-                                  onEdit: () {
-                                    Get.to(
-                                      () => NoteDetailScreen(
-                                        noteId: note.id,
-                                      ),
-                                    )?.then((value) {
-                                      if (value == true) {
-                                        _loadNotes(); // Refresh the notes list after editing
-                                      }
-                                    });
-                                  },
-                                  onDelete: null, // No delete option in notebook view for now
-                                );
-                              },
+                              const Gap(4.0),
+                              Expanded(
+                                child: Text(
+                                  _notebook?.title ?? 'Notes',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: AppFontWeight.medium,
+                                    color: Theme.of(
+                                      context,
+                                    ).appBarTheme.titleTextStyle?.color,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                              const Gap(8.0),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ];
+                  },
+                  body: _notes.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No notes yet',
+                            style: TextStyle(
+                              fontSize: AppFontSize.body,
+                              color: Colors.grey,
                             ),
-                    ),
-                  ),
-                ],
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: _notes.length,
+                          itemBuilder: (context, index) {
+                            final note = _notes[index];
+                            return NoteCard(
+                              note: note,
+                              onEdit: () {
+                                Get.to(
+                                  () => NoteDetailScreen(
+                                    noteId: note.id,
+                                  ),
+                                )?.then((value) {
+                                  if (value == true) {
+                                    _loadNotes(); // Refresh the notes list after editing
+                                  }
+                                });
+                              },
+                              onDelete: null, // No delete option in notebook view for now
+                            );
+                          },
+                        ),
+                ),
               ),
       ),
       floatingActionButton: FloatingActionButton(
