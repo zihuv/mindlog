@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:mindlog/data/database/app_database.dart';
-import 'package:mindlog/data/database/note_dao.dart';
+import 'package:mindlog/data/database/notebooks_dao.dart';
 import 'package:mindlog/data/models/notebook.dart'
     as domain_notebook;
 import 'package:uuid/uuid.dart';
@@ -10,25 +10,24 @@ import 'notebook_storage_repository.dart';
 
 class NotebookDatabaseRepository implements NotebookStorageRepository {
   late AppDatabase _database;
-  late NoteDao _noteDao;
+  late NotebooksDao _notebooksDao;
   final Uuid _uuid = const Uuid();
 
   @override
   Future<void> initialize() async {
     _database = Get.find<DatabaseProvider>().database;
-    _noteDao = NoteDao(_database);
+    _notebooksDao = NotebooksDao(_database);
   }
 
   @override
-  @override
   Future<List<domain_notebook.Notebook>> getAllNotebooks() async {
-    final notebookDataList = await _noteDao.getAllNotebooks();
+    final notebookDataList = await _notebooksDao.getAllNotebooks();
     return notebookDataList.map(_mapNotebookDataToNotebook).toList();
   }
 
   @override
   Future<domain_notebook.Notebook?> getNotebookById(String id) async {
-    final notebookData = await _noteDao.getNotebookById(id);
+    final notebookData = await _notebooksDao.getNotebookById(id);
     if (notebookData == null) {
       return null;
     }
@@ -40,7 +39,7 @@ class NotebookDatabaseRepository implements NotebookStorageRepository {
     // Generate a UUID if the notebook doesn't have an ID yet
     final id = notebook.id.isEmpty ? _uuid.v7() : notebook.id;
 
-    await _noteDao.insertNotebook(
+    await _notebooksDao.insertNotebook(
       NotebooksCompanion(
         id: drift.Value(id),
         title: drift.Value(notebook.title),
@@ -58,7 +57,7 @@ class NotebookDatabaseRepository implements NotebookStorageRepository {
 
   @override
   Future<void> updateNotebook(domain_notebook.Notebook notebook) async {
-    await _noteDao.updateNotebook(
+    await _notebooksDao.updateNotebook(
       NotebooksCompanion(
         title: drift.Value(notebook.title),
         description: drift.Value(notebook.description),
@@ -76,7 +75,7 @@ class NotebookDatabaseRepository implements NotebookStorageRepository {
 
   @override
   Future<void> deleteNotebook(String id) async {
-    await _noteDao.deleteNotebook(id);
+    await _notebooksDao.deleteNotebook(id);
   }
 
   @override
