@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.4-beta] - 2025-12-07
+
+- windows 打包异常
+
 ## [v0.0.3-beta] - 2025-12-07
 
 - windows 打包异常 zip 错误

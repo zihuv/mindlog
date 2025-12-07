@@ -167,7 +167,7 @@ jobs:
         # Use 7z which is available on Windows runners
         7z a -tzip mindlog_windows_${VERSION}.zip *
         # Clean up all files except the zip
-        rm -rf !(mindlog_windows_${VERSION}.zip)
+        ls -1 | grep -v mindlog_windows_${VERSION}.zip | xargs rm -rf
 
     - name: Upload Windows App
       uses: actions/upload-artifact@v4
