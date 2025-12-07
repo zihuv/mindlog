@@ -164,7 +164,9 @@ jobs:
         VERSION=${{ steps.get_tag.outputs.version }}
         cp -r build/windows/x64/runner/Release/* build-artifacts/windows/
         cd build-artifacts/windows/
-        zip -r mindlog_windows_${VERSION}.zip *
+        # Use 7z which is available on Windows runners
+        7z a -tzip mindlog_windows_${VERSION}.zip *
+        # Clean up all files except the zip
         rm -rf !(mindlog_windows_${VERSION}.zip)
 
     - name: Upload Windows App
