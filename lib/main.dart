@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'ui/home/home_screen.dart';
-import 'controllers/note_controller.dart';
-import 'controllers/notebooks/notebook_controller.dart';
-import 'ui/design_system/app_theme.dart';
+import 'presentation/views/home/home_screen.dart';
+import 'presentation/controllers/note_controller.dart';
+import 'presentation/controllers/notebook_controller.dart';
+import 'core/design_system/app_theme.dart';
 import 'utils/log_util.dart';
-import 'features/notes/data/note_service.dart';
-import 'features/notebooks/notebook_service.dart';
-import 'database/app_database.dart';
+import 'data/services/note_service.dart';
+import 'data/services/notebook_service.dart';
+import 'data/database/app_database.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

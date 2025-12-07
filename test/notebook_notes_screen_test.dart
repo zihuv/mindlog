@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:mindlog/controllers/note_controller.dart';
-import 'package:mindlog/controllers/notebooks/notebook_controller.dart';
+import 'package:mindlog/presentation/controllers/note_controller.dart';
+import 'package:mindlog/presentation/controllers/notebook_controller.dart';
 import 'package:mindlog/ui/notebooks/notebook_notes_screen.dart';
 
 void main() {

@@ -1,7 +1,7 @@
 import 'note_business_service.dart';
 import 'package:mindlog/utils/media_util.dart';
-import 'package:mindlog/features/notes/domain/entities/note.dart';
-import 'package:mindlog/features/notes/data/note_service.dart';
+import 'package:mindlog/data/models/note.dart';
+import 'package:mindlog/data/services/note_service.dart';
 import 'package:get/get.dart';
 
 class CombinedNoteService {

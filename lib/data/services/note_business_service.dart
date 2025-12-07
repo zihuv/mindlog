@@ -1,5 +1,5 @@
-import 'package:mindlog/features/notes/data/note_service.dart';
-import 'package:mindlog/features/notes/domain/entities/note.dart';
+import 'package:mindlog/data/services/note_service.dart';
+import 'package:mindlog/data/models/note.dart';
 import 'package:uuid/uuid.dart';
 import 'package:get/get.dart';
 

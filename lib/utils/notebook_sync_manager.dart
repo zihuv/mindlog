@@ -4,8 +4,8 @@ import 'dart:typed_data';
 
 import 'package:webdav_client/webdav_client.dart' as webdav;
 
-import 'package:mindlog/features/notebooks/domain/entities/notebook.dart';
-import 'package:mindlog/features/notebooks/notebook_service.dart';
+import 'package:mindlog/data/models/notebook.dart';
+import 'package:mindlog/data/services/notebook_service.dart';
 import 'package:get/get.dart';
 import 'log_util.dart';
 

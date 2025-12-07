@@ -4,7 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:mindlog/data/services/combined_note_service.dart';
-import 'package:mindlog/features/notes/domain/entities/note.dart';
+import 'package:mindlog/data/models/note.dart';
 import 'package:mindlog/utils/notebook_sync_manager.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
