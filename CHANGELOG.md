@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.0.5-beta] - 2025-12-07
+
+### 更新内容
+- 测试 Changelog
+
 ## [v0.0.4-beta] - 2025-12-07
 
 - windows 打包异常
