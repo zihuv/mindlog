@@ -3,6 +3,8 @@ import 'package:gap/gap.dart';
 import 'package:mindlog/data/models/note.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:mindlog/presentation/widgets/note/image_display.dart';
 import 'dart:io';
 import 'dart:async';
 
@@ -151,8 +153,10 @@ class NoteCard extends StatelessWidget {
                 future: _isFileAccessible(imagesToShow[index]),
                 builder: (context, snapshot) {
                   if (snapshot.data == true) {
-                    return Image.file(
-                      File(imagesToShow[index]),
+                    return ImageDisplay(
+                      imagePath: imagesToShow[index],
+                      allImages: imagePaths,  // Pass all images for gallery view
+                      imageIndex: index,      // Current index in the note's images
                       fit: BoxFit.cover,
                     );
                   } else {
@@ -171,6 +175,8 @@ class NoteCard extends StatelessWidget {
   }
 
   void _showFullscreenImage(BuildContext context, String imagePath) {
+    // This method is only used from the note card, so we need to get all images from the note
+    // For now, we'll show a single image with PhotoView since we don't have all image paths here
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => Scaffold(
@@ -180,24 +186,19 @@ class NoteCard extends StatelessWidget {
             foregroundColor: Colors.white,
           ),
           backgroundColor: Colors.black,
-          body: InteractiveViewer(
-            minScale: 0.1,
-            maxScale: 5.0,
-            child: Container(
-              constraints: const BoxConstraints.expand(),
-              child: FutureBuilder<bool>(
-                future: _isFileAccessible(imagePath),
-                builder: (context, snapshot) {
-                  if (snapshot.data == true) {
-                    return Image.file(File(imagePath), fit: BoxFit.contain);
-                  } else {
-                    return const Icon(
-                      Icons.broken_image,
-                      color: Colors.grey,
-                      size: 50,
-                    );
-                  }
-                },
+          body: Container(
+            constraints: const BoxConstraints.expand(),
+            child: PhotoView(
+              imageProvider: FileImage(File(imagePath)),
+              initialScale: PhotoViewComputedScale.contained * 0.8,
+              minScale: PhotoViewComputedScale.contained * 0.3,
+              maxScale: PhotoViewComputedScale.covered * 3,
+              heroAttributes: PhotoViewHeroAttributes(tag: imagePath),
+              filterQuality: FilterQuality.high,
+              loadingBuilder: (context, event) => const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
               ),
             ),
           ),

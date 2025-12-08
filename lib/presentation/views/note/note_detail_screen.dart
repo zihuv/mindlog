@@ -8,6 +8,9 @@ import 'package:mindlog/core/design_system/design_system.dart';
 import 'package:mindlog/utils/media_util.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:mindlog/presentation/widgets/note/image_gallery_screen.dart';
+import 'package:mindlog/presentation/widgets/note/image_display.dart';
 
 class NoteDetailScreen extends StatefulWidget {
   final String? noteId;
@@ -464,39 +467,51 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   }
 
   void _showFullscreenImage(BuildContext context, String imagePath) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Image View'),
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
+    // Find the index of the image in the list
+    int imageIndex = _images.indexOf(imagePath);
+
+    if (_images.length > 1 && imageIndex >= 0) {
+      // Show in gallery view with all images
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ImageGalleryScreen(
+            imagePaths: _images,
+            initialIndex: imageIndex,
+            appBarTitle: 'Image View',
           ),
-          backgroundColor: Colors.black,
-          body: InteractiveViewer(
-            minScale: 0.1,
-            maxScale: 5.0,
-            child: Container(
+        ),
+      );
+    } else {
+      // Show single image with PhotoView
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => Scaffold(
+            appBar: AppBar(
+              title: const Text('Image View'),
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+            ),
+            backgroundColor: Colors.black,
+            body: Container(
               constraints: const BoxConstraints.expand(),
-              child: FutureBuilder<bool>(
-                future: _isFileAccessible(imagePath),
-                builder: (context, snapshot) {
-                  if (snapshot.data == true) {
-                    return Image.file(File(imagePath), fit: BoxFit.contain);
-                  } else {
-                    return const Icon(
-                      Icons.broken_image,
-                      color: Colors.grey,
-                      size: 50,
-                    );
-                  }
-                },
+              child: PhotoView(
+                imageProvider: FileImage(File(imagePath)),
+                initialScale: PhotoViewComputedScale.contained * 0.8,
+                minScale: PhotoViewComputedScale.contained * 0.3,
+                maxScale: PhotoViewComputedScale.covered * 3,
+                heroAttributes: PhotoViewHeroAttributes(tag: imagePath),
+                filterQuality: FilterQuality.high,
+                loadingBuilder: (context, event) => const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   Future<void> _deleteSelectedImages() async {
@@ -735,9 +750,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                     future: _isFileAccessible(imagesToShow[index]),
                     builder: (context, snapshot) {
                       if (snapshot.data == true) {
-                        return Image.file(
-                          File(imagesToShow[index]),
-                          fit: BoxFit.cover, // Make image fill the container
+                        return ImageDisplay(
+                          imagePath: imagesToShow[index],
+                          allImages: _images,  // Pass all images for gallery view
+                          imageIndex: index,   // Current index in the note's images
+                          fit: BoxFit.cover,   // Make image fill the container
                         );
                       } else {
                         return Container(
