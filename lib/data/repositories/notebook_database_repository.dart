@@ -106,6 +106,10 @@ class NotebookDatabaseRepository implements NotebookStorageRepository {
         return domain_notebook.NotebookType.checklist;
       case 'timer':
         return domain_notebook.NotebookType.timer;
+      case '打卡':
+      case 'checkin':
+      case 'check_in':
+        return domain_notebook.NotebookType.checkIn;
       case 'standard':
       default:
         return domain_notebook.NotebookType.standard;

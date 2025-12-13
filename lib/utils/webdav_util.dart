@@ -582,12 +582,15 @@ class WebDAVUtil {
       // Default to a few recent months
       DateTime now = DateTime.now();
       String currentYearMonth = _getYearMonthFromTimestamp(now);
-      String prevMonthYearMonth = _getYearMonthFromTimestamp(DateTime(now.year, now.month - 1));
-      String prev2MonthYearMonth = _getYearMonthFromTimestamp(DateTime(now.year, now.month - 2));
+      String prevMonthYearMonth = _getYearMonthFromTimestamp(
+        DateTime(now.year, now.month - 1),
+      );
+      String prev2MonthYearMonth = _getYearMonthFromTimestamp(
+        DateTime(now.year, now.month - 2),
+      );
       return [currentYearMonth, prevMonthYearMonth, prev2MonthYearMonth];
     }
   }
-
 
   Future<void> _uploadImage(
     String noteId,

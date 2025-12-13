@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:mindlog/presentation/widgets/note/image_gallery_screen.dart';
 import 'package:mindlog/presentation/widgets/note/image_display.dart';
+import '../../widgets/common/custom_header_bar.dart'; // Updated import
 
 class NoteDetailScreen extends StatefulWidget {
   final String? noteId;
@@ -197,12 +198,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             final imageFile = File(imagePath);
             if (await imageFile.exists()) {
               // Use compressAndSaveImage to handle both compression and saving
-              final savedImagePath =
-                  await MediaUtil.compressAndSaveImage(
-                    '', // Will be set when note is created
-                    imageFile,
-                    null,
-                  );
+              final savedImagePath = await MediaUtil.compressAndSaveImage(
+                '', // Will be set when note is created
+                imageFile,
+                null,
+              );
 
               final savedImageFile = File(savedImagePath);
 
@@ -273,12 +273,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           final imageFile = File(imagePath);
           if (await imageFile.exists()) {
             // Use compressAndSaveImage to handle both compression and saving
-            final savedImagePath =
-                await MediaUtil.compressAndSaveImage(
-                  noteId,
-                  imageFile,
-                  null,
-                );
+            final savedImagePath = await MediaUtil.compressAndSaveImage(
+              noteId,
+              imageFile,
+              null,
+            );
 
             final savedImageFile = File(savedImagePath);
 
@@ -752,9 +751,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                       if (snapshot.data == true) {
                         return ImageDisplay(
                           imagePath: imagesToShow[index],
-                          allImages: _images,  // Pass all images for gallery view
-                          imageIndex: index,   // Current index in the note's images
-                          fit: BoxFit.cover,   // Make image fill the container
+                          allImages:
+                              _images, // Pass all images for gallery view
+                          imageIndex:
+                              index, // Current index in the note's images
+                          fit: BoxFit.cover, // Make image fill the container
                         );
                       } else {
                         return Container(
@@ -821,14 +822,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _isNewNote
-              ? 'New Note'
-              : _selectingImages
-              ? 'Select Images to Delete'
-              : 'Edit Note',
-        ),
+      appBar: CustomHeaderBar(
+        title: _isNewNote
+            ? 'New Note'
+            : _selectingImages
+                ? 'Select Images to Delete'
+                : 'Edit Note',
+        showBackButton: true,
         actions: [
           if (_selectingImages)
             IconButton(

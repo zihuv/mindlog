@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum NotebookType { standard, checklist, timer }
+enum NotebookType { standard, checklist, timer, checkIn }
 
 class Notebook extends Equatable {
   final String id;
@@ -93,6 +93,10 @@ class Notebook extends Equatable {
         return NotebookType.checklist;
       case 'timer':
         return NotebookType.timer;
+      case '打卡':
+      case 'checkin':
+      case 'check_in':
+        return NotebookType.checkIn;
       case 'standard':
       default:
         return NotebookType.standard;

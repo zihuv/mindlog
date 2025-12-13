@@ -58,6 +58,17 @@ class NoteService extends GetxService {
       repository.getNotesByNotebookId(notebookId);
   Future<List<Note>> getNotesByDate(DateTime date) =>
       repository.getNotesByDate(date);
+  Future<List<Note>> getNotesByNotebookIdAndDate(
+    String notebookId,
+    DateTime date,
+  ) => repository.getNotesByNotebookIdAndDate(notebookId, date);
+  
+  // 新增方法：获取指定笔记本和日期的所有笔记（包括已删除的）
+  Future<List<Note>> getAllNotesByNotebookIdAndDate(
+    String notebookId,
+    DateTime date,
+  ) => repository.getAllNotesByNotebookIdAndDate(notebookId, date);
+
   Future<List<String>> getAllTags() async {
     // Tags functionality has been removed from the app
     return [];
@@ -67,19 +78,22 @@ class NoteService extends GetxService {
   // Create a new note
   Future<String> createNote({
     required String content,
+    String? notebookId,
+    DateTime? createTime,
     List<String>? imageName,
     List<String>? audioName,
     List<String>? videoName,
     Map<int, bool>? checklistStates,
   }) async {
     final noteId = uuid.v7();
-    final now = DateTime.now();
+    final now = createTime ?? DateTime.now();
 
     final note = db.NotesCompanion.insert(
       id: noteId,
       content: content,
       createTime: now,
       updateTime: now,
+      notebookId: drift.Value(notebookId),
       imageName: imageName ?? [],
       audioName: audioName ?? [],
       videoName: videoName ?? [],
@@ -124,23 +138,11 @@ class NoteService extends GetxService {
   }) async {
     switch (mediaType.toLowerCase()) {
       case 'image':
-        return await MediaUtil.saveImage(
-          noteId,
-          mediaFile,
-          fileName: fileName,
-        );
+        return await MediaUtil.saveImage(noteId, mediaFile, fileName: fileName);
       case 'video':
-        return await MediaUtil.saveVideo(
-          noteId,
-          mediaFile,
-          fileName: fileName,
-        );
+        return await MediaUtil.saveVideo(noteId, mediaFile, fileName: fileName);
       case 'audio':
-        return await MediaUtil.saveAudio(
-          noteId,
-          mediaFile,
-          fileName: fileName,
-        );
+        return await MediaUtil.saveAudio(noteId, mediaFile, fileName: fileName);
       default:
         throw Exception('Unsupported media type: $mediaType');
     }
@@ -221,3 +223,7 @@ class NoteService extends GetxService {
     await init();
   }
 }
+
+
+
+

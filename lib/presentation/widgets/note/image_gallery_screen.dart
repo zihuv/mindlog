@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:mindlog/presentation/widgets/common/custom_header_bar.dart';
 
 class ImageGalleryScreen extends StatefulWidget {
   final List<String> imagePaths;
@@ -39,8 +40,9 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.appBarTitle),
+      appBar: CustomHeaderBar(
+        title: widget.appBarTitle,
+        showBackButton: true,
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         actions: [

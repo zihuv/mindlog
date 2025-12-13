@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:mindlog/utils/log_util.dart';
+import 'package:mindlog/presentation/widgets/common/custom_header_bar.dart';
 
 class NoteListScreen extends StatelessWidget {
   const NoteListScreen({super.key});
@@ -17,8 +18,9 @@ class NoteListScreen extends StatelessWidget {
       init: NoteController(),
       builder: (controller) {
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('My Notes'),
+          appBar: CustomHeaderBar(
+            title: 'My Notes',
+            showBackButton: false, // Note list is typically a main screen, so no back button
             actions: [
               IconButton(
                 icon: const Icon(Icons.search),
@@ -79,9 +81,12 @@ class NoteListScreen extends StatelessWidget {
                           }
                         });
                       },
-                      borderRadius: AppBorderRadius.card, // Match the card's border radius for proper InkWell effect
+                      borderRadius: AppBorderRadius
+                          .card, // Match the card's border radius for proper InkWell effect
                       // Make the InkWell more responsive to touches
-                      splashColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                      splashColor: Theme.of(
+                        context,
+                      ).primaryColor.withValues(alpha: 0.1),
                       customBorder: RoundedRectangleBorder(
                         borderRadius: AppBorderRadius.card,
                       ),
@@ -218,9 +223,15 @@ class NoteListScreen extends StatelessWidget {
                                   ),
                                 // Main content as plain text with expanded touch area
                                 Container(
-                                  width: double.infinity, // Ensure text takes full width
-                                  padding: const EdgeInsets.only(top: 8.0, bottom: 8.0), // Add vertical padding to expand touch area
-                                  margin: const EdgeInsets.only(top: 4.0), // Add margin for better spacing
+                                  width: double
+                                      .infinity, // Ensure text takes full width
+                                  padding: const EdgeInsets.only(
+                                    top: 8.0,
+                                    bottom: 8.0,
+                                  ), // Add vertical padding to expand touch area
+                                  margin: const EdgeInsets.only(
+                                    top: 4.0,
+                                  ), // Add margin for better spacing
                                   child: Text(
                                     note.content.length > 200
                                         ? '${note.content.substring(0, 200)}...'
@@ -266,7 +277,6 @@ class NoteListScreen extends StatelessWidget {
     }
     return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
-
 }
 
 class _NoteSearchDelegate extends SearchDelegate<String> {

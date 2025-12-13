@@ -115,6 +115,34 @@ class NoteDao extends DatabaseAccessor<AppDatabase> with _$NoteDaoMixin {
         .get()
         .then((rows) => rows.map((row) => NoteData.fromTable(row)).toList());
   }
+
+  // Get notes by notebook ID and date
+  Future<List<NoteData>> getNotesByNotebookIdAndDate(
+    String notebookId,
+    DateTime date,
+  ) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      23,
+      59,
+      59,
+      999,
+      999,
+    );
+
+    return (select(notes)..where(
+          (tbl) =>
+              tbl.notebookId.equals(notebookId) &
+              tbl.isDeleted.equals(false) &
+              tbl.createTime.isBiggerOrEqualValue(startOfDay) &
+              tbl.createTime.isSmallerOrEqualValue(endOfDay),
+        ))
+        .get()
+        .then((rows) => rows.map((row) => NoteData.fromTable(row)).toList());
+  }
 }
 
 // Data class for note

@@ -1,28 +1,28 @@
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mindlog/data/services/note_service.dart';
+import 'package:mindlog/presentation/controllers/check_in_controller.dart';
 import 'package:mindlog/data/models/note.dart';
 import 'package:mindlog/presentation/views/note/note_detail_screen.dart';
 import 'package:mindlog/presentation/widgets/note/note_card.dart';
 import 'package:mindlog/core/design_system/design_system.dart';
 import 'package:mindlog/presentation/widgets/common/custom_header_bar.dart';
 
-class CalendarScreen extends StatefulWidget {
-  const CalendarScreen({super.key});
+class CheckInCalendarScreen extends StatefulWidget {
+  final String? notebookId;
+
+  const CheckInCalendarScreen({super.key, this.notebookId});
 
   @override
-  State<CalendarScreen> createState() => _CalendarScreenState();
+  State<CheckInCalendarScreen> createState() => _CheckInCalendarScreenState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
+class _CheckInCalendarScreenState extends State<CheckInCalendarScreen> {
   DateTime? _currentDate;
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedMonth = DateTime.now();
-  List<Note> _notesForSelectedDate = [];
-  bool _isLoading = false;
-  Map<DateTime, List<NoteEvent>> _events = {};
   late ScrollController _scrollController;
+  late CheckInController _checkInController;
 
   @override
   void initState() {
@@ -31,10 +31,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _focusedDay = DateTime.now();
     _selectedMonth = DateTime.now();
     _scrollController = ScrollController();
+    _checkInController = Get.find<CheckInController>();
+
     // Load notes for the current date
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadNotesForDate(_currentDate!);
-      _loadAllEvents();
+      if (widget.notebookId != null) {
+        _checkInController.loadAllEventsForNotebook(widget.notebookId!);
+      } else {
+        _checkInController.loadAllEvents();
+      }
+      _checkInController.loadNotesForDate(
+        _currentDate!,
+        notebookId: widget.notebookId,
+      );
     });
   }
 
@@ -44,48 +53,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     super.dispose();
   }
 
-  void _loadAllEvents() async {
-    final notes = await Get.find<NoteService>().getAllNotes();
-    final events = <DateTime, List<NoteEvent>>{};
-
-    for (final note in notes) {
-      final date = DateTime(
-        note.createTime.year,
-        note.createTime.month,
-        note.createTime.day,
-      );
-      if (!events.containsKey(date)) {
-        events[date] = [];
-      }
-      events[date]!.add(NoteEvent(note));
-    }
-
-    setState(() {
-      _events = events;
-    });
-  }
-
-  List<NoteEvent> _getEventsForDay(DateTime day) {
-    return _events[day] ?? [];
-  }
-
-  Future<void> _loadNotesForDate(DateTime date) async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // Get notes specifically for the selected date using the service directly
-      final notesForDate = await Get.find<NoteService>().getNotesByDate(date);
-
-      setState(() {
-        _notesForSelectedDate = notesForDate;
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+  List<CheckInEvent> _getEventsForDay(DateTime day) {
+    return _checkInController.getEventsForDay(day);
   }
 
   void _onMonthChanged(DateTime month) {
@@ -126,13 +95,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomHeaderBar(
-        title: 'Calendar View',
+        title: widget.notebookId != null ? 'Notebook Check-in' : 'Check-in Calendar',
         showBackButton: true,
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          await _loadNotesForDate(_currentDate!);
-          _loadAllEvents();
+          _checkInController.loadNotesForDate(
+            _checkInController.selectedDate.value,
+            notebookId: widget.notebookId,
+          );
+          if (widget.notebookId != null) {
+            _checkInController.loadAllEventsForNotebook(widget.notebookId!);
+          } else {
+            _checkInController.loadAllEvents();
+          }
           return; // Required for the refresh indicator
         },
         child: CustomScrollView(
@@ -167,12 +143,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
             SliverToBoxAdapter(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TableCalendar<NoteEvent>(
+                child: TableCalendar<CheckInEvent>(
                   firstDay: DateTime.utc(2020, 1, 1),
                   lastDay: DateTime.utc(2030, 12, 31),
                   focusedDay: _focusedDay,
                   selectedDayPredicate: (day) {
-                    return isSameDay(_currentDate, day);
+                    return isSameDay(
+                      _checkInController.selectedDate.value,
+                      day,
+                    );
                   },
                   calendarFormat: CalendarFormat.month,
                   onPageChanged: (focusedDay) {
@@ -191,11 +170,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   weekendDays: const [DateTime.sunday, DateTime.saturday],
                   startingDayOfWeek: StartingDayOfWeek.sunday,
                   onDaySelected: (selectedDay, focusedDay) {
-                    setState(() {
-                      _currentDate = selectedDay;
-                      _focusedDay = focusedDay;
-                    });
-                    _loadNotesForDate(selectedDay);
+                    _checkInController.updateSelectedDate(selectedDay);
+                    _checkInController.loadNotesForDate(
+                      selectedDay,
+                      notebookId: widget.notebookId,
+                    );
+                  },
+                  onDayLongPressed: (selectedDay, focusedDay) {
+                    // Long press creates a new note for the specific date
+                    _checkInController.createNoteForDate(
+                      selectedDay,
+                      notebookId: widget.notebookId,
+                    );
                   },
                   calendarStyle: CalendarStyle(
                     outsideDaysVisible: false,
@@ -218,6 +204,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       color: Theme.of(context).colorScheme.secondary,
                       shape: BoxShape.circle,
                     ),
+                    // Different style for punched days
+                    // This is handled by the eventLoader and markers
                     weekendTextStyle: TextStyle(
                       color: Theme.of(context).colorScheme.error,
                       fontWeight: AppFontWeight.normal,
@@ -251,75 +239,118 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
 
             // Selected date header
-            if (_currentDate != null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '${_currentDate!.year}-${_currentDate!.month}-${_currentDate!.day}',
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Obx(() {
+                      final selectedDate =
+                          _checkInController.selectedDate.value;
+                      return Text(
+                        '${selectedDate.year}-${selectedDate.month}-${selectedDate.day}',
                         style: TextStyle(
                           fontSize: AppFontSize.medium,
                           fontWeight: AppFontWeight.semiBold,
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
-                      ),
-                      Text(
-                        '${_notesForSelectedDate.length} 条笔记',
-                        style: TextStyle(
-                          fontSize: AppFontSize.small,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
+                      );
+                    }),
+                    Row(
+                      children: [
+                        Obx(() {
+                          final noteCount =
+                              _checkInController.notesForSelectedDate.length;
+                          return Text(
+                            '$noteCount 条记录',
+                            style: TextStyle(
+                              fontSize: AppFontSize.small,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
+                          );
+                        }),
+                        // Punch button - toggles punch status
+                        Obx(() {
+                          final selectedDate =
+                              _checkInController.selectedDate.value;
+                          final hasEvents = _getEventsForDay(
+                            selectedDate,
+                          ).isNotEmpty;
+                          return IconButton(
+                            icon: Icon(
+                              hasEvents
+                                  ? Icons.check_circle
+                                  : Icons.radio_button_unchecked,
+                              color: hasEvents
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                            ),
+                            onPressed: () {
+                              _checkInController.togglePunchForDate(
+                                selectedDate,
+                                notebookId: widget.notebookId,
+                              );
+                            },
+                          );
+                        }),
+                      ],
+                    ),
+                  ],
                 ),
               ),
+            ),
 
             // Notes list for selected date
-            if (_isLoading)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              )
-            else if (_notesForSelectedDate.isEmpty)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Center(
-                    child: Text(
-                      '该日期没有笔记',
-                      style: TextStyle(
-                        fontSize: AppFontSize.large,
-                        fontWeight: AppFontWeight.normal,
-                        color: Theme.of(context).colorScheme.onSurface,
+            Obx(() {
+              if (_checkInController.isLoading.value) {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                );
+              } else if (_checkInController.notesForSelectedDate.isEmpty) {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(
+                      child: Text(
+                        '该日期没有记录',
+                        style: TextStyle(
+                          fontSize: AppFontSize.large,
+                          fontWeight: AppFontWeight.normal,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              )
-            else
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  childCount: _notesForSelectedDate.length,
-                  (context, index) {
-                    final note = _notesForSelectedDate[index];
-                    return NoteCard(
-                      note: note,
-                      onEdit: () {
-                        Get.to(() => NoteDetailScreen(noteId: note.id));
-                      },
-                    );
-                  },
-                ),
-              ),
+                );
+              } else {
+                return SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    childCount: _checkInController.notesForSelectedDate.length,
+                    (context, index) {
+                      final note =
+                          _checkInController.notesForSelectedDate[index];
+                      return NoteCard(
+                        note: note,
+                        onEdit: () {
+                          Get.to(() => NoteDetailScreen(noteId: note.id));
+                        },
+                      );
+                    },
+                  ),
+                );
+              }
+            }),
           ],
         ),
       ),
@@ -327,8 +358,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 }
 
-class NoteEvent {
-  Note note;
+enum CheckInEventType {
+  checkInOnly,  // Pure check-in, no content
+  noteWithContent,  // Note with actual content
+}
 
-  NoteEvent(this.note);
+class CheckInEvent {
+  Note note;
+  CheckInEventType type;
+
+  CheckInEvent(this.note) : type = _determineEventType(note);
+
+  static CheckInEventType _determineEventType(Note note) {
+    // Check if the note is just a check-in marker (like "打卡 - 2023-12-01")
+    if (note.content.startsWith('打卡 - ') ||
+        note.content.startsWith('Check-in - ') ||
+        note.content.startsWith('打卡日志 - ')) {
+      return CheckInEventType.checkInOnly;
+    } else {
+      // Note has actual content beyond just the check-in marker
+      return CheckInEventType.noteWithContent;
+    }
+  }
 }

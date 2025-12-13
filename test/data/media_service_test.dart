@@ -7,8 +7,7 @@ import 'package:path/path.dart' as path;
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUp(() async {
-  });
+  setUp(() async {});
 
   group('MediaService Tests', () {
     test('Create note directories through public API', () async {
@@ -143,7 +142,9 @@ void main() {
       await MediaUtil.saveImageToNote(noteId, 'test_image.jpg', testImage.path);
 
       // Verify file exists
-      final imagesBefore = await MediaUtil.getNoteImagesFromMediaService(noteId);
+      final imagesBefore = await MediaUtil.getNoteImagesFromMediaService(
+        noteId,
+      );
       expect(imagesBefore.length, equals(1));
 
       // Delete all media for the note

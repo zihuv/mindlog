@@ -81,7 +81,9 @@ class DataExportUtil {
           throw Exception('Downloads directory not available');
         }
       } catch (e) {
-        logger.warning('Downloads directory not available, using Documents: $e');
+        logger.warning(
+          'Downloads directory not available, using Documents: $e',
+        );
         final docsDir = await getApplicationDocumentsDirectory();
         basePath = docsDir.path;
       }
@@ -105,9 +107,7 @@ class DataExportUtil {
 
       // If user didn't select a path or file picker failed, use default location
       if (selectedPath == null) {
-        logger.debug(
-          'No path selected by user, using default Downloads path',
-        );
+        logger.debug('No path selected by user, using default Downloads path');
         selectedPath = path.join(basePath, exportFileName);
       }
 
@@ -143,7 +143,9 @@ class DataExportUtil {
       if (Get.isOverlaysOpen) {
         ScaffoldMessenger.of(Get.context!).showSnackBar(
           SnackBar(
-            content: Text('Backup exported successfully!\nLocation: $finalPath'),
+            content: Text(
+              'Backup exported successfully!\nLocation: $finalPath',
+            ),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 4),
           ),
@@ -477,7 +479,10 @@ class DataExportUtil {
   }
 
   /// Creates a symbolic link to a file (Unix-like systems only)
-  static Future<void> _createSymbolicLink(String originalPath, String linkPath) async {
+  static Future<void> _createSymbolicLink(
+    String originalPath,
+    String linkPath,
+  ) async {
     try {
       // Delete existing file or link at the destination
       final linkFile = File(linkPath);

@@ -12,7 +12,7 @@ class MediaUtil {
   static const String _imagesDir = 'images';
   static const String _videosDir = 'videos';
   static const String _audioDir = 'audio';
-  
+
   // MediaService constants
   static const String _imagesDirName = 'images';
   static const String _videosDirName = 'videos';
@@ -44,7 +44,21 @@ class MediaUtil {
   static String _getFileExtension(String filePath) {
     final extension = filePath.split('.').last.toLowerCase();
     // Ensure we return a valid image extension
-    if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'mp4', 'mov', 'avi', 'mkv', 'mp3', 'wav', 'm4a'].contains(extension)) {
+    if ([
+      'jpg',
+      'jpeg',
+      'png',
+      'webp',
+      'gif',
+      'bmp',
+      'mp4',
+      'mov',
+      'avi',
+      'mkv',
+      'mp3',
+      'wav',
+      'm4a',
+    ].contains(extension)) {
       return extension;
     }
     // Default to jpg if extension is not recognized for images
@@ -89,7 +103,10 @@ class MediaUtil {
     return filePath.startsWith(cachePath);
   }
 
-  static Future<Directory> _getNoteDirectory(String noteId, String mediaType) async {
+  static Future<Directory> _getNoteDirectory(
+    String noteId,
+    String mediaType,
+  ) async {
     final appDir = await _getAppDirectory();
     final noteDir = Directory(path.join(appDir.path, mediaType, noteId));
 
@@ -319,7 +336,9 @@ class MediaUtil {
 
   // MediaService functionality - Get methods
   // Get all image paths for a specific note
-  static Future<List<String>> getNoteImagesFromMediaService(String noteId) async {
+  static Future<List<String>> getNoteImagesFromMediaService(
+    String noteId,
+  ) async {
     final noteDir = await _getNoteDirectory(noteId, _imagesDirName);
     if (!await noteDir.exists()) {
       return [];
@@ -330,7 +349,9 @@ class MediaUtil {
   }
 
   // Get all video paths for a specific note
-  static Future<List<String>> getNoteVideosFromMediaService(String noteId) async {
+  static Future<List<String>> getNoteVideosFromMediaService(
+    String noteId,
+  ) async {
     final noteDir = await _getNoteDirectory(noteId, _videosDirName);
     if (!await noteDir.exists()) {
       return [];
@@ -341,7 +362,9 @@ class MediaUtil {
   }
 
   // Get all audio paths for a specific note
-  static Future<List<String>> getNoteAudiosFromMediaService(String noteId) async {
+  static Future<List<String>> getNoteAudiosFromMediaService(
+    String noteId,
+  ) async {
     final noteDir = await _getNoteDirectory(noteId, _audiosDirName);
     if (!await noteDir.exists()) {
       return [];
@@ -406,19 +429,28 @@ class MediaUtil {
   }
 
   // Delete a specific image file for a note
-  static Future<void> deleteImageFromMediaService(String noteId, String imageName) async {
+  static Future<void> deleteImageFromMediaService(
+    String noteId,
+    String imageName,
+  ) async {
     final imagePath = await getMediaPath(noteId, _imagesDirName, imageName);
     await deleteMediaFile(imagePath);
   }
 
   // Delete a specific video file for a note
-  static Future<void> deleteVideoFromMediaService(String noteId, String videoName) async {
+  static Future<void> deleteVideoFromMediaService(
+    String noteId,
+    String videoName,
+  ) async {
     final videoPath = await getMediaPath(noteId, _videosDirName, videoName);
     await deleteMediaFile(videoPath);
   }
 
   // Delete a specific audio file for a note
-  static Future<void> deleteAudioFromMediaService(String noteId, String audioName) async {
+  static Future<void> deleteAudioFromMediaService(
+    String noteId,
+    String audioName,
+  ) async {
     final audioPath = await getMediaPath(noteId, _audiosDirName, audioName);
     await deleteMediaFile(audioPath);
   }

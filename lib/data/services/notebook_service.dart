@@ -44,12 +44,12 @@ class NotebookService extends GetxService {
 
       // Check if there are notebooks with sortIndex=0 that may be old notebooks
       // If there are notebooks with the same sortIndex, it indicates a need for migration
-      final hasDuplicateSortIndex = allNotebooks
-          .map((nb) => nb.sortIndex)
-          .toSet()
-          .length != allNotebooks.length;
+      final hasDuplicateSortIndex =
+          allNotebooks.map((nb) => nb.sortIndex).toSet().length !=
+          allNotebooks.length;
 
-      if (hasDuplicateSortIndex || allNotebooks.any((nb) => nb.sortIndex == 0)) {
+      if (hasDuplicateSortIndex ||
+          allNotebooks.any((nb) => nb.sortIndex == 0)) {
         // Sort notebooks by creation time and assign sortIndex accordingly
         final sortedNotebooks = List<Notebook>.from(allNotebooks)
           ..sort((a, b) => a.createTime.compareTo(b.createTime));

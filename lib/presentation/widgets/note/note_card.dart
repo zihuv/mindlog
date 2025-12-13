@@ -35,10 +35,7 @@ class NoteCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Note content as plain text
-              Text(
-                note.content,
-                style: const TextStyle(fontSize: 14.0),
-              ),
+              Text(note.content, style: const TextStyle(fontSize: 14.0)),
               const Gap(8), // Add spacing between content and images
               // Display attached images as thumbnails if any (grid format)
               if (note.images.isNotEmpty)
@@ -155,8 +152,8 @@ class NoteCard extends StatelessWidget {
                   if (snapshot.data == true) {
                     return ImageDisplay(
                       imagePath: imagesToShow[index],
-                      allImages: imagePaths,  // Pass all images for gallery view
-                      imageIndex: index,      // Current index in the note's images
+                      allImages: imagePaths, // Pass all images for gallery view
+                      imageIndex: index, // Current index in the note's images
                       fit: BoxFit.cover,
                     );
                   } else {

@@ -1,11 +1,14 @@
-import 'package:drift/drift.dart' as drift show Value; // Import Value from drift with alias
+import 'package:drift/drift.dart'
+    as drift
+    show Value; // Import Value from drift with alias
 import 'package:drift/drift.dart';
 import 'package:mindlog/data/database/app_database.dart';
 
 part 'notebooks_dao.g.dart';
 
 @DriftAccessor(tables: [Notebooks])
-class NotebooksDao extends DatabaseAccessor<AppDatabase> with _$NotebooksDaoMixin {
+class NotebooksDao extends DatabaseAccessor<AppDatabase>
+    with _$NotebooksDaoMixin {
   NotebooksDao(super.db);
 
   // Notebook operations

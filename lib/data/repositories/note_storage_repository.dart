@@ -11,6 +11,15 @@ abstract class NoteStorageRepository {
   Future<List<Note>> searchNotes(String query);
   Future<List<Note>> getNotesByNotebookId(String notebookId);
   Future<List<Note>> getNotesByDate(DateTime date);
+  Future<List<Note>> getNotesByNotebookIdAndDate(
+    String notebookId,
+    DateTime date,
+  );
+  // 新增方法：获取指定笔记本和日期的所有笔记（包括已删除的）
+  Future<List<Note>> getAllNotesByNotebookIdAndDate(
+    String notebookId,
+    DateTime date,
+  );
   Future<List<String>> getAllTags();
   Future<void> close();
 }

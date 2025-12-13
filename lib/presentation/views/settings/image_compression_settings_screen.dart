@@ -6,10 +6,12 @@ class ImageCompressionSettingsScreen extends StatefulWidget {
   const ImageCompressionSettingsScreen({super.key});
 
   @override
-  State<ImageCompressionSettingsScreen> createState() => _ImageCompressionSettingsScreenState();
+  State<ImageCompressionSettingsScreen> createState() =>
+      _ImageCompressionSettingsScreenState();
 }
 
-class _ImageCompressionSettingsScreenState extends State<ImageCompressionSettingsScreen> {
+class _ImageCompressionSettingsScreenState
+    extends State<ImageCompressionSettingsScreen> {
   String _selectedQuality = 'standard'; // Default quality level
   bool _compressionEnabled = true; // Default: compression enabled
 
@@ -22,7 +24,8 @@ class _ImageCompressionSettingsScreenState extends State<ImageCompressionSetting
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _selectedQuality = prefs.getString('image_compression_quality') ?? 'standard';
+      _selectedQuality =
+          prefs.getString('image_compression_quality') ?? 'standard';
       _compressionEnabled = prefs.getBool('image_compression_enabled') ?? true;
     });
   }
@@ -135,11 +138,7 @@ class _ImageCompressionSettingsScreenState extends State<ImageCompressionSetting
     );
   }
 
-  Widget _buildQualityOption(
-    String title,
-    String subtitle,
-    String value,
-  ) {
+  Widget _buildQualityOption(String title, String subtitle, String value) {
     return RadioListTile<String>(
       title: Text(title),
       subtitle: Text(subtitle),

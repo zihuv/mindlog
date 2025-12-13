@@ -119,6 +119,34 @@ class NoteDatabaseRepository implements NoteStorageRepository {
   }
 
   @override
+  Future<List<Note>> getNotesByNotebookIdAndDate(
+    String notebookId,
+    DateTime date,
+  ) async {
+    final noteDataList = await _noteDao.getNotesByNotebookIdAndDate(
+      notebookId,
+      date,
+    );
+    return noteDataList
+        .where((note) => !note.isDeleted)
+        .map(_mapNoteDataToNote)
+        .toList();
+  }
+
+  // 新增方法：获取指定笔记本和日期的所有笔记（包括已删除的）
+  @override
+  Future<List<Note>> getAllNotesByNotebookIdAndDate(
+    String notebookId,
+    DateTime date,
+  ) async {
+    final noteDataList = await _noteDao.getNotesByNotebookIdAndDate(
+      notebookId,
+      date,
+    );
+    return noteDataList.map(_mapNoteDataToNote).toList();
+  }
+
+  @override
   Future<List<String>> getAllTags() async {
     // Tags functionality has been removed from the app
     return [];
@@ -149,3 +177,5 @@ class NoteDatabaseRepository implements NoteStorageRepository {
     );
   }
 }
+
+

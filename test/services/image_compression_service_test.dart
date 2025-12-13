@@ -52,26 +52,41 @@ void main() {
       expect(enabled, isFalse);
     });
 
-    test('compressImage with compression disabled returns original file', () async {
-      // Disable compression
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('image_compression_enabled', false);
+    test(
+      'compressImage with compression disabled returns original file',
+      () async {
+        // Disable compression
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('image_compression_enabled', false);
 
-      // Create a temporary image file for testing
-      final tempDir = await getTemporaryDirectory();
-      final testImageFile = File(path.join(tempDir.path, 'test_image.jpg'));
-      // Write minimal valid JPEG data (just a placeholder for test)
-      await testImageFile.writeAsBytes([0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00]);
+        // Create a temporary image file for testing
+        final tempDir = await getTemporaryDirectory();
+        final testImageFile = File(path.join(tempDir.path, 'test_image.jpg'));
+        // Write minimal valid JPEG data (just a placeholder for test)
+        await testImageFile.writeAsBytes([
+          0xFF,
+          0xD8,
+          0xFF,
+          0xE0,
+          0x00,
+          0x10,
+          0x4A,
+          0x46,
+          0x49,
+          0x46,
+          0x00,
+        ]);
 
-      // Compress image (should return original since compression is disabled)
-      final resultFile = await MediaUtil.compressImage(testImageFile);
+        // Compress image (should return original since compression is disabled)
+        final resultFile = await MediaUtil.compressImage(testImageFile);
 
-      // Should return the original file when compression is disabled
-      expect(resultFile.path, equals(testImageFile.path));
+        // Should return the original file when compression is disabled
+        expect(resultFile.path, equals(testImageFile.path));
 
-      // Clean up
-      await testImageFile.delete();
-    });
+        // Clean up
+        await testImageFile.delete();
+      },
+    );
 
     test('compressImage with original quality returns original file', () async {
       // Set quality to original
@@ -82,7 +97,19 @@ void main() {
       final tempDir = await getTemporaryDirectory();
       final testImageFile = File(path.join(tempDir.path, 'test_image.jpg'));
       // Write minimal valid JPEG data (just a placeholder for test)
-      await testImageFile.writeAsBytes([0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00]);
+      await testImageFile.writeAsBytes([
+        0xFF,
+        0xD8,
+        0xFF,
+        0xE0,
+        0x00,
+        0x10,
+        0x4A,
+        0x46,
+        0x49,
+        0x46,
+        0x00,
+      ]);
 
       // Compress image (should return original since quality is original)
       final resultFile = await MediaUtil.compressImage(testImageFile);

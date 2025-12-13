@@ -4,7 +4,9 @@ import 'package:mindlog/presentation/widgets/note/image_gallery_screen.dart';
 
 void main() {
   group('ImageGalleryScreen Test', () {
-    testWidgets('ImageGalleryScreen builds correctly', (WidgetTester tester) async {
+    testWidgets('ImageGalleryScreen builds correctly', (
+      WidgetTester tester,
+    ) async {
       const imagePaths = ['/path/to/image1.jpg', '/path/to/image2.jpg'];
 
       await tester.pumpWidget(
@@ -21,8 +23,14 @@ void main() {
       expect(find.byType(ImageGalleryScreen), findsOneWidget);
     });
 
-    testWidgets('ImageGalleryScreen shows correct image count in app bar', (WidgetTester tester) async {
-      const imagePaths = ['/path/to/image1.jpg', '/path/to/image2.jpg', '/path/to/image3.jpg'];
+    testWidgets('ImageGalleryScreen shows correct image count in app bar', (
+      WidgetTester tester,
+    ) async {
+      const imagePaths = [
+        '/path/to/image1.jpg',
+        '/path/to/image2.jpg',
+        '/path/to/image3.jpg',
+      ];
 
       await tester.pumpWidget(
         MaterialApp(

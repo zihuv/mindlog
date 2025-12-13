@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'presentation/routes/app_pages.dart';
 import 'presentation/views/home/home_screen.dart';
 import 'presentation/controllers/note_controller.dart';
 import 'presentation/controllers/notebook_controller.dart';
+import 'presentation/controllers/check_in_controller.dart';
 import 'core/design_system/app_theme.dart';
 import 'utils/log_util.dart';
 import 'data/services/note_service.dart';
@@ -26,6 +28,7 @@ class MyApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       home: const HomeScreen(),
       initialBinding: AppBindings(),
+      getPages: AppPages.pages,
     );
   }
 }
@@ -38,5 +41,8 @@ class AppBindings extends Bindings {
     Get.put(NotebookService());
     Get.put<NoteController>(NoteController());
     Get.put<NotebookController>(NotebookController());
+    Get.lazyPut<CheckInController>(
+      () => CheckInController(Get.find<NoteService>()),
+    );
   }
 }

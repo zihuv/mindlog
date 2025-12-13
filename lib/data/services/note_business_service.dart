@@ -12,6 +12,11 @@ class NoteBusinessService {
     await service.init();
   }
 
+  // Get all notes including deleted ones for sync purposes
+  Future<List<Note>> getAllNotesForSync() async {
+    return await Get.find<NoteService>().getAllNotesForSync();
+  }
+
   // Create a new note
   Future<String> createNote({
     required String content,
@@ -19,9 +24,10 @@ class NoteBusinessService {
     List<String>? audioName,
     List<String>? videoName,
     String? notebookId,
+    DateTime? createTime,
   }) async {
     final noteId = _uuid.v7();
-    final now = DateTime.now();
+    final now = createTime ?? DateTime.now();
 
     // Create a new note with the generated UUID
     final note = Note(
@@ -44,11 +50,6 @@ class NoteBusinessService {
     return await Get.find<NoteService>().getAllNotes();
   }
 
-  // Get all notes including deleted ones for sync purposes
-  Future<List<Note>> getAllNotesForSync() async {
-    return await Get.find<NoteService>().getAllNotesForSync();
-  }
-
   // Get a note by ID
   Future<Note?> getNoteById(String id) async {
     return await Get.find<NoteService>().getNoteById(id);
@@ -62,23 +63,22 @@ class NoteBusinessService {
     List<String>? audioName,
     List<String>? videoName,
     String? notebookId,
-    DateTime? updateTime, // Allow specifying updateTime from cloud
+    DateTime? updateTime,
   }) async {
-    final existingNote = await Get.find<NoteService>().getNoteById(id);
+    // Get the existing note
+    final existingNote = await getNoteById(id);
     if (existingNote == null) {
       throw Exception('Note with id $id does not exist');
     }
 
-    final updatedNote = Note(
-      id: id,
+    // Create updated note with new values or keep existing ones
+    final updatedNote = existingNote.copyWith(
       content: content ?? existingNote.content,
-      createTime: existingNote.createTime,
-      // Keep existing updateTime unless explicitly provided (to maintain cloud data consistency)
-      updateTime: updateTime ?? existingNote.updateTime,
-      notebookId: notebookId ?? existingNote.notebookId,
       images: imageName ?? existingNote.images,
-      videos: videoName ?? existingNote.videos,
       audios: audioName ?? existingNote.audios,
+      videos: videoName ?? existingNote.videos,
+      notebookId: notebookId ?? existingNote.notebookId,
+      updateTime: updateTime ?? DateTime.now(),
     );
 
     await Get.find<NoteService>().updateNote(updatedNote);
@@ -89,11 +89,8 @@ class NoteBusinessService {
     await Get.find<NoteService>().deleteNote(id);
   }
 
-  // Search notes by content
+  // Search notes
   Future<List<Note>> searchNotes(String query) async {
-    if (query.trim().isEmpty) {
-      return await getAllNotes();
-    }
     return await Get.find<NoteService>().searchNotes(query);
   }
 
@@ -107,13 +104,35 @@ class NoteBusinessService {
     return await Get.find<NoteService>().getNotesByDate(date);
   }
 
-  // Get all unique tags
+  // Get notes by notebook ID and date
+  Future<List<Note>> getNotesByNotebookIdAndDate(
+    String notebookId,
+    DateTime date,
+  ) async {
+    return await Get.find<NoteService>().getNotesByNotebookIdAndDate(
+      notebookId,
+      date,
+    );
+  }
+
+  // 获取指定笔记本和日期的所有笔记（包括已删除的）
+  Future<List<Note>> getAllNotesByNotebookIdAndDate(
+    String notebookId,
+    DateTime date,
+  ) async {
+    return await Get.find<NoteService>().getAllNotesByNotebookIdAndDate(
+      notebookId,
+      date,
+    );
+  }
+
+  // Get all tags
   Future<List<String>> getAllTags() async {
     return await Get.find<NoteService>().getAllTags();
   }
 
-  // Close the connection
+  // Close the service
   Future<void> close() async {
-    // Note service doesn't require explicit closing
+    await Get.find<NoteService>().close();
   }
 }

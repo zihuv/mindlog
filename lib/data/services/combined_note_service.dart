@@ -18,11 +18,18 @@ class CombinedNoteService {
     List<String>? videosToCopy, // Source paths for videos to be copied
     List<String>? audiosToCopy, // Source paths for audios to be copied
     String? notebookId,
+    DateTime? createTime,
   }) async {
     // Generate new UUID-based filenames for all media files
-    final imageNames = imagesToCopy?.map((e) => MediaUtil.generateImageFilename(e)).toList();
-    final videoNames = videosToCopy?.map((e) => MediaUtil.generateVideoFilename(e)).toList();
-    final audioNames = audiosToCopy?.map((e) => MediaUtil.generateAudioFilename(e)).toList();
+    final imageNames = imagesToCopy
+        ?.map((e) => MediaUtil.generateImageFilename(e))
+        .toList();
+    final videoNames = videosToCopy
+        ?.map((e) => MediaUtil.generateVideoFilename(e))
+        .toList();
+    final audioNames = audiosToCopy
+        ?.map((e) => MediaUtil.generateAudioFilename(e))
+        .toList();
 
     // Create the note first with the new UUID-based filenames
     final noteId = await _noteService.createNote(
@@ -31,6 +38,7 @@ class CombinedNoteService {
       videoName: videoNames,
       audioName: audioNames,
       notebookId: notebookId,
+      createTime: createTime,
     );
 
     // Copy media files to the appropriate directories using the UUID-based filenames
@@ -279,6 +287,22 @@ class CombinedNoteService {
   // Get notes by date
   Future<List<Note>> getNotesByDate(DateTime date) async {
     return await _noteService.getNotesByDate(date);
+  }
+
+  // Get notes by notebook ID and date
+  Future<List<Note>> getNotesByNotebookIdAndDate(
+    String notebookId,
+    DateTime date,
+  ) async {
+    return await _noteService.getNotesByNotebookIdAndDate(notebookId, date);
+  }
+
+  // 获取指定笔记本和日期的所有笔记（包括已删除的）
+  Future<List<Note>> getAllNotesByNotebookIdAndDate(
+    String notebookId,
+    DateTime date,
+  ) async {
+    return await _noteService.getAllNotesByNotebookIdAndDate(notebookId, date);
   }
 
   // Get all unique tags

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gap/gap.dart';
 import 'package:mindlog/data/models/notebook.dart';
 import 'package:mindlog/presentation/controllers/notebook_controller.dart';
 import 'package:mindlog/presentation/controllers/note_controller.dart';
@@ -9,6 +8,8 @@ import 'package:mindlog/presentation/views/note/note_detail_screen.dart';
 import 'package:mindlog/presentation/widgets/note/note_card.dart';
 import 'package:mindlog/core/design_system/design_system.dart';
 import 'package:mindlog/utils/log_util.dart';
+import 'check_in_calendar_screen.dart';
+import 'package:mindlog/presentation/widgets/common/custom_header_bar.dart';
 
 class NotebookNotesScreen extends StatefulWidget {
   final String notebookId;
@@ -130,8 +131,16 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // If the notebook type is checkIn, show the calendar view
+    if (_notebook?.type == NotebookType.checkIn) {
+      return CheckInCalendarScreen(notebookId: widget.notebookId);
+    }
+
     return Scaffold(
-      appBar: null, // Remove the AppBar as requested
+      appBar: CustomHeaderBar(
+        title: _notebook?.title ?? 'Notes',
+        showBackButton: true,
+      ),
       body: SafeArea(
         bottom: false,
         child: _isLoading
@@ -140,89 +149,36 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
                 onRefresh: () async {
                   await _loadNotes();
                 },
-                child: NestedScrollView(
-                  headerSliverBuilder: (context, innerBoxIsScrolled) {
-                    return [
-                      // Notebook title as a header with back button
-                      SliverToBoxAdapter(
-                        child: Container(
-                          width: double.infinity,
-                          height: 40, // Very compact height
-                          padding: EdgeInsets.zero,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).appBarTheme.backgroundColor,
-                            boxShadow: AppBoxShadow.appBar,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 36,
-                                height: 36,
-                                child: IconButton(
-                                  padding: EdgeInsets.zero,
-                                  iconSize: 20,
-                                  icon: const Icon(Icons.arrow_back),
-                                  onPressed: () {
-                                    Get.back(); // Navigate back to previous screen
-                                  },
-                                ),
-                              ),
-                              const Gap(4.0),
-                              Expanded(
-                                child: Text(
-                                  _notebook?.title ?? 'Notes',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: AppFontWeight.medium,
-                                    color: Theme.of(
-                                      context,
-                                    ).appBarTheme.titleTextStyle?.color,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ),
-                              const Gap(8.0),
-                            ],
+                child: _notes.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No notes yet',
+                          style: TextStyle(
+                            fontSize: AppFontSize.body,
+                            color: Colors.grey,
                           ),
                         ),
+                      )
+                    : ListView.builder(
+                        itemCount: _notes.length,
+                        itemBuilder: (context, index) {
+                          final note = _notes[index];
+                          return NoteCard(
+                            note: note,
+                            onEdit: () {
+                              Get.to(
+                                () => NoteDetailScreen(noteId: note.id),
+                              )?.then((value) {
+                                if (value == true) {
+                                  _loadNotes(); // Refresh the notes list after editing
+                                }
+                              });
+                            },
+                            onDelete:
+                                null, // No delete option in notebook view for now
+                          );
+                        },
                       ),
-                    ];
-                  },
-                  body: _notes.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'No notes yet',
-                            style: TextStyle(
-                              fontSize: AppFontSize.body,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        )
-                      : ListView.builder(
-                          itemCount: _notes.length,
-                          itemBuilder: (context, index) {
-                            final note = _notes[index];
-                            return NoteCard(
-                              note: note,
-                              onEdit: () {
-                                Get.to(
-                                  () => NoteDetailScreen(
-                                    noteId: note.id,
-                                  ),
-                                )?.then((value) {
-                                  if (value == true) {
-                                    _loadNotes(); // Refresh the notes list after editing
-                                  }
-                                });
-                              },
-                              onDelete: null, // No delete option in notebook view for now
-                            );
-                          },
-                        ),
-                ),
               ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -240,5 +196,4 @@ class _NotebookNotesScreenState extends State<NotebookNotesScreen> {
       ),
     );
   }
-
 }
